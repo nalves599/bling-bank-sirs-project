@@ -14,12 +14,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
-
-    <java.version>17</java.version>
-
-    <p>pt.ulisboa.tecnico</p>
-    <c>Library</c>
-    <mainclass>${p}.${c}</mainclass>
   </properties>
 
   <dependencies>
@@ -27,6 +21,20 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.9.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.9.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -72,25 +80,6 @@
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>3.1.0</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>java</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <mainClass>${mainclass}</mainClass>
-            <arguments>
-              <!-- can be defined here with multiple argument tags,
-              or in command line with -Dexec.args="arg0 arg1 arg2" -->
-            </arguments>
-          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
