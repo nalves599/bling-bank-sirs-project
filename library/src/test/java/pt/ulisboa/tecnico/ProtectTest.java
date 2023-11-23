@@ -15,12 +15,12 @@ public class ProtectTest
     public void protectFile(){
 
         Library lib = new Library();
-        lib.protect(Constants.SOURCE_TEST_PATH_1, Constants.DEST_TEST_PATH_1);
+        lib.protect(Constants.SOURCE_TEST_PATH_1, tempFolder.getAbsolutePath() + Constants.DEST_TEST_PATH_1);
     }
 
     @Test
     public void protectNonExistentFile(){
         Library lib = new Library();
-        lib.protect(Constants.NON_EXISTENT_FILE, Constants.DEST_TEST_PATH_1);
+        lib.protect(Constants.NON_EXISTENT_FILE, tempFolder.getAbsolutePath() + Constants.DEST_TEST_PATH_1);
     }
 }

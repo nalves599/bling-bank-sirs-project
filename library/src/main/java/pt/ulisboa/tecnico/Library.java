@@ -1,9 +1,5 @@
 package pt.ulisboa.tecnico;
 
-/**
- * Hello world!
- *
- */
 public class Library
 {
     public void protect(String input, String output) {
