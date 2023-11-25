@@ -45,3 +45,6 @@ buildNumber.properties
 
 # IDEA ###
 *.idea
+
+# VSCODE
+.vscode

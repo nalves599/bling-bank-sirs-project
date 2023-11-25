@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 
@@ -52,11 +53,56 @@ public class Library
         return encrypt(os.toByteArray(), secretKey);
     }
 
-    public void unprotect(String input, String output) {
+    public byte[] unprotect(String input, String output) throws Exception {
         if (fileDoesNotExist(input)) {
             throw new IllegalArgumentException("Input file does not exist");
         }
-        throw new UnsupportedOperationException("Not implemented yet");
+
+        // decrypt file input to file output
+
+        byte[] decryptedBytes = decrypt(input.getBytes(), secretKey);
+        // decryptedBytes is (A + K1 + C)
+        // A is the original message + nonce
+        // K1 is server's public key encrypted with client's public key
+        // C is the encription of digest of A + K1 with server's private key
+
+        // separate A, K1 and C
+        byte[] A = new byte[decryptedBytes.length - Constants.ASYM_KEY_SIZE - Constants.DIGEST_SIZE];
+        byte[] K1 = new byte[Constants.ASYM_KEY_SIZE];
+        byte[] C = new byte[Constants.DIGEST_SIZE];
+
+        System.arraycopy(decryptedBytes, 0, A, 0, A.length);
+        System.arraycopy(decryptedBytes, A.length, K1, 0, K1.length);
+        System.arraycopy(decryptedBytes, A.length + K1.length, C, 0, C.length);
+
+        // decrypt K1 with client's private key
+        byte[] K1Decrypted = decrypt(K1, privateKey);
+
+        // parse K1 as server's public key
+        Key publicKey1 = KeyFactory.getInstance(Constants.ASYM_ALGO).generatePublic(new X509EncodedKeySpec(K1Decrypted));
+
+        // decrypt C with server's public key
+        byte[] CDecrypted = decrypt(C, publicKey1);
+
+        // calculate digest of A + K1
+        ByteArrayOutputStream os = new ByteArrayOutputStream( );
+        os.write(A);
+        os.write(K1Decrypted);
+        byte[] digest = digest(os.toByteArray());
+
+        // compare digest with CDecrypted
+        if (!MessageDigest.isEqual(digest, CDecrypted)) {
+            throw new Exception("Digests don't match");
+        }
+
+        // check nonces - TO DO
+
+        // write A to output file
+        FileOutputStream fos = new FileOutputStream(output);
+        fos.write(A);
+        fos.close();
+
+        return A;
     }
 
     public boolean check(String input) {
@@ -87,6 +133,12 @@ public class Library
     private byte[] encrypt(byte[] input, Key key) throws Exception {
         Cipher cipher = Cipher.getInstance(Constants.ASYM_ALGO);
         cipher.init(Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(input);
+    }
+
+    private byte[] decrypt(byte[] input, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance(Constants.ASYM_ALGO);
+        cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(input);
     }
 

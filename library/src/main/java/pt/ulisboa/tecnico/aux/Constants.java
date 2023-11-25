@@ -11,6 +11,7 @@ public class Constants {
     public static String ASYM_MODE = "RSA/ECB/PKCS1Padding";
 
     public static String DIGEST_ALGO = "SHA-256";
+    public static int DIGEST_SIZE = 32; // 256 bits = 32 bytes
 
     public static String RANDOM_ALGO = "SHA1PRNG";
     public static String RANDOM_PROVIDER = "SUN";
