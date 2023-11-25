@@ -30,27 +30,22 @@ public class Library
         assignSecretKey(secretKeyPath);
         createAsymmetricKeys();
     }
-    public byte[] protect(byte[] input, byte[] receiverPublicKey) throws Exception {
+    public byte[] protect(byte[] input) throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream( );
 
         int randomNumber = random.nextInt();
         int sequenceNumber = this.sequenceNumber;
 
-        System.err.println(receiverPublicKey.length);
-
-        Key publicKey1 = KeyFactory.getInstance(Constants.ASYM_ALGO).generatePublic(new X509EncodedKeySpec(receiverPublicKey));
-        byte[] publicKeyEncrypted = encrypt(publicKey.getEncoded(), publicKey1);
-
         os.write(input);
         os.write(randomNumber);
         os.write(sequenceNumber);
-        os.write(publicKeyEncrypted);
+        os.write(publicKey.getEncoded());
 
         byte[] digest = digest(os.toByteArray());
 
-        os.write(encrypt(digest, privateKey));
+        os.write(asymEncrypt(digest, privateKey));
 
-        return encrypt(os.toByteArray(), secretKey);
+        return symEncrypt(os.toByteArray(), secretKey);
     }
 
     public byte[] unprotect(String input, String output) throws Exception {
@@ -60,7 +55,7 @@ public class Library
 
         // decrypt file input to file output
 
-        byte[] decryptedBytes = decrypt(input.getBytes(), secretKey);
+        byte[] decryptedBytes = asymDecrypt(input.getBytes(), secretKey);
         // decryptedBytes is (A + K1 + C)
         // A is the original message + nonce
         // K1 is server's public key encrypted with client's public key
@@ -76,13 +71,13 @@ public class Library
         System.arraycopy(decryptedBytes, A.length + K1.length, C, 0, C.length);
 
         // decrypt K1 with client's private key
-        byte[] K1Decrypted = decrypt(K1, privateKey);
+        byte[] K1Decrypted = asymDecrypt(K1, privateKey);
 
         // parse K1 as server's public key
         Key publicKey1 = KeyFactory.getInstance(Constants.ASYM_ALGO).generatePublic(new X509EncodedKeySpec(K1Decrypted));
 
         // decrypt C with server's public key
-        byte[] CDecrypted = decrypt(C, publicKey1);
+        byte[] CDecrypted = asymDecrypt(C, publicKey1);
 
         // calculate digest of A + K1
         ByteArrayOutputStream os = new ByteArrayOutputStream( );
@@ -130,17 +125,31 @@ public class Library
         return content;
     }
 
-    private byte[] encrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(Constants.ASYM_ALGO);
+    private byte[] asymEncrypt(byte[] input, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance(Constants.ASYM_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(input);
     }
 
-    private byte[] decrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(Constants.ASYM_ALGO);
+    private byte[] symEncrypt(byte[] input, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance(Constants.SYM_MODE);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(input);
+    }
+
+    private byte[] asymDecrypt(byte[] input, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance(Constants.ASYM_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(input);
     }
+
+    private byte[] symDecrypt(byte[] input, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance(Constants.SYM_MODE);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        return cipher.doFinal(input);
+    }
+
+
 
     private byte[] digest(byte[] input) throws Exception {
         MessageDigest messageDigest = MessageDigest.getInstance(Constants.DIGEST_ALGO);

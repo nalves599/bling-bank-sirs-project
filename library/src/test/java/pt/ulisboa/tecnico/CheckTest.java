@@ -1,9 +1,8 @@
 package pt.ulisboa.tecnico;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.io.TempDir;
-import pt.ulisboa.tecnico.auxTests.Constants;
+import pt.ulisboa.tecnico.auxTests.TestConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,21 +21,21 @@ public class CheckTest
     static void init() throws IOException {
         tempPath = tempFolder.getAbsolutePath() + "/";
 
-        Path tempFile = Files.createFile(tempFolder.toPath().resolve(Constants.SOURCE_TEST_PATH_1));
-        Files.write(tempFile, Constants.SOURCE_1_JSON.getBytes());
+        Path tempFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SOURCE_TEST_PATH_1));
+        Files.write(tempFile, TestConfig.SOURCE_1_JSON.getBytes());
     }
 
     /*
     @Test
     public void checkFile(){
         Library lib = new Library();
-        lib.check(tempPath + Constants.SOURCE_TEST_PATH_1);
+        lib.check(tempPath + TestConfig.SOURCE_TEST_PATH_1);
     }
 
     @Test
     public void checkNonExistentFile(){
         Library lib = new Library();
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> lib.check(Constants.NON_EXISTENT_FILE));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> lib.check(TestConfig.NON_EXISTENT_FILE));
         assertEquals("Input file does not exist", exception.getMessage());
     }
 
