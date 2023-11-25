@@ -9,9 +9,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import java.io.FileInputStream;
-import java.security.Key;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
 
 @Setter
 public class Library
@@ -28,27 +27,29 @@ public class Library
     // Needs to throw exception because of SecureRandom.getInstance
     public Library (String secretKeyPath) throws Exception {
         assignSecretKey(secretKeyPath);
-        // createAssymetricKeys();
+        createAsymmetricKeys();
     }
     public byte[] protect(byte[] input, byte[] receiverPublicKey) throws Exception {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        ByteArrayOutputStream os = new ByteArrayOutputStream( );
 
-        // TODO: Add nonces
         int randomNumber = random.nextInt();
         int sequenceNumber = this.sequenceNumber;
 
+        System.err.println(receiverPublicKey.length);
 
-        outputStream.write(input);
-        outputStream.write(randomNumber);
-        outputStream.write(sequenceNumber);
-        // TODO: Encrypt digest
+        Key publicKey1 = KeyFactory.getInstance(Constants.ASYM_ALGO).generatePublic(new X509EncodedKeySpec(receiverPublicKey));
+        byte[] publicKeyEncrypted = encrypt(publicKey.getEncoded(), publicKey1);
 
-        byte[] payload = outputStream.toByteArray();
+        os.write(input);
+        os.write(randomNumber);
+        os.write(sequenceNumber);
+        os.write(publicKeyEncrypted);
 
-        Cipher cipher = Cipher.getInstance(Constants.SYM_ALGO);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        byte[] digest = digest(os.toByteArray());
 
-        return cipher.doFinal(payload);
+        os.write(encrypt(digest, privateKey));
+
+        return encrypt(os.toByteArray(), secretKey);
     }
 
     public void unprotect(String input, String output) {
@@ -81,5 +82,24 @@ public class Library
         fis.read(content);
         fis.close();
         return content;
+    }
+
+    private byte[] encrypt(byte[] input, Key key) throws Exception {
+        Cipher cipher = Cipher.getInstance(Constants.ASYM_ALGO);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(input);
+    }
+
+    private byte[] digest(byte[] input) throws Exception {
+        MessageDigest messageDigest = MessageDigest.getInstance(Constants.DIGEST_ALGO);
+        return messageDigest.digest(input);
+    }
+
+    private void createAsymmetricKeys() throws Exception {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(Constants.ASYM_ALGO);
+        keyGen.initialize(Constants.ASYM_KEY_SIZE);
+        KeyPair keyPair = keyGen.generateKeyPair();
+        publicKey = keyPair.getPublic();
+        privateKey = keyPair.getPrivate();
     }
 }

@@ -10,6 +10,8 @@ public class Constants {
     public static int ASYM_KEY_SIZE = 2048;
     public static String ASYM_MODE = "RSA/ECB/PKCS1Padding";
 
+    public static String DIGEST_ALGO = "SHA-256";
+
     public static String RANDOM_ALGO = "SHA1PRNG";
     public static String RANDOM_PROVIDER = "SUN";
 

@@ -31,7 +31,7 @@ public class ProtectTest
     @Test
     public void protectFile() throws Exception {
         Library lib = new Library(tempPath + Constants.SECRET_KEY_TEST_PATH_1);
-        byte[] output = lib.protect(Constants.SOURCE_1_JSON.getBytes(), Constants.PUBLIC_KEY_1.getBytes());
+        byte[] output = lib.protect(Constants.SOURCE_1_JSON.getBytes(), Constants.PUBLIC_KEY_1);
 
     }
 }
