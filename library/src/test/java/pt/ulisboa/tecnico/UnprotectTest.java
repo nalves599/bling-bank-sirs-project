@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnprotectTest
@@ -33,5 +34,14 @@ public class UnprotectTest
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
         byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         byte[] decrypted = lib.unprotect(encrypted);
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted));
+    }
+
+    @Test
+    public void unProtectTamperedFile() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        encrypted[0] = (byte) (encrypted[0] + 1);
+        assertThrows(Exception.class, () -> lib.unprotect(encrypted));
     }
 }

@@ -87,7 +87,11 @@ public class Library
     }
 
     public boolean check(byte[] input) throws Exception {
-        unprotect(input);
+        try {
+            unprotect(input);
+        } catch (Exception e) {
+            return false;
+        }
         return true;
     }
 
