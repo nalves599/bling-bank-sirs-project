@@ -1,15 +1,10 @@
 package pt.ulisboa.tecnico;
 
-import lombok.Setter;
-import pt.ulisboa.tecnico.aux.Constants;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
@@ -17,7 +12,6 @@ import java.util.Arrays;
 
 import static pt.ulisboa.tecnico.aux.Constants.*;
 
-@Setter
 public class Library
 {
     private Key secretKey;
@@ -45,12 +39,8 @@ public class Library
         os.write(intToBytes(sequenceNumber));
         os.write(publicKey.getEncoded());
 
-
         byte[] digestEncrypted = asymEncrypt(digest(os.toByteArray()), privateKey);
-        System.err.println(Arrays.toString(digest(os.toByteArray())));
-
         os.write(digestEncrypted);
-
 
         os.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
         os.write(intToBytes(publicKey.getEncoded().length)) ; // length of K1
@@ -78,15 +68,11 @@ public class Library
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKey1);
         Key publicKey2 = KeyFactory.getInstance(ASYM_ALGO).generatePublic(publicKeySpec);
 
-
-
         ByteArrayOutputStream os = new ByteArrayOutputStream( );
         os.write(data);
         os.write(intToBytes(randomNumber));
         os.write(intToBytes(sequenceNumber));
         os.write(publicKey1);
-
-
 
         byte[] digest = digest(os.toByteArray());
         byte[] digestDecrypted = asymDecrypt(digestEncrypted, publicKey2);
@@ -100,8 +86,9 @@ public class Library
         return data;
     }
 
-    public boolean check(byte[] input) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    public boolean check(byte[] input) throws Exception {
+        unprotect(input);
+        return true;
     }
 
     private void assignSecretKey(String secretKeyPath) throws Exception {

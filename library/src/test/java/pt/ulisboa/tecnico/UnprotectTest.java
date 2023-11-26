@@ -33,6 +33,5 @@ public class UnprotectTest
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
         byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         byte[] decrypted = lib.unprotect(encrypted);
-        System.err.println(new String(decrypted));
     }
 }
