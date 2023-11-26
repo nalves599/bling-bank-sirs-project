@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import pt.ulisboa.tecnico.auxTests.TestConfig;
 
@@ -22,22 +23,16 @@ public class UnprotectTest
 
         Path tempFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SOURCE_TEST_PATH_1));
         Files.write(tempFile, TestConfig.SOURCE_1_JSON.getBytes());
-    }
-/*
-    @Test
-    public void unprotectFile(){
-        Library lib = new Library();
-        lib.protect(tempPath + TestConfig.SOURCE_TEST_PATH_1, tempPath + TestConfig.DEST_TEST_PATH_1);
-        lib.unprotect(tempPath + TestConfig.DEST_TEST_PATH_1, tempPath + TestConfig.DEST_TEST_PATH_1); // TODO: change to DEST_TEST_PATH_1
+
+        Path secretKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_KEY_TEST_PATH_1));
+        Files.write(secretKeyFile, TestConfig.SECRET_KEY_1.getBytes());
     }
 
     @Test
-    public void unprotectNonExistentFile(){
-        Library lib = new Library();
-        Exception exception = assertThrows(IllegalArgumentException.class,
-            () -> lib.unprotect(TestConfig.NON_EXISTENT_FILE, tempPath + TestConfig.DEST_TEST_PATH_1));
-        Assertions.assertEquals("Input file does not exist", exception.getMessage());
+    public void unProtectFile() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        byte[] decrypted = lib.unprotect(encrypted);
+        System.err.println(new String(decrypted));
     }
-
- */
 }

@@ -10,8 +10,12 @@ import java.io.File;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
+
+import static pt.ulisboa.tecnico.aux.Constants.*;
 
 @Setter
 public class Library
@@ -21,9 +25,9 @@ public class Library
     private Key publicKey;
     private Key privateKey;
 
-    private int sequenceNumber = Constants.INITIAL_SEQUENCE_NUMBER;
+    private int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
 
-    SecureRandom random = SecureRandom.getInstance(Constants.RANDOM_ALGO, Constants.RANDOM_PROVIDER);
+    SecureRandom random = SecureRandom.getInstance(RANDOM_ALGO, RANDOM_PROVIDER);
 
     // Needs to throw exception because of SecureRandom.getInstance
     public Library (String secretKeyPath) throws Exception {
@@ -37,84 +41,45 @@ public class Library
         int sequenceNumber = this.sequenceNumber;
 
         os.write(input);
-        os.write(randomNumber);
-        os.write(sequenceNumber);
+        os.write(intToBytes(randomNumber));
+        os.write(intToBytes(sequenceNumber));
         os.write(publicKey.getEncoded());
 
-        byte[] digest = digest(os.toByteArray());
+        byte[] digestEncrypted = asymEncrypt(digest(os.toByteArray()), privateKey);
+        os.write(digestEncrypted);
 
-        os.write(asymEncrypt(digest, privateKey));
+        os.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
+        os.write(intToBytes(publicKey.getEncoded().length)) ; // length of K1
 
         return symEncrypt(os.toByteArray(), secretKey);
     }
 
-    public byte[] unprotect(String input, String output) throws Exception {
-        if (fileDoesNotExist(input)) {
-            throw new IllegalArgumentException("Input file does not exist");
-        }
+    public byte[] unprotect(byte[] input) throws Exception {
+        byte[] decrypted = symDecrypt(input, secretKey);
 
-        // decrypt file input to file output
+        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted,decrypted.length - INT_SIZE, decrypted.length)).intValue();
+        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted,decrypted.length - INT_SIZE * 2, decrypted.length - INT_SIZE)).intValue();
 
-        byte[] decryptedBytes = asymDecrypt(input.getBytes(), secretKey);
-        // decryptedBytes is (A + K1 + C)
-        // A is the original message + nonce
-        // K1 is server's public key encrypted with client's public key
-        // C is the encription of digest of A + K1 with server's private key
+        int startDigestEncrypted = decrypted.length  - digestEncryptedLength - INT_SIZE * 2;
+        int startPublicKey1 = startDigestEncrypted - publicKey1Length;
+        int startSequenceNumber = startPublicKey1 - INT_SIZE;
+        int startRandomNumber = startSequenceNumber - INT_SIZE;
 
-        // separate A, K1 and C
-        byte[] A = new byte[decryptedBytes.length - Constants.ASYM_KEY_SIZE - Constants.DIGEST_SIZE];
-        byte[] K1 = new byte[Constants.ASYM_KEY_SIZE];
-        byte[] C = new byte[Constants.DIGEST_SIZE];
+        byte[] digestEncrypted = Arrays.copyOfRange(decrypted, startDigestEncrypted, startDigestEncrypted + digestEncryptedLength);
+        byte[] publicKey1 = Arrays.copyOfRange(decrypted, startDigestEncrypted - publicKey1Length, startDigestEncrypted);
+        int sequenceNumber = new BigInteger(Arrays.copyOfRange(decrypted, startSequenceNumber, startSequenceNumber + INT_SIZE)).intValue();
+        int randomNumber = new BigInteger(Arrays.copyOfRange(decrypted, startRandomNumber, startRandomNumber + INT_SIZE)).intValue();
 
-        System.arraycopy(decryptedBytes, 0, A, 0, A.length);
-        System.arraycopy(decryptedBytes, A.length, K1, 0, K1.length);
-        System.arraycopy(decryptedBytes, A.length + K1.length, C, 0, C.length);
-
-        // decrypt K1 with client's private key
-        byte[] K1Decrypted = asymDecrypt(K1, privateKey);
-
-        // parse K1 as server's public key
-        Key publicKey1 = KeyFactory.getInstance(Constants.ASYM_ALGO).generatePublic(new X509EncodedKeySpec(K1Decrypted));
-
-        // decrypt C with server's public key
-        byte[] CDecrypted = asymDecrypt(C, publicKey1);
-
-        // calculate digest of A + K1
-        ByteArrayOutputStream os = new ByteArrayOutputStream( );
-        os.write(A);
-        os.write(K1Decrypted);
-        byte[] digest = digest(os.toByteArray());
-
-        // compare digest with CDecrypted
-        if (!MessageDigest.isEqual(digest, CDecrypted)) {
-            throw new Exception("Digests don't match");
-        }
-
-        // check nonces - TO DO
-
-        // write A to output file
-        FileOutputStream fos = new FileOutputStream(output);
-        fos.write(A);
-        fos.close();
-
-        return A;
+        return Arrays.copyOfRange(decrypted, 0, startRandomNumber);
     }
 
-    public boolean check(String input) {
-        if (fileDoesNotExist(input)) {
-            throw new IllegalArgumentException("Input file does not exist");
-        }
+    public boolean check(byte[] input) {
         throw new UnsupportedOperationException("Not implemented yet");
-    }
-
-    private boolean fileDoesNotExist(String input) {
-        File f = new File(input);
-        return !f.exists() || f.isDirectory();
     }
 
     private void assignSecretKey(String secretKeyPath) throws Exception {
         byte[] encoded = readFile(secretKeyPath);
-        secretKey = new SecretKeySpec(encoded, Constants.SYM_ALGO);
+        secretKey = new SecretKeySpec(encoded, SYM_ALGO);
     }
 
     private byte[] readFile(String path) throws Exception {
@@ -126,41 +91,47 @@ public class Library
     }
 
     private byte[] asymEncrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(Constants.ASYM_CYPHER);
+        Cipher cipher = Cipher.getInstance(ASYM_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(input);
     }
 
     private byte[] symEncrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(Constants.SYM_MODE);
+        Cipher cipher = Cipher.getInstance(SYM_CYPHER);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(input);
     }
 
     private byte[] asymDecrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(Constants.ASYM_CYPHER);
+        Cipher cipher = Cipher.getInstance(ASYM_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(input);
     }
 
     private byte[] symDecrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(Constants.SYM_MODE);
+        Cipher cipher = Cipher.getInstance(SYM_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(input);
     }
 
-
-
     private byte[] digest(byte[] input) throws Exception {
-        MessageDigest messageDigest = MessageDigest.getInstance(Constants.DIGEST_ALGO);
+        MessageDigest messageDigest = MessageDigest.getInstance(DIGEST_ALGO);
         return messageDigest.digest(input);
     }
 
     private void createAsymmetricKeys() throws Exception {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(Constants.ASYM_ALGO);
-        keyGen.initialize(Constants.ASYM_KEY_SIZE);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ASYM_ALGO);
+        keyGen.initialize(ASYM_KEY_SIZE);
         KeyPair keyPair = keyGen.generateKeyPair();
         publicKey = keyPair.getPublic();
         privateKey = keyPair.getPrivate();
+    }
+
+    private byte[] intToBytes(int value) {
+        return new byte[] {
+            (byte)(value >>> 24),
+            (byte)(value >>> 16),
+            (byte)(value >>> 8),
+            (byte)value};
     }
 }
