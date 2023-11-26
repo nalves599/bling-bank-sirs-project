@@ -45,8 +45,12 @@ public class Library
         os.write(intToBytes(sequenceNumber));
         os.write(publicKey.getEncoded());
 
+
         byte[] digestEncrypted = asymEncrypt(digest(os.toByteArray()), privateKey);
+        System.err.println(Arrays.toString(digest(os.toByteArray())));
+
         os.write(digestEncrypted);
+
 
         os.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
         os.write(intToBytes(publicKey.getEncoded().length)) ; // length of K1
@@ -69,8 +73,31 @@ public class Library
         byte[] publicKey1 = Arrays.copyOfRange(decrypted, startDigestEncrypted - publicKey1Length, startDigestEncrypted);
         int sequenceNumber = new BigInteger(Arrays.copyOfRange(decrypted, startSequenceNumber, startSequenceNumber + INT_SIZE)).intValue();
         int randomNumber = new BigInteger(Arrays.copyOfRange(decrypted, startRandomNumber, startRandomNumber + INT_SIZE)).intValue();
+        byte[] data = Arrays.copyOfRange(decrypted, 0, startRandomNumber);
 
-        return Arrays.copyOfRange(decrypted, 0, startRandomNumber);
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKey1);
+        Key publicKey2 = KeyFactory.getInstance(ASYM_ALGO).generatePublic(publicKeySpec);
+
+
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream( );
+        os.write(data);
+        os.write(intToBytes(randomNumber));
+        os.write(intToBytes(sequenceNumber));
+        os.write(publicKey1);
+
+
+
+        byte[] digest = digest(os.toByteArray());
+        byte[] digestDecrypted = asymDecrypt(digestEncrypted, publicKey2);
+        // Fix problem with padding
+        digestDecrypted = Arrays.copyOfRange(digestDecrypted, digestEncrypted.length - digest.length, digestDecrypted.length);
+
+        if (!Arrays.equals(digest, digestDecrypted)) {
+            throw new Exception("Digests don't match");
+        }
+
+        return data;
     }
 
     public boolean check(byte[] input) {
@@ -105,7 +132,7 @@ public class Library
     private byte[] asymDecrypt(byte[] input, Key key) throws Exception {
         Cipher cipher = Cipher.getInstance(ASYM_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(input);
+        return cipher.doFinal(input, cipher.getBlockSize(), input.length - cipher.getBlockSize());
     }
 
     private byte[] symDecrypt(byte[] input, Key key) throws Exception {
