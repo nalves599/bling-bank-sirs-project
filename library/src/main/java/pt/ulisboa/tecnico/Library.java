@@ -24,12 +24,13 @@ public class Library
     SecureRandom random = SecureRandom.getInstance(RANDOM_ALGO, RANDOM_PROVIDER);
 
     // Needs to throw exception because of SecureRandom.getInstance
-    public Library (String secretKeyPath) throws Exception {
+    public Library(String secretKeyPath) throws Exception {
         assignSecretKey(secretKeyPath);
         createAsymmetricKeys();
     }
+
     public byte[] protect(byte[] input) throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream( );
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         int randomNumber = random.nextInt();
         int sequenceNumber = this.sequenceNumber;
@@ -51,8 +52,8 @@ public class Library
     public byte[] unprotect(byte[] input) throws Exception {
         byte[] decrypted = symDecrypt(input, secretKey);
 
-        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted,decrypted.length - INT_SIZE, decrypted.length)).intValue();
-        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted,decrypted.length - INT_SIZE * 2, decrypted.length - INT_SIZE)).intValue();
+        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE, decrypted.length)).intValue();
+        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE * 2, decrypted.length - INT_SIZE)).intValue();
 
         int startDigestEncrypted = decrypted.length  - digestEncryptedLength - INT_SIZE * 2;
         int startPublicKey1 = startDigestEncrypted - publicKey1Length;
@@ -68,7 +69,7 @@ public class Library
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKey1);
         Key publicKey2 = KeyFactory.getInstance(ASYM_ALGO).generatePublic(publicKeySpec);
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream( );
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
         os.write(data);
         os.write(intToBytes(randomNumber));
         os.write(intToBytes(sequenceNumber));
