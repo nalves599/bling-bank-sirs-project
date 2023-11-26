@@ -19,7 +19,7 @@ public class Library
     private Key publicKey;
     private Key privateKey;
 
-    private int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
+    private final int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
 
     SecureRandom random = SecureRandom.getInstance(RANDOM_ALGO, RANDOM_PROVIDER);
 
@@ -86,7 +86,7 @@ public class Library
         return data;
     }
 
-    public boolean check(byte[] input) throws Exception {
+    public boolean check(byte[] input) {
         try {
             unprotect(input);
         } catch (Exception e) {
@@ -103,7 +103,12 @@ public class Library
     private byte[] readFile(String path) throws Exception {
         FileInputStream fis = new FileInputStream(path);
         byte[] content = new byte[fis.available()];
-        fis.read(content);
+        while (true) {
+            int read = fis.read(content);
+            if (read == -1) {
+                break;
+            }
+        }
         fis.close();
         return content;
     }
