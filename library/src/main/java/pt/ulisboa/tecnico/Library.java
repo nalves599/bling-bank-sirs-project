@@ -12,8 +12,7 @@ import java.util.Arrays;
 
 import static pt.ulisboa.tecnico.aux.Constants.*;
 
-public class Library
-{
+public class Library {
     private Key secretKey;
 
     private Key publicKey;
@@ -44,7 +43,7 @@ public class Library
         os.write(digestEncrypted);
 
         os.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
-        os.write(intToBytes(publicKey.getEncoded().length)) ; // length of K1
+        os.write(intToBytes(publicKey.getEncoded().length)); // length of K1
 
         return symEncrypt(os.toByteArray(), secretKey);
     }
@@ -52,18 +51,24 @@ public class Library
     public byte[] unprotect(byte[] input) throws Exception {
         byte[] decrypted = symDecrypt(input, secretKey);
 
-        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE, decrypted.length)).intValue();
-        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE * 2, decrypted.length - INT_SIZE)).intValue();
+        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE,
+            decrypted.length)).intValue();
+        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE * 2,
+            decrypted.length - INT_SIZE)).intValue();
 
-        int startDigestEncrypted = decrypted.length  - digestEncryptedLength - INT_SIZE * 2;
+        int startDigestEncrypted = decrypted.length - digestEncryptedLength - INT_SIZE * 2;
         int startPublicKey1 = startDigestEncrypted - publicKey1Length;
         int startSequenceNumber = startPublicKey1 - INT_SIZE;
         int startRandomNumber = startSequenceNumber - INT_SIZE;
 
-        byte[] digestEncrypted = Arrays.copyOfRange(decrypted, startDigestEncrypted, startDigestEncrypted + digestEncryptedLength);
-        byte[] publicKey1 = Arrays.copyOfRange(decrypted, startDigestEncrypted - publicKey1Length, startDigestEncrypted);
-        int sequenceNumber = new BigInteger(Arrays.copyOfRange(decrypted, startSequenceNumber, startSequenceNumber + INT_SIZE)).intValue();
-        int randomNumber = new BigInteger(Arrays.copyOfRange(decrypted, startRandomNumber, startRandomNumber + INT_SIZE)).intValue();
+        byte[] digestEncrypted = Arrays.copyOfRange(decrypted, startDigestEncrypted, startDigestEncrypted +
+                                                                                     digestEncryptedLength);
+        byte[] publicKey1 = Arrays.copyOfRange(decrypted, startDigestEncrypted - publicKey1Length,
+            startDigestEncrypted);
+        int sequenceNumber = new BigInteger(Arrays.copyOfRange(decrypted, startSequenceNumber, startSequenceNumber +
+                                                                                               INT_SIZE)).intValue();
+        int randomNumber = new BigInteger(Arrays.copyOfRange(decrypted, startRandomNumber, startRandomNumber +
+                                                                                           INT_SIZE)).intValue();
         byte[] data = Arrays.copyOfRange(decrypted, 0, startRandomNumber);
 
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKey1);
@@ -78,7 +83,8 @@ public class Library
         byte[] digest = digest(os.toByteArray());
         byte[] digestDecrypted = asymDecrypt(digestEncrypted, publicKey2);
         // Fix problem with padding
-        digestDecrypted = Arrays.copyOfRange(digestDecrypted, digestEncrypted.length - digest.length, digestDecrypted.length);
+        digestDecrypted = Arrays.copyOfRange(digestDecrypted, digestEncrypted.length - digest.length,
+            digestDecrypted.length);
 
         if (!Arrays.equals(digest, digestDecrypted)) {
             throw new Exception("Digests don't match");
@@ -152,10 +158,6 @@ public class Library
     }
 
     private byte[] intToBytes(int value) {
-        return new byte[] {
-            (byte)(value >>> 24),
-            (byte)(value >>> 16),
-            (byte)(value >>> 8),
-            (byte)value};
+        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
     }
 }

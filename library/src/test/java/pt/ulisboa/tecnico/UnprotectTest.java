@@ -13,11 +13,11 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class UnprotectTest
-{
+public class UnprotectTest {
     @TempDir
     static File tempFolder;
     static String tempPath;
+
     @BeforeAll
     static void init() throws IOException {
         tempPath = tempFolder.getAbsolutePath() + "/";

@@ -12,11 +12,11 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CheckTest
-{
+public class CheckTest {
     @TempDir
     static File tempFolder;
     static String tempPath;
+
     @BeforeAll
     static void init() throws IOException {
         tempPath = tempFolder.getAbsolutePath() + "/";

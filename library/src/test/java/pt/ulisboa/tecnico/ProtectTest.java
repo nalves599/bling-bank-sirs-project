@@ -17,11 +17,11 @@ import java.util.Arrays;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ProtectTest
-{
+public class ProtectTest {
     @TempDir
     static File tempFolder;
     static String tempPath;
+
     @BeforeAll
     static void init() throws Exception {
         tempPath = tempFolder.getAbsolutePath() + "/";
@@ -32,6 +32,7 @@ public class ProtectTest
         Path secretKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_KEY_TEST_PATH_1));
         Files.write(secretKeyFile, TestConfig.SECRET_KEY_1.getBytes());
     }
+
     @Test
     public void protectFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
