@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 
@@ -14,6 +15,8 @@ import static pt.ulisboa.tecnico.aux.Constants.*;
 
 public class Library {
     private Key secretKey;
+
+    private final IvParameterSpec iv = new IvParameterSpec(IV);
 
     private Key publicKey;
     private Key privateKey;
@@ -29,64 +32,52 @@ public class Library {
     }
 
     public byte[] protect(byte[] input) throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        output.write(iv.getIV());
+
+        ByteArrayOutputStream payload = new ByteArrayOutputStream();
+
+        payload.write(intToBytes(input.length));
+        payload.write(input);
 
         int randomNumber = random.nextInt();
         int sequenceNumber = this.sequenceNumber;
 
-        os.write(input);
-        os.write(intToBytes(randomNumber));
-        os.write(intToBytes(sequenceNumber));
-        os.write(publicKey.getEncoded());
+        payload.write(intToBytes(randomNumber));
+        payload.write(intToBytes(sequenceNumber));
 
-        byte[] digestEncrypted = asymEncrypt(digest(os.toByteArray()), privateKey);
-        os.write(digestEncrypted);
+        byte[] digestEncrypted = asymEncrypt(digest(payload.toByteArray()), privateKey);
 
-        os.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
-        os.write(intToBytes(publicKey.getEncoded().length)); // length of K1
+        payload.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
+        payload.write(digestEncrypted);
 
-        return symEncrypt(os.toByteArray(), secretKey);
+        output.write(symEncrypt(payload.toByteArray(), secretKey, iv));
+
+        return output.toByteArray();
     }
 
     public byte[] unprotect(byte[] input) throws Exception {
-        byte[] decrypted = symDecrypt(input, secretKey);
+        byte[] iv = Arrays.copyOfRange(input, 0, 16);
 
-        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE,
-            decrypted.length)).intValue();
-        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE * 2,
-            decrypted.length - INT_SIZE)).intValue();
+        byte[] payload = symDecrypt(Arrays.copyOfRange(input, 16, input.length), secretKey, new IvParameterSpec(iv));
 
-        int startDigestEncrypted = decrypted.length - digestEncryptedLength - INT_SIZE * 2;
-        int startPublicKey1 = startDigestEncrypted - publicKey1Length;
-        int startSequenceNumber = startPublicKey1 - INT_SIZE;
-        int startRandomNumber = startSequenceNumber - INT_SIZE;
+        int payloadLength = bytesToInt(payload, 0);
+        byte[] data = Arrays.copyOfRange(payload, INT_SIZE, INT_SIZE + payloadLength);
 
-        byte[] digestEncrypted = Arrays.copyOfRange(decrypted, startDigestEncrypted, startDigestEncrypted +
-                                                                                     digestEncryptedLength);
-        byte[] publicKey1 = Arrays.copyOfRange(decrypted, startDigestEncrypted - publicKey1Length,
-            startDigestEncrypted);
-        int sequenceNumber = new BigInteger(Arrays.copyOfRange(decrypted, startSequenceNumber, startSequenceNumber +
-                                                                                               INT_SIZE)).intValue();
-        int randomNumber = new BigInteger(Arrays.copyOfRange(decrypted, startRandomNumber, startRandomNumber +
-                                                                                           INT_SIZE)).intValue();
-        byte[] data = Arrays.copyOfRange(decrypted, 0, startRandomNumber);
+        int randomNumber = bytesToInt(payload, INT_SIZE + payloadLength);
+        int sequenceNumber = bytesToInt(payload, INT_SIZE + payloadLength + INT_SIZE);
 
-        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKey1);
-        Key publicKey2 = KeyFactory.getInstance(ASYM_ALGO).generatePublic(publicKeySpec);
+        int digestEncryptStart = INT_SIZE + payloadLength + INT_SIZE + INT_SIZE;
+        int digestEncryptedLength = bytesToInt(payload, digestEncryptStart);
+        byte[] digestEncrypted = Arrays.copyOfRange(payload, digestEncryptStart + INT_SIZE, digestEncryptStart +
+                                                                                            INT_SIZE +
+                                                                                            digestEncryptedLength);
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        os.write(data);
-        os.write(intToBytes(randomNumber));
-        os.write(intToBytes(sequenceNumber));
-        os.write(publicKey1);
+        byte[] digestDecrypted = asymDecrypt(digestEncrypted, publicKey);
+        byte[] digestCalculated = digest(Arrays.copyOfRange(payload, 0, digestEncryptStart));
 
-        byte[] digest = digest(os.toByteArray());
-        byte[] digestDecrypted = asymDecrypt(digestEncrypted, publicKey2);
-        // Fix problem with padding
-        digestDecrypted = Arrays.copyOfRange(digestDecrypted, digestEncrypted.length - digest.length,
-            digestDecrypted.length);
-
-        if (!Arrays.equals(digest, digestDecrypted)) {
+        if (!Arrays.equals(digestDecrypted, digestCalculated)) {
             throw new Exception("Digests don't match");
         }
 
@@ -126,21 +117,21 @@ public class Library {
         return cipher.doFinal(input);
     }
 
-    private byte[] symEncrypt(byte[] input, Key key) throws Exception {
+    private byte[] symEncrypt(byte[] input, Key key, IvParameterSpec iv) throws Exception {
         Cipher cipher = Cipher.getInstance(SYM_CYPHER);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
+        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         return cipher.doFinal(input);
     }
 
     private byte[] asymDecrypt(byte[] input, Key key) throws Exception {
         Cipher cipher = Cipher.getInstance(ASYM_CYPHER);
         cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(input, cipher.getBlockSize(), input.length - cipher.getBlockSize());
+        return cipher.doFinal(input);
     }
 
-    private byte[] symDecrypt(byte[] input, Key key) throws Exception {
+    private byte[] symDecrypt(byte[] input, Key key, IvParameterSpec iv) throws Exception {
         Cipher cipher = Cipher.getInstance(SYM_CYPHER);
-        cipher.init(Cipher.DECRYPT_MODE, key);
+        cipher.init(Cipher.DECRYPT_MODE, key, iv);
         return cipher.doFinal(input);
     }
 
@@ -159,5 +150,9 @@ public class Library {
 
     private byte[] intToBytes(int value) {
         return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
+    }
+
+    private int bytesToInt(byte[] bytes, int offset) {
+        return new BigInteger(Arrays.copyOfRange(bytes, offset, offset + INT_SIZE)).intValue();
     }
 }
