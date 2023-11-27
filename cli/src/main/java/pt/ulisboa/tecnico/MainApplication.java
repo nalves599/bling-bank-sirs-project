@@ -1,29 +1,32 @@
-public class Commands {
+package pt.ulisboa.tecnico;
 
-    public String start() {
-        return """
-            Welcome to BlingBank!
-            
-            Available commands:
-              (blingbank) help
-              (blingbank) protect
-              (blingbank) check
-              (blingbank) unprotect
-            
-            Type a command to proceed: 
-            """;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Scanner;
+
+import Commands;
+
+public class MainApplication {
+    public static void main(String[] args) {
+        Commands commands = new Commands();
+
+        final PrintStream out = System.out;
+        final InputStream in = System.in;
+
+        Scanner scanner = new Scanner(in);
+
+        out.println(commands.start());
+
+        while (scanner.hasNextLine()) {
+            String line = scanner.nextLine();
+
+            if (line.equals("help")) {
+                out.println(commands.help());
+            } else {
+                out.println("Unknown command");
+            }
+            out.println();
+        }
+
+        scanner.close();
     }
-
-    public String help() {
-        return """
-            Available commands:
-              (blingbank) help: display all available commands and their description
-              (blingbank) protect: protect a message
-                          usage: (blingbank) protect <input-file> <output-file> <...>
-              (blingbank) check: check if a message is protected
-                          usage: (blingbank) check <input-file>
-              (blingbank) unprotect: unprotect a message
-                          usage: (blingbank) unprotect <input-file> <output-file> <...>
-            """;
-    }   
-}
