@@ -2,22 +2,19 @@ package pt.ulisboa.tecnico;
 
 public class Commands {
 
-    public String start() {
-        return """
+    public final String start = """
             Welcome to BlingBank!
-            
-            Available commands:
-              (blingbank) help
-              (blingbank) protect
-              (blingbank) check
-              (blingbank) unprotect
-            
-            Type a command to proceed: 
-            """;
-    }
+        
+        Available commands:
+          (blingbank) help
+          (blingbank) protect
+          (blingbank) check
+          (blingbank) unprotect
+        
+        Type a command to proceed: 
+        """;
 
-    public String help() {
-        return """
+    public final String help = """
             Available commands:
               (blingbank) help: display all available commands and their description
               (blingbank) protect: protect a message
@@ -27,5 +24,4 @@ public class Commands {
               (blingbank) unprotect: unprotect a message
                           usage: (blingbank) unprotect <input-file> <output-file> <...>
             """;
-    }   
 }
