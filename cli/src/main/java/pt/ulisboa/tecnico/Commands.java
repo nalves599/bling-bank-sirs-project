@@ -16,10 +16,12 @@ public class Commands {
           (blingbank) unprotect
           (blingbank) exit
         
-        Type a command to proceed: 
+        Type a command to proceed:
+        (blingbank) 
         """;
 
-    public final String help = """
+    public final String help() {
+        return """
             Available commands:
               (blingbank) help: display all available commands and their description
               (blingbank) protect: protect a message
@@ -29,6 +31,7 @@ public class Commands {
               (blingbank) unprotect: unprotect a message
                           usage: (blingbank) unprotect <input-file> <output-file> <...>
             """;
+    }
 
     public Commands(Library library) {
         this.library = library;

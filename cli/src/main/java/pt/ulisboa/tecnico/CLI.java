@@ -4,11 +4,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-public class MainApplication {
+public class CLI {
     public static void main(String[] args) {
 
         if (args.length != 1) {
-            System.out.println("Arguments missing");
+            System.out.println("Only one argument is needed: path to secret key");
             return;
         }
         String secretKeyPath = args[0]; // path to secret key
@@ -32,7 +32,7 @@ public class MainApplication {
 
                 switch (command[0]) {
                     case "help":
-                        out.println(commands.help);
+                        out.println(commands.help());
                         break;
                     case "protect":
                         commands.protect(command);
@@ -50,7 +50,7 @@ public class MainApplication {
                         out.println("Invalid command");
                         break;
                 }
-                out.println("\nType a command to proceed: ");
+                out.print("\nType a command to proceed:\n(blingbank) ");
             }
             scanner.close();
 
