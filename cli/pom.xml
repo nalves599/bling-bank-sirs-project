@@ -18,6 +18,8 @@
     <maven.compiler.target>1.7</maven.compiler.target>
 
     <java.version>17</java.version>
+    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <mainclass>pt.ulisboa.tecnico.MainApplication</mainclass>
   </properties>
 
   <dependencies>
@@ -26,6 +28,12 @@
       <artifactId>junit</artifactId>
       <version>4.11</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>pt.ulisboa.tecnico</groupId>
+      <artifactId>library</artifactId>
+      <version>1.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -80,6 +88,26 @@
         <configuration>
           <source>15</source>
           <target>15</target>
+        </configuration>
+      </plugin>
+      <!-- Plugin that provides two goals to execute system and Java programs -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${exec-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>${mainclass}</mainClass>
+          <arguments>
+            <!-- can be defined here with multiple argument tags,
+            or in command line with -Dexec.args="arg0 arg1 arg2" -->
+          </arguments>
         </configuration>
       </plugin>
     </plugins>

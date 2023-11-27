@@ -6,26 +6,56 @@ import java.util.Scanner;
 
 public class MainApplication {
     public static void main(String[] args) {
-        Commands commands = new Commands();
 
-        final PrintStream out = System.out;
-        final InputStream in = System.in;
-
-        Scanner scanner = new Scanner(in);
-
-        out.println(commands.start());
-
-        while (scanner.hasNextLine()) {
-            String line = scanner.nextLine();
-
-            if (line.equals("help")) {
-                out.println(commands.help());
-            } else {
-                out.println("Unknown command");
-            }
-            out.println();
+        if (args.length != 1) {
+            System.out.println("Arguments missing");
+            return;
         }
+        String secretKeyPath = args[0]; // path to secret key
 
-        scanner.close();
+        try {
+            Library library = new Library(secretKeyPath);
+
+            Commands commands = new Commands(library);
+
+            final PrintStream out = System.out;
+            final InputStream in = System.in;
+
+            Scanner scanner = new Scanner(in);
+
+            out.println(commands.start);
+
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+
+                String[] command = line.split(" ");
+
+                switch (command[0]) {
+                    case "help":
+                        out.println(commands.help);
+                        break;
+                    case "protect":
+                        commands.protect(command);
+                        break;
+                    case "check":
+                        commands.check(command);
+                        break;
+                    case "unprotect":
+                        commands.unprotect(command);
+                        break;
+                    case "exit":
+                        out.println("Exiting...");
+                        return;
+                    default:
+                        out.println("Invalid command");
+                        break;
+                }
+                out.println("\nType a command to proceed: ");
+            }
+            scanner.close();
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }
