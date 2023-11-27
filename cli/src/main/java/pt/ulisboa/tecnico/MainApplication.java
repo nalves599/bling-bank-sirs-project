@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-import Commands;
-
 public class MainApplication {
     public static void main(String[] args) {
         Commands commands = new Commands();
@@ -30,3 +28,4 @@ public class MainApplication {
 
         scanner.close();
     }
+}
