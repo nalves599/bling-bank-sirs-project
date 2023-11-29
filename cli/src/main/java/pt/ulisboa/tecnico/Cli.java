@@ -4,13 +4,14 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-public class CLI {
+public class Cli {
     public static void main(String[] args) {
 
         if (args.length != 1) {
-            System.out.println("Only one argument is needed: path to secret key");
+            System.out.println("Only one argument is allowed: path to secret key");
             return;
         }
+
         String secretKeyPath = args[0]; // path to secret key
 
         try {
@@ -33,7 +34,7 @@ public class CLI {
                 // line_args[0] is the command, the rest are the arguments to the command
                 switch (line_args[0]) {
                     case "help":
-                        out.println(commands.help());
+                        commands.help();
                         break;
                     case "protect":
                         commands.protect(line_args);
