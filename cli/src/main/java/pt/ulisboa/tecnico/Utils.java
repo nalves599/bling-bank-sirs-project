@@ -4,7 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
 public class Utils {
-    public static byte[] readFile(String path)  {
+    public static byte[] readFile(String path) {
         try {
             FileInputStream fis = new FileInputStream(path);
             byte[] data = fis.readAllBytes();
@@ -16,7 +16,7 @@ public class Utils {
         }
     }
 
-    public static void writeFile(String path, byte[] content)  {
+    public static void writeFile(String path, byte[] content) {
         try {
             FileOutputStream fos = new FileOutputStream(path);
             fos.write(content);
