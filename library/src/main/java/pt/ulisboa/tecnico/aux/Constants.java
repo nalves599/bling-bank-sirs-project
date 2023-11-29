@@ -2,7 +2,7 @@ package pt.ulisboa.tecnico.aux;
 
 public class Constants {
 
-    public static String SYM_ALGO = "AES";
+    static String SYM_ALGO = "AES";
     public static int SYM_KEY_SIZE = 128;
     public static String SYM_CYPHER = "AES/CBC/PKCS5Padding";
 
