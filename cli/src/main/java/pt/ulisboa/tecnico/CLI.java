@@ -28,20 +28,21 @@ public class CLI {
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
 
-                String[] command = line.split(" ");
+                String[] line_args = line.split(" ");
 
-                switch (command[0]) {
+                // line_args[0] is the command, the rest are the arguments to the command
+                switch (line_args[0]) {
                     case "help":
                         out.println(commands.help());
                         break;
                     case "protect":
-                        commands.protect(command);
+                        commands.protect(line_args);
                         break;
                     case "check":
-                        commands.check(command);
+                        commands.check(line_args);
                         break;
                     case "unprotect":
-                        commands.unprotect(command);
+                        commands.unprotect(line_args);
                         break;
                     case "exit":
                         out.println("Exiting...");
