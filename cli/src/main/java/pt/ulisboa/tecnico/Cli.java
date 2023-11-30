@@ -24,7 +24,7 @@ public class Cli {
 
             Scanner scanner = new Scanner(in);
 
-            out.println(commands.start);
+            out.print(commands.start);
 
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();

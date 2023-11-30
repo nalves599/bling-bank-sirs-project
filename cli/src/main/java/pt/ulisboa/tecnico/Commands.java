@@ -13,8 +13,7 @@ public class Commands {
           (blingbank) exit
 
         Type a command to proceed:
-        (blingbank)\s
-        """;
+        (blingbank)\s""";
 
     public final String help = """
         Available commands:
