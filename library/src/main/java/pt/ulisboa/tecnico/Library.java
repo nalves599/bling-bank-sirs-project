@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico;
 
+import io.vavr.control.Either;
+import org.apache.commons.lang3.ArrayUtils;
 import pt.ulisboa.tecnico.aux.Cryptography;
 import pt.ulisboa.tecnico.aux.Keys;
 
@@ -22,33 +24,49 @@ public class Library {
         crypto = new Cryptography();
     }
 
-    public byte[] protect(byte[] input) throws Exception {
+    public Either<String, byte[]> protect(byte[] input) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        output.write(keys.getIv().getIV());
+        if (!write(keys.getIv().getIV(), output)) return Either.left("Check the initialization vector");
 
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
 
-        payload.write(intToBytes(input.length));
-        payload.write(input);
+        if (!write(intToBytes(input.length), payload)) return Either.left("Check the payload length");
+        if (!write(input, payload)) return Either.left("Check the payload");
 
         int randomNumber = crypto.getRandomNumber();
         int sequenceNumber = crypto.getAndSetSequenceNumber();
 
-        payload.write(intToBytes(randomNumber));
-        payload.write(intToBytes(sequenceNumber));
+        if (!write(intToBytes(randomNumber), payload)) return Either.left("Check the random number");
+        if (!write(intToBytes(sequenceNumber), payload)) return Either.left("Check the sequence number");
 
-        byte[] digestEncrypted = crypto.asymEncrypt(crypto.digest(payload.toByteArray()), keys.privateKey);
+        byte[] digestEncrypted;
+        try {
+            digestEncrypted = crypto.asymEncrypt(crypto.digest(payload.toByteArray()), keys.privateKey);
+        } catch (Exception e) {
+            return Either.left("Check the asymmetric encryption method");
+        }
 
-        payload.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
-        payload.write(digestEncrypted);
+        if (!write(intToBytes(digestEncrypted.length), payload)) return Either.left(
+            "Check the length of digestEncrypted");
+        if (!write((byte[]) ArrayUtils.toPrimitive(digestEncrypted), payload)) return Either.left(
+            "Check the digestEncrypted");
 
-        output.write(crypto.symEncrypt(payload.toByteArray(), keys.secretKey, keys.iv));
+        byte[] encryptedPayload;
 
-        return output.toByteArray();
+        try {
+            encryptedPayload = crypto.symEncrypt(payload.toByteArray(), keys.secretKey, keys.iv);
+        } catch (Exception e) {
+            return Either.left("Check the symmetric encryption method");
+        }
+
+        if (!write(encryptedPayload, output)) return Either.left("Check the encrypted payload");
+
+        return Either.right(output.toByteArray());
     }
 
     public byte[] unprotect(byte[] input) throws Exception {
+
         byte[] iv = Arrays.copyOfRange(input, 0, 16);
 
         byte[] payload = crypto.symDecrypt(Arrays.copyOfRange(input, 16, input.length), keys.secretKey,
@@ -79,6 +97,15 @@ public class Library {
     public boolean check(byte[] input) {
         try {
             unprotect(input);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean write(byte[] input, ByteArrayOutputStream output) {
+        try {
+            output.write(input);
         } catch (Exception e) {
             return false;
         }
