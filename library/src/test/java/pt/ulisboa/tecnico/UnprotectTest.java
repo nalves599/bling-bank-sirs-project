@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico;
 
+import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -10,8 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UnprotectTest {
     @TempDir
@@ -32,15 +32,16 @@ public class UnprotectTest {
     @Test
     public void unProtectFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
-        byte[] decrypted = lib.unprotect(encrypted);
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        byte[] decrypted = lib.unprotect(output.get());
         assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted));
     }
 
     @Test
     public void unProtectTamperedFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        byte[] encrypted = output.get();
         encrypted[0] = (byte) (encrypted[0] + 1);
         assertThrows(Exception.class, () -> lib.unprotect(encrypted));
     }
