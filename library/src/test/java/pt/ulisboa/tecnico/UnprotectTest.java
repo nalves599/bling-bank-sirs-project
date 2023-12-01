@@ -33,8 +33,8 @@ public class UnprotectTest {
     public void unProtectFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
-        byte[] decrypted = lib.unprotect(output.get());
-        assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted));
+        Either<String, byte[]> decrypted = lib.unprotect(output.get());
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted.get()));
     }
 
     @Test
@@ -43,6 +43,7 @@ public class UnprotectTest {
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         byte[] encrypted = output.get();
         encrypted[0] = (byte) (encrypted[0] + 1);
-        assertThrows(Exception.class, () -> lib.unprotect(encrypted));
+        Either<String, byte[]> decrypted = lib.unprotect(encrypted);
+        assertTrue(decrypted.isLeft());
     }
 }
