@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.aux;
 
-import io.vavr.control.Either;
 import lombok.Getter;
 
 import javax.crypto.Cipher;
