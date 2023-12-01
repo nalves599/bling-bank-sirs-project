@@ -3,7 +3,7 @@ package pt.ulisboa.tecnico;
 public class Commands {
 
     public final String start = """
-            Welcome to BlingBank!
+        Welcome to BlingBank!
 
         Available commands:
           (blingbank) help
@@ -16,7 +16,7 @@ public class Commands {
         (blingbank)\s""";
 
     public final String help = """
-        Available commands:
+        \nAvailable commands:
           (blingbank) help: display all available commands and their description
           (blingbank) protect: protect a message
                       usage: (blingbank) protect <input-file> <output-file> <...>
@@ -32,10 +32,11 @@ public class Commands {
     }
 
     public void help() {
-        System.out.println(help);
+        System.out.print(help);
     }
 
     public void protect(String[] args) {
+        // TODO: check number of args
         if (args.length < 3) {
             System.out.println("Usage: (blingbank) protect <input-file> <output-file> <...>");
             return;
@@ -45,11 +46,12 @@ public class Commands {
 
         // more args needed? - TODO
         try {
-            byte[] input = Utils.readFile(inputFilePath);
-            byte[] output = library.protect(input);
+            byte[] input = Utils.readFile(inputFilePath).orElseThrow(() -> new Exception("Could not read file"));
+            byte[] output = library.protect(input).getOrElseThrow((r) -> new Exception(r));
             Utils.writeFile(outputFilePath, output);
         } catch (Exception e) {
-            System.out.println("Could not protect file: " + e.getMessage());
+            System.out.println("Could not protect file " + inputFilePath);
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -61,15 +63,17 @@ public class Commands {
         String inputFilePath = args[1];
 
         try {
-            byte[] input = Utils.readFile(inputFilePath);
+            byte[] input = Utils.readFile(inputFilePath).orElseThrow(() -> new Exception("Could not read file"));
             boolean result = library.check(input);
             System.out.println(result ? "File protected" : "File not protected");
         } catch (Exception e) {
+            System.out.println("Could not check file " + inputFilePath);
             System.out.println("Error: " + e.getMessage());
         }
     }
 
     public void unprotect(String[] args) {
+        // TODO: check number of args
         if (args.length < 3) {
             System.out.println("Usage: (blingbank) unprotect <input-file> <output-file> <...>");
             return;
@@ -78,12 +82,12 @@ public class Commands {
         String outputFilePath = args[2];
 
         // more args needed? - TODO
-
         try {
-            byte[] input = Utils.readFile(inputFilePath);
-            byte[] output = library.unprotect(input);
+            byte[] input = Utils.readFile(inputFilePath).orElseThrow(() -> new Exception("Could not read file"));
+            byte[] output = library.unprotect(input).getOrElseThrow((r) -> new Exception(r));
             Utils.writeFile(outputFilePath, output);
         } catch (Exception e) {
+            System.out.println("Could not unprotect file " + inputFilePath);
             System.out.println("Error: " + e.getMessage());
         }
     }
