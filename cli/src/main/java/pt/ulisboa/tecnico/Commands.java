@@ -1,8 +1,8 @@
 package pt.ulisboa.tecnico;
 
-public class Commands {
+class Commands {
 
-    public final String start = """
+    final String start = """
         Welcome to BlingBank!
 
         Available commands:
@@ -15,27 +15,27 @@ public class Commands {
         Type a command to proceed:
         (blingbank)\s""";
 
-    public final String help = """
-        \nAvailable commands:
-          (blingbank) help: display all available commands and their description
-          (blingbank) protect: protect a message
-                      usage: (blingbank) protect <input-file> <output-file> <...>
-          (blingbank) check: check if a message is protected
-                      usage: (blingbank) check <input-file>
-          (blingbank) unprotect: unprotect a message
-                      usage: (blingbank) unprotect <input-file> <output-file> <...>
-        """;
     private final Library library;
 
-    public Commands(Library library) {
+    Commands(Library library) {
         this.library = library;
     }
 
-    public void help() {
+    void help() {
+        String help = """
+            \nAvailable commands:
+              (blingbank) help: display all available commands and their description
+              (blingbank) protect: protect a message
+                          usage: (blingbank) protect <input-file> <output-file> <...>
+              (blingbank) check: check if a message is protected
+                          usage: (blingbank) check <input-file>
+              (blingbank) unprotect: unprotect a message
+                          usage: (blingbank) unprotect <input-file> <output-file> <...>
+            """;
         System.out.print(help);
     }
 
-    public void protect(String[] args) {
+    void protect(String[] args) {
         // TODO: check number of args
         if (args.length < 3) {
             System.out.println("Usage: (blingbank) protect <input-file> <output-file> <...>");
@@ -55,7 +55,7 @@ public class Commands {
         }
     }
 
-    public void check(String[] args) {
+    void check(String[] args) {
         if (args.length != 2) {
             System.out.println("Usage: (blingbank) check <input-file>");
             return;
@@ -72,7 +72,7 @@ public class Commands {
         }
     }
 
-    public void unprotect(String[] args) {
+    void unprotect(String[] args) {
         // TODO: check number of args
         if (args.length < 3) {
             System.out.println("Usage: (blingbank) unprotect <input-file> <output-file> <...>");
