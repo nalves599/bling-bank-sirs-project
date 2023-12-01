@@ -1,10 +1,12 @@
 package pt.ulisboa.tecnico.aux;
 
+import io.vavr.control.Either;
 import lombok.Getter;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.*;
+import java.util.Optional;
 
 import static pt.ulisboa.tecnico.aux.Constants.*;
 
@@ -23,24 +25,40 @@ public class Cryptography {
 
     public Cryptography() throws Exception {}
 
-    public byte[] symEncrypt(byte[] input, Key key, IvParameterSpec iv) throws Exception {
-        symCipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        return symCipher.doFinal(input);
+    public Optional<byte[]> symEncrypt(byte[] input, Key key, IvParameterSpec iv) {
+        try {
+            symCipher.init(Cipher.ENCRYPT_MODE, key, iv);
+            return Optional.of(symCipher.doFinal(input));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
-    public byte[] symDecrypt(byte[] input, Key key, IvParameterSpec iv) throws Exception {
-        symCipher.init(Cipher.DECRYPT_MODE, key, iv);
-        return symCipher.doFinal(input);
+    public Optional<byte[]> symDecrypt(byte[] input, Key key, IvParameterSpec iv) {
+        try {
+            symCipher.init(Cipher.DECRYPT_MODE, key, iv);
+            return Optional.of(symCipher.doFinal(input));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
-    public byte[] asymDecrypt(byte[] input, Key key) throws Exception {
-        asymCipher.init(Cipher.DECRYPT_MODE, key);
-        return asymCipher.doFinal(input);
+    public Optional<byte[]> asymEncrypt(byte[] input, Key key) {
+        try {
+            asymCipher.init(Cipher.ENCRYPT_MODE, key);
+            return Optional.of(asymCipher.doFinal(input));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
-    public byte[] asymEncrypt(byte[] input, Key key) throws Exception {
-        asymCipher.init(Cipher.ENCRYPT_MODE, key);
-        return asymCipher.doFinal(input);
+    public Optional<byte[]> asymDecrypt(byte[] input, Key key) {
+        try {
+            asymCipher.init(Cipher.DECRYPT_MODE, key);
+            return Optional.of(asymCipher.doFinal(input));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public byte[] digest(byte[] input) {
