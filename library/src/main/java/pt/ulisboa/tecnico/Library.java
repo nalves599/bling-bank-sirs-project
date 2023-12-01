@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico;
 
 import io.vavr.control.Either;
-import org.apache.commons.lang3.ArrayUtils;
 import pt.ulisboa.tecnico.aux.Cryptography;
 import pt.ulisboa.tecnico.aux.Keys;
 

@@ -46,4 +46,16 @@ public class UnprotectTest {
         Either<String, byte[]> decrypted = lib.unprotect(encrypted);
         assertTrue(decrypted.isLeft());
     }
+
+    @Test
+    public void unProtectMultipleFiles() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> decrypted1 = lib.unprotect(output1.get());
+        Either<String, byte[]> decrypted2 = lib.unprotect(output2.get());
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted1.get()));
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted2.get()));
+        assertNotEquals(decrypted1.get(), decrypted2.get());
+    }
 }
