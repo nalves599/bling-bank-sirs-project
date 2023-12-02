@@ -1,0 +1,8 @@
+## Datasource
+spring.datasource.url=jdbc:mariadb://localhost:<DATABASE PORT>/<DATABASE NAME>
+spring.datasource.username=<DATABASE USERNAME>
+spring.datasource.password=<DATABASE PASSWORD>
+
+## Jpa
+spring.jpa.database-platform=org.mariadb.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect

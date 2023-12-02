@@ -41,8 +41,28 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-		</dependency>
+      </dependency>
+
+         <!-- MariaDB -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
+
 	</dependencies>
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <activatedProperties>local</activatedProperties>
+        </properties>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      </profile>
+    </profiles>
 
 	<build>
 		<plugins>
@@ -50,15 +70,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<image>
-						<builder>paketobuildpacks/builder-jammy-base:latest</builder>
-					</image>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
+          <executable>true</executable>
 				</configuration>
 			</plugin>
 		</plugins>
