@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.bling_bank.account.domain;
 
 import jakarta.persistence.*;
-import lombok.Data
+import lombok.Data;
+
+import java.util.Set;
 
 @Data
 @Entity
@@ -14,7 +16,7 @@ public class AccountHolder {
 
     private String accountHolderName;
 
-    @ManyToMany(mappedBy = "accountHolder")
+    @ManyToMany()
     private Set<Account> accounts;
 
     public AccountHolder() {

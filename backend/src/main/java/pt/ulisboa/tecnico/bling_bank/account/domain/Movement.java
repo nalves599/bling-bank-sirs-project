@@ -1,7 +1,7 @@
 package pt.ulisboa.tecnico.bling_bank.account.domain;
 
 import jakarta.persistence.*;
-import lombok.Data
+import lombok.Data;
 import java.util.Date;
 
 @Data
@@ -20,7 +20,6 @@ public class Movement {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "account_id")
     private Account account;
 
     public Movement() {
