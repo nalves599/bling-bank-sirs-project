@@ -2,8 +2,12 @@ package pt.ulisboa.tecnico.bling_bank.account.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "accounts")
 public class Account {
@@ -12,15 +16,20 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int balance;
+    private int balance; // in cents
 
     private String currencyType;
 
-    public Account() {
-    }
+    @ManyToMany
+    private Set<AccountHolder> accountHolder;
 
-    public Account(int balance, String currencyType) {
+    @OneToMany
+    private Set<Movement> movements;
+
+    public Account(int balance, String currencyType, Set<AccountHolder> accountHolder) {
         this.balance = balance;
         this.currencyType = currencyType;
+        this.accountHolder = accountHolder;
+        this.movements = Set.of();
     }
 }
