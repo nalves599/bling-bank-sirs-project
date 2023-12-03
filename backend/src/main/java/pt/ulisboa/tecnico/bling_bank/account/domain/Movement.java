@@ -13,13 +13,16 @@ import java.util.Date;
 public class Movement {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "date")
     private Date date; // DD/MM/YYYY
 
+    @Column(name = "value")
     private int value; // in cents
 
+    @Column(name = "description")
     private String description;
 
     @ManyToOne(optional = false)

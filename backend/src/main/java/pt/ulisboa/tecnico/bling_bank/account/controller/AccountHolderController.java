@@ -12,17 +12,17 @@ public class AccountHolderController {
     private AccountHolderService accountHolderService;
 
     @PostMapping("/holders/create")
-    public JSONObject createAccountHolder(@RequestBody String body) {
+    public String createAccountHolder(@RequestBody String body) {
         JSONObject json = new JSONObject(body);
         String holderName = json.getString("holderName");
         return accountHolderService.createAccountHolder(holderName);
     }
 
     @GetMapping("/holders/{id}")
-    public JSONObject getAccountHolder(@PathVariable Long id) {
+    public String getAccountHolder(@PathVariable Long id) {
         return accountHolderService.getAccountHolder(id);
     }
 
     @GetMapping("/holders")
-    public JSONObject getAccountHolders() { return accountHolderService.getAccountHolders(); }
+    public String getAccountHolders() { return accountHolderService.getAccountHolders(); }
 }

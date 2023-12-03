@@ -13,14 +13,16 @@ import java.util.Set;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "balance")
     private int balance; // in cents
 
+    @Column(name = "currencyType")
     private String currencyType;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "accounts")
     private Set<AccountHolder> accountHolder;
 
     @OneToMany

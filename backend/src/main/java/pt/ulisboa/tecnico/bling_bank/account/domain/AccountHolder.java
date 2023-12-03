@@ -13,16 +13,20 @@ import java.util.Set;
 public class AccountHolder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(name = "holderName")
     private String holderName;
 
     @ManyToMany()
+    @JoinTable(
+        name = "accountHolders_accounts",
+        joinColumns = @JoinColumn(name = "accountHolder_id"),
+        inverseJoinColumns = @JoinColumn(name = "account_id"))
     private Set<Account> accounts;
 
     public AccountHolder(String holderName) {
         this.holderName = holderName;
-        this.accounts = Set.of(new Account(0, "EUR", Set.of(this)));
     }
 }
