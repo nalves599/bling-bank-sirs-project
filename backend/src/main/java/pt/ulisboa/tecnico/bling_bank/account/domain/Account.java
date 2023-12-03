@@ -34,4 +34,8 @@ public class Account {
         this.accountHolder = accountHolder;
         this.movements = Set.of();
     }
+
+    public void addMovement(Movement movement) {
+        this.movements.add(movement);
+    }
 }

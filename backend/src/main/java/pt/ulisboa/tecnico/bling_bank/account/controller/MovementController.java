@@ -14,7 +14,7 @@ public class MovementController {
     private MovementService movementService;
 
     @PostMapping("/movements/create")
-    public JSONObject createMovement(@RequestBody String body) {
+    public String createMovement(@RequestBody String body) {
         JSONObject json = new JSONObject(body);
         Date date = new Date(json.getString("date"));
         int value = json.getInt("value");
@@ -24,12 +24,12 @@ public class MovementController {
     }
 
     @GetMapping("/movements/{id}")
-    public JSONObject getMovement(@PathVariable Long id) {
+    public String getMovement(@PathVariable Long id) {
         return movementService.getMovement(id);
     }
 
     @GetMapping("/movements/account/{id}")
-    public JSONObject getMovementByAccount(@PathVariable Long id) {
+    public String getMovementByAccount(@PathVariable Long id) {
         return movementService.getMovementByAccount(id);
     }
 }
