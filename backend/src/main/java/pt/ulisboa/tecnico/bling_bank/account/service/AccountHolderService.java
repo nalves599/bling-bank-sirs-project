@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.bling_bank.account.service;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +25,7 @@ public class AccountHolderService {
 
         AccountHolder accountHolder = new AccountHolder(holderName);
         accountHolderRepository.save(accountHolder);
-        JSONObject json = new JSONObject();
-        json.put("id", accountHolder.getId());
-        json.put("holderName", accountHolder.getHolderName());
-        return json.toString();
+        return getAccountHolderJson(accountHolder).toString();
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -35,17 +33,26 @@ public class AccountHolderService {
         AccountHolder accountHolder = accountHolderRepository.findById(id).orElseThrow(
             () -> new BlingBankException(ErrorMessage.ACCOUNT_HOLDER_NOT_FOUND));
 
-        JSONObject json = new JSONObject();
-        json.put("id", accountHolder.getId());
-        json.put("holderName", accountHolder.getHolderName());
-        json.put("accounts", accountHolder.getAccounts());
-        return json.toString();
+        return getAccountHolderJson(accountHolder).toString();
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String getAccountHolders() {
         JSONObject json = new JSONObject();
-        json.put("accountHolders", accountHolderRepository.findAll());
+        JSONArray accountHolders = new JSONArray();
+
+        for (AccountHolder accountHolder : accountHolderRepository.findAll()) {
+            accountHolders.put(getAccountHolderJson(accountHolder));
+        }
+
+        json.put("accountHolders", accountHolders);
         return json.toString();
+    }
+
+    private JSONObject getAccountHolderJson(AccountHolder accountHolder) {
+        JSONObject json = new JSONObject();
+        json.put("accountHolderId", accountHolder.getId());
+        json.put("holderName", accountHolder.getHolderName());
+        return json;
     }
 }
