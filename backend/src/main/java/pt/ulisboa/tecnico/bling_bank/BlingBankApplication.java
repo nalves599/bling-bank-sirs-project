@@ -8,8 +8,8 @@ import org.springframework.context.annotation.PropertySource;
 @PropertySource("classpath:application.properties")
 public class BlingBankApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BlingBankApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(BlingBankApplication.class, args);
+    }
 
 }

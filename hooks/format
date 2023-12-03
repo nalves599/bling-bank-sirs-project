@@ -4,3 +4,7 @@ echo "Running spotless on library"
 cd library
 mvn spotless:apply
 
+echo "Running spotless on backend"
+cd ../backend
+mvn spotless:apply
+

@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.bling_bank.account.domain;
 
-
 import jakarta.persistence.*;
 import lombok.Data
 

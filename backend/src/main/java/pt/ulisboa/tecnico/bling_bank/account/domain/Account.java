@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.bling_bank.account.domain;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,6 +21,6 @@ public class Account {
 
     public Account(int balance, String currencyType) {
         this.balance = balance;
-    this.currencyType = currencyType;
+        this.currencyType = currencyType;
     }
 }
