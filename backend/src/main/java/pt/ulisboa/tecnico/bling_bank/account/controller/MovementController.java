@@ -2,7 +2,7 @@ package pt.ulisboa.tecnico.bling_bank.account.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-import pt.ulisboa.tecnico.bling_bank.account.MovementService;
+import pt.ulisboa.tecnico.bling_bank.account.service.MovementService;
 
 @RestController
 public class MovementController {

@@ -49,8 +49,13 @@
             <artifactId>mariadb-java-client</artifactId>
         </dependency>
 
-
-	</dependencies>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20231013</version>
+        </dependency>
+    </dependencies>
 
   <profiles>
     <profile>
