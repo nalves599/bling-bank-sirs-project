@@ -39,7 +39,8 @@ public class ProtectTest {
     public void protectEmptyFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
         Either<String, byte[]> output = lib.protect("".getBytes());
-        assertTrue(output.isRight() && output.get().length > 0);
+        assertTrue(output.isLeft());
+        assertTrue(output.getLeft().contains("A JSONObject text must begin with '{'"));
     }
 
     @Test

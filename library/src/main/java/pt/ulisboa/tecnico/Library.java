@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico;
 
 import io.vavr.control.Either;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import pt.ulisboa.tecnico.aux.Cryptography;
 import pt.ulisboa.tecnico.aux.Keys;
 
@@ -24,9 +26,32 @@ public class Library {
         crypto = new Cryptography();
     }
 
+    private void iterate(JSONObject json) throws Exception {
+        for (String k : json.keySet()) {
+            try {
+                if (k.equals("accountHolder") || k.equals("movements")) {
+                    JSONArray array = json.getJSONArray(k);
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject value = array.getJSONObject(i);
+                        iterate(value);
+                    }
+                } else {
+                    JSONObject value = json.getJSONObject(k);
+                    iterate(value);
+                }
+            } catch (Exception e) {
+                json.put(k, doProtect(json.get(k).toString().getBytes()));
+            }
+        }
+    }
+
     public Either<String, byte[]> protect(byte[] input) {
         try {
-            return Either.right(doProtect(input));
+            JSONObject json = new JSONObject(new String(input));
+
+            iterate(json);
+
+            return Either.right(json.toString().getBytes());
         } catch (Exception e) {
             return Either.left((e.getMessage()));
         }
@@ -127,4 +152,5 @@ public class Library {
         }
         return true;
     }
+
 }
