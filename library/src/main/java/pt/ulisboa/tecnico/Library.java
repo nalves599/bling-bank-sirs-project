@@ -27,64 +27,14 @@ public class Library {
         crypto = new Cryptography();
     }
 
-    private void iterate(JSONObject json, boolean encryption) throws Exception {
-        for (String k : json.keySet()) {
-            try {
-                if (k.equals("accountHolder") || k.equals("movements")) {
-                    JSONArray array = json.getJSONArray(k);
-                    if (array.isEmpty()) continue;
-                    boolean isString = array.get(0) instanceof String;
-                    for (int i = 0; i < array.length(); i++) {
-                        if (isString) {
-                            operateStringArray(encryption, array, i);
-                        } else {
-                            iterate(array.getJSONObject(i), encryption);
-                        }
-                    }
-                } else {
-                    iterate(json.getJSONObject(k), encryption);
-                }
-            } catch (Exception e) {
-                operate(json, k, json.get(k).toString().getBytes(), encryption);
-            }
-        }
-    }
-
-    private void operateStringArray(boolean encryption, JSONArray array, int i) throws Exception {
-        if (encryption) {
-            byte[] p = doProtect(array.get(i).toString().getBytes());
-            array.put(i, Base64.getEncoder().encodeToString(p));
-        } else {
-            byte[] u = Base64.getDecoder().decode(array.get(i).toString());
-            byte[] unprotectedValue = doUnprotect(u);
-            array.put(i, new String(unprotectedValue));
-        }
-    }
-
-    private void operate(JSONObject json, String entry, byte[] data, boolean encryption) throws Exception {
-        if (encryption) {
-            byte[] p = doProtect(data);
-            json.put(entry, Base64.getEncoder().encodeToString(p));
-        } else {
-            byte[] u = Base64.getDecoder().decode(json.get(entry).toString());
-            byte[] unprotectedValue = doUnprotect(u);
-            if (entry.equals("balance") || entry.equals("value")) {
-                json.put(entry, Double.parseDouble(new String(unprotectedValue)));
-                return;
-            }
-            json.put(entry, new String(unprotectedValue));
-        }
-    }
-
     public Either<String, byte[]> protect(byte[] input) {
         try {
             JSONObject json = new JSONObject(new String(input));
 
-            iterate(json, true);
+            iterateJSON(json, true);
 
             return Either.right(json.toString().getBytes());
         } catch (Exception e) {
-            ;
             return Either.left((e.getMessage()));
         }
     }
@@ -93,7 +43,7 @@ public class Library {
         try {
             JSONObject json = new JSONObject(new String(input));
 
-            iterate(json, false);
+            iterateJSON(json, false);
 
             return Either.right(json.toString().getBytes());
 
@@ -188,6 +138,55 @@ public class Library {
             return false;
         }
         return true;
+    }
+
+    private void iterateJSON(JSONObject json, boolean encryption) throws Exception {
+        for (String k : json.keySet()) {
+            try {
+                if (k.equals("accountHolder") || k.equals("movements")) {
+                    JSONArray array = json.getJSONArray(k);
+                    if (array.isEmpty()) continue;
+                    boolean isString = array.get(0) instanceof String;
+                    for (int i = 0; i < array.length(); i++) {
+                        if (isString) {
+                            operateStringArray(encryption, array, i);
+                        } else {
+                            iterateJSON(array.getJSONObject(i), encryption);
+                        }
+                    }
+                } else {
+                    iterateJSON(json.getJSONObject(k), encryption);
+                }
+            } catch (Exception e) {
+                operate(json, k, json.get(k).toString().getBytes(), encryption);
+            }
+        }
+    }
+
+    private void operateStringArray(boolean encryption, JSONArray array, int i) throws Exception {
+        if (encryption) {
+            byte[] p = doProtect(array.get(i).toString().getBytes());
+            array.put(i, Base64.getEncoder().encodeToString(p));
+        } else {
+            byte[] u = Base64.getDecoder().decode(array.get(i).toString());
+            byte[] unprotectedValue = doUnprotect(u);
+            array.put(i, new String(unprotectedValue));
+        }
+    }
+
+    private void operate(JSONObject json, String entry, byte[] data, boolean encryption) throws Exception {
+        if (encryption) {
+            byte[] p = doProtect(data);
+            json.put(entry, Base64.getEncoder().encodeToString(p));
+        } else {
+            byte[] u = Base64.getDecoder().decode(json.get(entry).toString());
+            byte[] unprotectedValue = doUnprotect(u);
+            if (entry.equals("balance") || entry.equals("value")) {
+                json.put(entry, Double.parseDouble(new String(unprotectedValue)));
+                return;
+            }
+            json.put(entry, new String(unprotectedValue));
+        }
     }
 
 }
