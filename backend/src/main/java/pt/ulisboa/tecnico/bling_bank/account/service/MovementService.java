@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.bling_bank.account.domain.Account;
 import pt.ulisboa.tecnico.bling_bank.account.domain.AccountHolder;
 import pt.ulisboa.tecnico.bling_bank.account.domain.Movement;
@@ -23,6 +25,7 @@ public class MovementService {
     @Autowired
     private MovementRepository movementRepository;
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String createMovement(Date date, int value, String description, Long accountId) {
         Account account = accountRepository.findById(accountId).orElseThrow(
             () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
@@ -31,11 +34,16 @@ public class MovementService {
         movementRepository.save(movement);
 
         JSONObject json = new JSONObject();
-        json.put("movement", getMovementJson(movement));
+
+        JSONArray movements = new JSONArray();
+        movements.put(getMovementJson(movement));
+        json.put("movements", movements);
         json.put("account", getAccountJson(movement.getAccount()));
 
         return json.toString();
     }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
 
     public String getMovement(Long id) {
         Movement movement = movementRepository.findById(id).orElseThrow(
@@ -47,6 +55,8 @@ public class MovementService {
 
         return json.toString();
     }
+
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
 
     public String getMovementByAccount(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(
@@ -67,12 +77,10 @@ public class MovementService {
     private JSONObject getMovementJson(Movement movement) {
         JSONObject json = new JSONObject();
 
-        JSONObject m = new JSONObject();
-        m.put("id", movement.getId());
-        m.put("date", movement.getDate());
-        m.put("value", movement.getValue());
-        m.put("description", movement.getDescription());
-        json.put("movement", m);
+        json.put("id", movement.getId());
+        json.put("date", movement.getDate());
+        json.put("value", movement.getValue());
+        json.put("description", movement.getDescription());
 
         return json;
     }
