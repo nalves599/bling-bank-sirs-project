@@ -38,6 +38,7 @@ public class Cryptography {
             symCipher.init(Cipher.DECRYPT_MODE, key, iv);
             return Optional.of(symCipher.doFinal(input));
         } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
             return Optional.empty();
         }
     }
