@@ -31,7 +31,3 @@ jobs:
       run: |
         cd library
         mvn install
-    - name: Install CLI
-      run: |
-        cd cli
-        mvn install
