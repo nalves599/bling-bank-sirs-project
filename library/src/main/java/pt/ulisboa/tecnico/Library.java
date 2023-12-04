@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,7 +34,7 @@ public class Library {
 
             iterateJSON(json, true);
 
-            return Either.right(json.toString().getBytes());
+            return Either.right(prettifyJSON(json));
         } catch (Exception e) {
             return Either.left((e.getMessage()));
         }
@@ -45,7 +46,7 @@ public class Library {
 
             iterateJSON(json, false);
 
-            return Either.right(json.toString().getBytes());
+            return Either.right(prettifyJSON(json));
 
         } catch (Exception e) {
             return Either.left(e.getMessage());
@@ -187,6 +188,11 @@ public class Library {
             }
             json.put(entry, new String(unprotectedValue));
         }
+    }
+
+    private byte[] prettifyJSON(JSONObject json) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readTree(json.toString()).toPrettyString().getBytes();
     }
 
 }
