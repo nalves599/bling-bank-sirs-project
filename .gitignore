@@ -86,3 +86,4 @@ build/
 ### direnv ###
 .direnv
 .envrc
+frontend/.env

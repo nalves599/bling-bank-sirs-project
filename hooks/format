@@ -8,3 +8,6 @@ echo "Running spotless on backend"
 cd ../backend
 mvn spotless:apply
 
+echo "Running prettier on frontend"
+cd ../frontend
+npm run format
