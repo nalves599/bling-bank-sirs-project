@@ -86,4 +86,7 @@ build/
 ### direnv ###
 .direnv
 .envrc
+# folder files
+/files
+# frontend env files
 frontend/.env

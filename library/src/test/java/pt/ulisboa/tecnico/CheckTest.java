@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico;
 
+import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -31,15 +32,24 @@ public class CheckTest {
     @Test
     public void checkFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
-        assertTrue(lib.check(encrypted));
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        assertTrue(lib.check(output.get()));
     }
 
     @Test
     public void checkTamperedFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        byte[] encrypted = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
-        encrypted[0] = (byte) (encrypted[0] + 1);
-        assertFalse(lib.check(encrypted));
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        output.get()[0] = (byte) (output.get()[0] + 1);
+        assertFalse(lib.check(output.get()));
+    }
+
+    @Test
+    public void checkMultipleFiles() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        assertTrue(lib.check(output1.get()));
+        assertTrue(lib.check(output2.get()));
     }
 }
