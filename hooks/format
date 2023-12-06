@@ -8,3 +8,6 @@ echo "Running spotless on cli"
 cd ../cli
 mvn spotless:apply
 
+echo "Running spotless on backend"
+cd ../backend
+mvn spotless:apply
