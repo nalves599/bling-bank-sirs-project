@@ -48,3 +48,6 @@ buildNumber.properties
 
 # VSCODE
 .vscode
+
+# folder files
+/files
