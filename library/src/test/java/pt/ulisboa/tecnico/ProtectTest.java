@@ -1,21 +1,16 @@
 package pt.ulisboa.tecnico;
 
+import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import pt.ulisboa.tecnico.aux.Constants;
 import pt.ulisboa.tecnico.auxTests.TestConfig;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ProtectTest {
     @TempDir
@@ -36,6 +31,24 @@ public class ProtectTest {
     @Test
     public void protectFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        byte[] output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        assertTrue(output.isRight() && output.get().length > 0);
+    }
+
+    @Test
+    public void protectEmptyFile() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Either<String, byte[]> output = lib.protect("".getBytes());
+        assertTrue(output.isLeft());
+        assertTrue(output.getLeft().contains("A JSONObject text must begin with '{'"));
+    }
+
+    @Test
+    public void protectMultipleFiles() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        assertTrue(output1.isRight() && output1.get().length > 0);
+        assertTrue(output2.isRight() && output2.get().length > 0);
     }
 }
