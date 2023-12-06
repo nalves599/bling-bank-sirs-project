@@ -1,163 +1,198 @@
 package pt.ulisboa.tecnico;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.control.Either;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import pt.ulisboa.tecnico.aux.Cryptography;
+import pt.ulisboa.tecnico.aux.Keys;
+
+import javax.crypto.spec.IvParameterSpec;
 import java.io.ByteArrayOutputStream;
 
-import java.io.FileInputStream;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Optional;
 
 import static pt.ulisboa.tecnico.aux.Constants.*;
+import static pt.ulisboa.tecnico.aux.Conversion.*;
 
 public class Library {
-    private Key secretKey;
 
-    private Key publicKey;
-    private Key privateKey;
+    final private Keys keys;
 
-    private final int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
+    final private Cryptography crypto;
 
-    SecureRandom random = SecureRandom.getInstance(RANDOM_ALGO, RANDOM_PROVIDER);
-
-    // Needs to throw exception because of SecureRandom.getInstance
     public Library(String secretKeyPath) throws Exception {
-        assignSecretKey(secretKeyPath);
-        createAsymmetricKeys();
+        keys = new Keys(secretKeyPath);
+        crypto = new Cryptography();
     }
 
-    public byte[] protect(byte[] input) throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+    public Either<String, byte[]> protect(byte[] input) {
+        try {
+            JSONObject json = new JSONObject(new String(input));
 
-        int randomNumber = random.nextInt();
-        int sequenceNumber = this.sequenceNumber;
+            iterateJSON(json, true);
 
-        os.write(input);
-        os.write(intToBytes(randomNumber));
-        os.write(intToBytes(sequenceNumber));
-        os.write(publicKey.getEncoded());
-
-        byte[] digestEncrypted = asymEncrypt(digest(os.toByteArray()), privateKey);
-        os.write(digestEncrypted);
-
-        os.write(intToBytes(digestEncrypted.length)); // length of digestEncrypted
-        os.write(intToBytes(publicKey.getEncoded().length)); // length of K1
-
-        return symEncrypt(os.toByteArray(), secretKey);
+            return Either.right(prettifyJSON(json));
+        } catch (Exception e) {
+            return Either.left((e.getMessage()));
+        }
     }
 
-    public byte[] unprotect(byte[] input) throws Exception {
-        byte[] decrypted = symDecrypt(input, secretKey);
+    public Either<String, byte[]> unprotect(byte[] input) {
+        try {
+            JSONObject json = new JSONObject(new String(input));
 
-        int publicKey1Length = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE,
-            decrypted.length)).intValue();
-        int digestEncryptedLength = new BigInteger(Arrays.copyOfRange(decrypted, decrypted.length - INT_SIZE * 2,
-            decrypted.length - INT_SIZE)).intValue();
+            iterateJSON(json, false);
 
-        int startDigestEncrypted = decrypted.length - digestEncryptedLength - INT_SIZE * 2;
-        int startPublicKey1 = startDigestEncrypted - publicKey1Length;
-        int startSequenceNumber = startPublicKey1 - INT_SIZE;
-        int startRandomNumber = startSequenceNumber - INT_SIZE;
+            return Either.right(prettifyJSON(json));
 
-        byte[] digestEncrypted = Arrays.copyOfRange(decrypted, startDigestEncrypted, startDigestEncrypted +
-                                                                                     digestEncryptedLength);
-        byte[] publicKey1 = Arrays.copyOfRange(decrypted, startDigestEncrypted - publicKey1Length,
-            startDigestEncrypted);
-        int sequenceNumber = new BigInteger(Arrays.copyOfRange(decrypted, startSequenceNumber, startSequenceNumber +
-                                                                                               INT_SIZE)).intValue();
-        int randomNumber = new BigInteger(Arrays.copyOfRange(decrypted, startRandomNumber, startRandomNumber +
-                                                                                           INT_SIZE)).intValue();
-        byte[] data = Arrays.copyOfRange(decrypted, 0, startRandomNumber);
+        } catch (Exception e) {
+            return Either.left(e.getMessage());
+        }
+    }
 
-        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKey1);
-        Key publicKey2 = KeyFactory.getInstance(ASYM_ALGO).generatePublic(publicKeySpec);
+    public boolean check(byte[] input) {
+        return unprotect(input).isRight();
+    }
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        os.write(data);
-        os.write(intToBytes(randomNumber));
-        os.write(intToBytes(sequenceNumber));
-        os.write(publicKey1);
+    private byte[] doProtect(byte[] input) throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        byte[] digest = digest(os.toByteArray());
-        byte[] digestDecrypted = asymDecrypt(digestEncrypted, publicKey2);
-        // Fix problem with padding
-        digestDecrypted = Arrays.copyOfRange(digestDecrypted, digestEncrypted.length - digest.length,
-            digestDecrypted.length);
+        if (!write(keys.getIv().getIV(), output)) throw new Exception("Check the initialization vector");
 
-        if (!Arrays.equals(digest, digestDecrypted)) {
+        ByteArrayOutputStream payload = new ByteArrayOutputStream();
+
+        if (!write(intToBytes(input.length), payload)) throw new Exception("Check the payload length");
+        if (!write(input, payload)) throw new Exception("Check the payload");
+
+        int randomNumber = crypto.getRandomNumber();
+        int sequenceNumber = crypto.getAndSetSequenceNumber();
+
+        if (!write(intToBytes(randomNumber), payload)) throw new Exception("Check the random number");
+        if (!write(intToBytes(sequenceNumber), payload)) throw new Exception("Check the sequence number");
+
+        byte[] digestEncrypted = crypto.asymEncrypt(crypto.digest(payload.toByteArray()), keys.privateKey).orElseThrow(
+            () -> new Exception("Check the asymmetric encryption method"));
+
+        if (!write(intToBytes(digestEncrypted.length), payload)) throw new Exception(
+            "Check the length of digestEncrypted");
+        if (!write(digestEncrypted, payload)) throw new Exception(
+            "Check the digestEncrypted");
+
+        byte[] encryptedPayload = crypto.symEncrypt(payload.toByteArray(), keys.secretKey, keys.iv).orElseThrow(
+            () -> new Exception("Check the symmetric encryption method"));
+
+        if (!write(encryptedPayload, output)) throw new Exception("Check the encrypted payload");
+
+        return output.toByteArray();
+    }
+
+    private byte[] doUnprotect(byte[] input) throws Exception {
+        byte[] iv = read(input, 0, 16).orElseThrow(() -> new Exception("Check the initialization vector"));
+
+        byte[] encryptedPayload = read(input, 16, input.length - 16).orElseThrow(
+            () -> new Exception("Check the encrypted payload"));
+
+        byte[] payload = crypto.symDecrypt(encryptedPayload, keys.secretKey, new IvParameterSpec(iv)).orElseThrow(
+            () -> new Exception("Check the symmetric decryption method"));
+
+        int payloadLength = bytesToInt(payload, 0).orElseThrow(() -> new Exception("Check the payload length"));
+        byte[] data = read(payload, INT_SIZE, payloadLength).orElseThrow(() -> new Exception("Check the payload"));
+
+        int randomNumber = bytesToInt(payload, INT_SIZE + payloadLength).orElseThrow(
+            () -> new Exception("Check the random number"));
+        int sequenceNumber = bytesToInt(payload, INT_SIZE + payloadLength + INT_SIZE).orElseThrow(
+            () -> new Exception("Check the sequence number"));
+
+        int digestEncryptStart = INT_SIZE + payloadLength + INT_SIZE + INT_SIZE;
+        int digestEncryptedLength = bytesToInt(payload, digestEncryptStart).orElseThrow(
+            () -> new Exception("Check the length of digestEncrypted"));
+
+        byte[] digestEncrypted = read(payload, digestEncryptStart + INT_SIZE, digestEncryptedLength)
+            .orElseThrow(() -> new Exception("Check the digestEncrypted"));
+
+        byte[] digestDecrypted = crypto.asymDecrypt(digestEncrypted, keys.publicKey).orElseThrow(
+            () -> new Exception("Check the asymmetric decryption method"));
+        byte[] digestCalculated = crypto.digest(Arrays.copyOfRange(payload, 0, digestEncryptStart));
+
+        if (!Arrays.equals(digestDecrypted, digestCalculated)) {
             throw new Exception("Digests don't match");
         }
 
         return data;
     }
 
-    public boolean check(byte[] input) {
+    private Optional<byte[]> read(byte[] input, int start, int length) {
         try {
-            unprotect(input);
+            return Optional.of(Arrays.copyOfRange(input, start, start + length));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    private boolean write(byte[] input, ByteArrayOutputStream output) {
+        try {
+            output.write(input);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    private void assignSecretKey(String secretKeyPath) throws Exception {
-        byte[] encoded = readFile(secretKeyPath);
-        secretKey = new SecretKeySpec(encoded, SYM_ALGO);
-    }
-
-    private byte[] readFile(String path) throws Exception {
-        FileInputStream fis = new FileInputStream(path);
-        byte[] content = new byte[fis.available()];
-        while (true) {
-            int read = fis.read(content);
-            if (read == -1) {
-                break;
+    private void iterateJSON(JSONObject json, boolean encryption) throws Exception {
+        for (String k : json.keySet()) {
+            try {
+                if (k.equals("accountHolder") || k.equals("movements")) {
+                    JSONArray array = json.getJSONArray(k);
+                    if (array.isEmpty()) continue;
+                    boolean isString = array.get(0) instanceof String;
+                    for (int i = 0; i < array.length(); i++) {
+                        if (isString) {
+                            operateStringArray(encryption, array, i);
+                        } else {
+                            iterateJSON(array.getJSONObject(i), encryption);
+                        }
+                    }
+                } else {
+                    iterateJSON(json.getJSONObject(k), encryption);
+                }
+            } catch (Exception e) {
+                operate(json, k, json.get(k).toString().getBytes(), encryption);
             }
         }
-        fis.close();
-        return content;
     }
 
-    private byte[] asymEncrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(ASYM_CYPHER);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(input);
+    private void operateStringArray(boolean encryption, JSONArray array, int i) throws Exception {
+        if (encryption) {
+            byte[] p = doProtect(array.get(i).toString().getBytes());
+            array.put(i, Base64.getEncoder().encodeToString(p));
+        } else {
+            byte[] u = Base64.getDecoder().decode(array.get(i).toString());
+            byte[] unprotectedValue = doUnprotect(u);
+            array.put(i, new String(unprotectedValue));
+        }
     }
 
-    private byte[] symEncrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(SYM_CYPHER);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(input);
+    private void operate(JSONObject json, String entry, byte[] data, boolean encryption) throws Exception {
+        if (encryption) {
+            byte[] p = doProtect(data);
+            json.put(entry, Base64.getEncoder().encodeToString(p));
+        } else {
+            byte[] u = Base64.getDecoder().decode(json.get(entry).toString());
+            byte[] unprotectedValue = doUnprotect(u);
+            if (entry.equals("balance") || entry.equals("value")) {
+                json.put(entry, Double.parseDouble(new String(unprotectedValue)));
+                return;
+            }
+            json.put(entry, new String(unprotectedValue));
+        }
     }
 
-    private byte[] asymDecrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(ASYM_CYPHER);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(input, cipher.getBlockSize(), input.length - cipher.getBlockSize());
+    private byte[] prettifyJSON(JSONObject json) throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readTree(json.toString()).toPrettyString().getBytes();
     }
 
-    private byte[] symDecrypt(byte[] input, Key key) throws Exception {
-        Cipher cipher = Cipher.getInstance(SYM_CYPHER);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(input);
-    }
-
-    private byte[] digest(byte[] input) throws Exception {
-        MessageDigest messageDigest = MessageDigest.getInstance(DIGEST_ALGO);
-        return messageDigest.digest(input);
-    }
-
-    private void createAsymmetricKeys() throws Exception {
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ASYM_ALGO);
-        keyGen.initialize(ASYM_KEY_SIZE);
-        KeyPair keyPair = keyGen.generateKeyPair();
-        publicKey = keyPair.getPublic();
-        privateKey = keyPair.getPrivate();
-    }
-
-    private byte[] intToBytes(int value) {
-        return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
-    }
 }
