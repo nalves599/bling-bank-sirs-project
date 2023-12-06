@@ -38,4 +38,4 @@ jobs:
     - name: Install Backend
       run: |
         cd backend
-        mvn install
+        mvn test
