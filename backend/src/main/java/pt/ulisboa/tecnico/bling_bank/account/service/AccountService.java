@@ -50,11 +50,29 @@ public class AccountService {
         return getAccountJson(account).toString();
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public String getAccountsFromHolder(Long id) {
+        AccountHolder accountHolder = accountHolderRepository.findById(id).orElseThrow(
+            () -> new BlingBankException(ErrorMessage.ACCOUNT_HOLDER_NOT_FOUND));
+
+        Set<Account> accounts = accountHolder.getAccounts();
+
+        JSONArray array = new JSONArray();
+        for (Account account : accounts) {
+            array.put(getAccountJson(account));
+        }
+
+        JSONObject json = new JSONObject();
+        json.put("accounts", array);
+        return json.toString();
+    }
+
     private JSONObject getAccountJson(Account account) {
         JSONObject json = new JSONObject();
         json.put("id", account.getId());
         json.put("accountHolder", getAccountHolderJson(account));
         json.put("balance", account.getBalance());
+        json.put("currency", account.getCurrencyType());
         json.put("movements", getAccountsMovementsJson(account));
         return json;
     }

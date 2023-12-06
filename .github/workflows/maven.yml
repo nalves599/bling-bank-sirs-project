@@ -35,6 +35,3 @@ jobs:
       run: |
         cd cli
         mvn install
-    - name: Install Backend
-      run: |
-        cd backend
