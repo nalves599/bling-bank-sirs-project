@@ -30,4 +30,8 @@ public class AccountController {
         return accountService.getAccount(id);
     }
 
+    @GetMapping("/accounts/holder/{id}")
+    public String getAccountsFromHolder(@PathVariable Long id) {
+        return accountService.getAccountsFromHolder(id);
+    }
 }
