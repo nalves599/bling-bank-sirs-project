@@ -2,6 +2,7 @@
   <div class="accounts">
     <h1>This is a accounts page</h1>
     <v-data-table :items="accounts" :headers="headers"> </v-data-table>
+    <BottomBar />
   </div>
 </template>
 
@@ -10,6 +11,7 @@ import { ref } from 'vue'
 import { getAccountsFromHolder } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import { useRoute } from 'vue-router'
+import BottomBar from '@/components/BottomBar.vue'
 
 const accounts = ref<AccountDto[]>([])
 
