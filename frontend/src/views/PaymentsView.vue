@@ -38,10 +38,12 @@
     </form>
     <BottomBar />
   </div>
+  <LogoutButton />
 </template>
 
 <script lang="ts">
 import BottomBar from '@/components/BottomBar.vue'
+import LogoutButton from '@/components/LogoutButton.vue';
 export default {
   data() {
     return {
@@ -67,14 +69,15 @@ export default {
     }
   },
   components: {
-    BottomBar
+    BottomBar,
+    LogoutButton
   }
 }
 </script>
 
 <style scoped>
 .create-payment {
-  font-size: 30px;
+  font-size: 20px;
   max-width: 600px;
   margin: auto;
   padding: 20px;

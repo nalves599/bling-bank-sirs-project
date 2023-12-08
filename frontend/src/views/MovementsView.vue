@@ -7,6 +7,7 @@
       <!-- Add more properties here -->
     </div>
     <BottomBar />
+    <LogoutButton />
   </div>
 </template>
 
@@ -15,6 +16,7 @@ import { ref } from 'vue'
 import { getHolders } from '@/services/api'
 import type { HolderDto } from '@/models/HolderDto'
 import BottomBar from '@/components/BottomBar.vue'
+import LogoutButton from '@/components/LogoutButton.vue';
 
 const holders = ref<HolderDto[]>([])
 

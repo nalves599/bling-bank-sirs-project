@@ -10,11 +10,12 @@
       <router-link :to="'/payments/' + user.id">Payments</router-link>
     </div>
     <router-view></router-view>
+    <LogoutButton />
   </div>
 </template>
 
 <script lang="ts">
-//import { useRoute } from 'vue-router';
+import LogoutButton from '@/components/LogoutButton.vue';
 
 export default {
   data() {
@@ -24,7 +25,10 @@ export default {
         name: 'John Doe' // Replace with the actual user's name
       }
     }
-  }
+  },
+  components: {
+    LogoutButton,
+  },
 }
 </script>
 

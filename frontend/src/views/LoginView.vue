@@ -36,7 +36,7 @@ export default {
       // Simulate authentication (replace with your actual authentication logic)
       if (this.id === 'user123' && this.password === 'password123') {
         // Redirect to the homepage or perform other actions
-        this.$router.push('/homepage') // Assuming you're using Vue Router
+        this.$router.push('/homepage/1') // Assuming you're using Vue Router
       } else {
         alert('Invalid credentials. Please try again.')
       }
