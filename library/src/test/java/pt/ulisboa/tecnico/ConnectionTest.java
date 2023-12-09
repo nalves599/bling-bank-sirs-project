@@ -73,4 +73,22 @@ public class ConnectionTest {
         assertEquals(TestConfig.SOURCE_1_JSON, new String(decryptedPayload3));
     }
 
+    @Test
+    public void tiktokTest() throws Exception {
+        Library lib1 = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Library lib2 = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+
+        byte[] encryptedKeys = lib1.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib2.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib1.receivePublicKey(encryptedPublicKey));
+
+        byte[] payload = lib1.protect(TestConfig.SOURCE_1_JSON.getBytes()).get();
+        byte[] decryptedPayload = lib2.unprotect(payload).get();
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decryptedPayload));
+
+        byte[] payload2 = lib2.protect(TestConfig.SOURCE_1_JSON.getBytes()).get();
+        byte[] decryptedPayload2 = lib1.unprotect(payload2).get();
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decryptedPayload2));
+    }
+
 }
