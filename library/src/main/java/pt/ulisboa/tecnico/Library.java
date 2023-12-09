@@ -32,9 +32,14 @@ public class Library {
 
     public Either<String, byte[]> createSessionKeys() {
         try {
+            keys.clearKeys();
+
+            keys.generateAsymKey();
             keys.generateSecretSessionKey();
+
             byte[] payload = keys.creationPayload();
             byte[] encryptedPayload = doProtect(payload, true);
+
             return Either.right(encryptedPayload);
         } catch (Exception e) {
             return Either.left(e.getMessage());
@@ -43,19 +48,23 @@ public class Library {
 
     public Either<String, byte[]> receiveSessionKeys(byte[] input) {
         try {
+            keys.clearKeys();
+
+            keys.generateAsymKey();
+
             byte[] decryptedInput = doUnprotect(input, true);
-            byte[] payload = keys.receiveSessionKey(decryptedInput);
+            byte[] payload = keys.getPublicKeyPayload();
             byte[] encryptedPayload = doProtect(payload, true);
             return Either.right(encryptedPayload);
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             return Either.left(e.getMessage());
         }
     }
 
     public boolean receivePublicKey(byte[] input) {
         try {
-            byte[] decryptedInput = doUnprotect(input, true);
-            keys.receivePublicKey(decryptedInput);
+            doUnprotect(input, true);
             return true;
 
         } catch (Exception e) {
@@ -88,6 +97,7 @@ public class Library {
             return Either.right(prettifyJSON(json));
 
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             return Either.left(e.getMessage());
         }
     }
@@ -162,8 +172,14 @@ public class Library {
             throw new Exception("Repeated sequence number");
         }
 
-        if (keys.getReceiverPublicKey() == null && sessionCreation) {
+        // Receiving new session (step 2)
+        if (keys.getSecretSessionKey() == null) {
             keys.receiveSessionKey(data);
+        }
+
+        // Receive public key (step 3)
+        if (keys.getReceiverPublicKey() == null) {
+            keys.receivePublicKey(data);
         }
 
         int digestEncryptStart = INT_SIZE + payloadLength + INT_SIZE + timestampLength + INT_SIZE;
@@ -173,7 +189,7 @@ public class Library {
         byte[] digestEncrypted = read(payload, digestEncryptStart + INT_SIZE, digestEncryptedLength)
             .orElseThrow(() -> new Exception("Check the digestEncrypted"));
 
-        Key publicKey = sessionCreation ? keys.getReceiverPublicKey() : keys.getPublicKey();
+        Key publicKey = keys.getReceiverPublicKey();
 
         byte[] digestDecrypted = crypto.asymDecrypt(digestEncrypted, publicKey).orElseThrow(
             () -> new Exception("Check the asymmetric decryption method"));

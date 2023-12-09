@@ -36,7 +36,6 @@ public class Keys {
 
     public Keys(String secretKeyPath) throws Exception {
         assignSecretKey(secretKeyPath);
-        generateAsymKey();
     }
 
     private void assignSecretKey(String secretKeyPath) throws Exception {
@@ -44,7 +43,7 @@ public class Keys {
         secretKey = new SecretKeySpec(encoded, SYM_ALGO);
     }
 
-    private void generateAsymKey() throws Exception {
+    public void generateAsymKey() throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ASYM_ALGO);
         keyPairGenerator.initialize(ASYM_KEY_SIZE);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -73,7 +72,7 @@ public class Keys {
         return payload.toByteArray();
     }
 
-    public byte[] receiveSessionKey(byte[] input) throws Exception {
+    public void receiveSessionKey(byte[] input) throws Exception {
         int secretSessionKeyLength = bytesToInt(input, 0).orElseThrow(() -> new Exception(
             "Error reading from byte array"));
         byte[] encodedSecretSessionKey = read(input, INT_SIZE, secretSessionKeyLength).orElseThrow(() -> new Exception(
@@ -86,7 +85,16 @@ public class Keys {
             .orElseThrow(() -> new Exception("Error reading from byte array"));
         receiverPublicKey = KeyFactory.getInstance(ASYM_ALGO).generatePublic(new X509EncodedKeySpec(
             encodedReceiverPublicKey));
+    }
 
+    public void receivePublicKey(byte[] input) throws Exception {
+        int publicKeyLength = bytesToInt(input, 0).orElseThrow(() -> new Exception("Error reading from byte array"));
+        byte[] encodedPublicKey = read(input, INT_SIZE, publicKeyLength).orElseThrow(() -> new Exception(
+            "Error reading from byte array"));
+        receiverPublicKey = KeyFactory.getInstance(ASYM_ALGO).generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+    }
+
+    public byte[] getPublicKeyPayload() throws Exception {
         byte[] encodedPublicKey = publicKey.getEncoded();
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
 
@@ -96,11 +104,11 @@ public class Keys {
         return payload.toByteArray();
     }
 
-    public void receivePublicKey(byte[] input) throws Exception {
-        int publicKeyLength = bytesToInt(input, 0).orElseThrow(() -> new Exception("Error reading from byte array"));
-        byte[] encodedPublicKey = read(input, INT_SIZE, publicKeyLength).orElseThrow(() -> new Exception(
-            "Error reading from byte array"));
-        receiverPublicKey = KeyFactory.getInstance(ASYM_ALGO).generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+    public void clearKeys() {
+        privateKey = null;
+        publicKey = null;
+        secretSessionKey = null;
+        receiverPublicKey = null;
     }
 
 }
