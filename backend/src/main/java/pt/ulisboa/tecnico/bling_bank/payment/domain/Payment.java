@@ -1,7 +1,6 @@
 package pt.tecnico.ulisboa.bling_bank.payment.domain;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import pt.tecnico.ulisboa.bling_bank.account.domain.Account;
@@ -41,7 +40,8 @@ public class Payment {
     @Column(name = "accepted")
     private boolean accepted;
 
-    public Payment(Account account, Date date, int amount, String currencyType, String description, int requiredApprovals) {
+    public Payment(Account account, Date date, int amount, String currencyType, String description,
+        int requiredApprovals) {
         this.account = account;
         this.date = date;
         this.amount = amount;
@@ -70,86 +70,52 @@ public class Payment {
         }
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public Account getAccount() {
-        return account;
-    }
+    public Account getAccount() { return account; }
 
-    public void setAccount(Account account) {
-        this.account = account;
-    }
+    public void setAccount(Account account) { this.account = account; }
 
-    public Date getDate() {
-        return date;
-    }
+    public Date getDate() { return date; }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
+    public void setDate(Date date) { this.date = date; }
 
-    public int getAmount() {
-        return amount;
-    }
+    public int getAmount() { return amount; }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
+    public void setAmount(int amount) { this.amount = amount; }
 
-    public String getCurrencyType() {
-        return currencyType;
-    }
+    public String getCurrencyType() { return currencyType; }
 
-    public void setCurrencyType(String currencyType) {
-        this.currencyType = currencyType;
-    }
+    public void setCurrencyType(String currencyType) { this.currencyType = currencyType; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() { return description; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public void setDescription(String description) { this.description = description; }
 
-    public int getRequiredApprovals() {
-        return requiredApprovals;
-    }
+    public int getRequiredApprovals() { return requiredApprovals; }
 
-    public void setRequiredApprovals(int requiredApprovals) {
-        this.requiredApprovals = requiredApprovals;
-    }
+    public void setRequiredApprovals(int requiredApprovals) { this.requiredApprovals = requiredApprovals; }
 
-    public int getApprovedApprovals() {
-        return approvedApprovals;
-    }
+    public int getApprovedApprovals() { return approvedApprovals; }
 
-    public void setApprovedApprovals(int approvedApprovals) {
-        this.approvedApprovals = approvedApprovals;
-    }
+    public void setApprovedApprovals(int approvedApprovals) { this.approvedApprovals = approvedApprovals; }
 
-    public boolean isAccepted() {
-        return accepted;
-    }
+    public boolean isAccepted() { return accepted; }
 
-    public void setAccepted(boolean accepted) {
-        this.accepted = accepted;
-    }
+    public void setAccepted(boolean accepted) { this.accepted = accepted; }
 
     @Override
     public String toString() {
         return "Payment{" +
-                "id=" + id +
-                ", account=" + account +
-                ", date=" + date +
-                ", amount=" + amount +
-                ", currencyType='" + currencyType + '\'' +
-                ", description='" + description + '\'' +
-                ", requiredApprovals=" + requiredApprovals +
-                ", approvedApprovals=" + approvedApprovals +
-                ", accepted=" + accepted +
-                '}';
+               "id=" + id +
+               ", account=" + account +
+               ", date=" + date +
+               ", amount=" + amount +
+               ", currencyType='" + currencyType + '\'' +
+               ", description='" + description + '\'' +
+               ", requiredApprovals=" + requiredApprovals +
+               ", approvedApprovals=" + approvedApprovals +
+               ", accepted=" + accepted +
+               '}';
     }
 }

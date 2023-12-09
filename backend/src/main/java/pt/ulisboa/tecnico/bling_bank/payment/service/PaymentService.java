@@ -28,7 +28,7 @@ public class PaymentService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String createPayment(long accountId, Date date, int amount, String description) {
         Account account = accountRepository.findById(accountId).orElseThrow(
-                () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
+            () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
 
         int requiredApprovals = account.getAccountHolders().size();
         String currencyType = account.getCurrencyType();
@@ -41,7 +41,7 @@ public class PaymentService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String getAccountPayments(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(
-                () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
+            () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
 
         Set<Payment> payments = account.getPayments();
 
@@ -51,7 +51,7 @@ public class PaymentService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String approvePayment(Long id) {
         Payment payment = paymentRepository.findById(id).orElseThrow(
-                () -> new BlingBankException(ErrorMessage.PAYMENT_NOT_FOUND));
+            () -> new BlingBankException(ErrorMessage.PAYMENT_NOT_FOUND));
 
         payment.addApproval();
 
@@ -59,7 +59,8 @@ public class PaymentService {
             Account account = payment.getAccount();
             account.setBalance(account.getBalance() - payment.getAmount());
             account.addPayment(payment);
-            account.addMovement(new Movement(payment.getDate(), payment.getAmount(), payment.getDescription(), account));
+            account.addMovement(new Movement(payment.getDate(), payment.getAmount(), payment.getDescription(),
+                account));
         }
 
         return getPaymentJson(payment).toString();

@@ -30,25 +30,15 @@ public class AccountHolder {
         this.holderName = holderName;
     }
 
-    public long getId() {
-        return this.id;
-    }
+    public long getId() { return this.id; }
 
-    public String getHolderName() {
-        return this.holderName;
-    }
+    public String getHolderName() { return this.holderName; }
 
-    public void setHolderName(String holderName) {
-        this.holderName = holderName;
-    }
+    public void setHolderName(String holderName) { this.holderName = holderName; }
 
-    public Set<Account> getAccounts() {
-        return this.accounts;
-    }
+    public Set<Account> getAccounts() { return this.accounts; }
 
-    public void setAccounts(Set<Account> accounts) {
-        this.accounts = accounts;
-    }
+    public void setAccounts(Set<Account> accounts) { this.accounts = accounts; }
 
     public void addAccount(Account account) {
         this.accounts.add(account);
@@ -57,9 +47,9 @@ public class AccountHolder {
     @Override
     public String toString() {
         return "AccountHolder{" +
-                "id=" + id +
-                ", holderName='" + holderName + '\'' +
-                ", accounts=" + accounts +
-                '}';
+               "id=" + id +
+               ", holderName='" + holderName + '\'' +
+               ", accounts=" + accounts +
+               '}';
     }
 }
