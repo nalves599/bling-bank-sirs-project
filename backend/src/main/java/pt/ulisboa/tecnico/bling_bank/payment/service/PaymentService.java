@@ -67,6 +67,16 @@ public class PaymentService {
         return getPaymentJson(payment).toString();
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public String cancelPayment(Long id) {
+        Payment payment = paymentRepository.findById(id).orElseThrow(
+            () -> new BlingBankException(ErrorMessage.PAYMENT_NOT_FOUND));
+
+        payment.removeApproval();
+
+        return getPaymentJson(payment).toString();
+    }
+
     private JSONObject getPaymentJson(Payment payment) {
         JSONObject json = new JSONObject();
         json.put("id", payment.getId());

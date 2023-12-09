@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.bling_bank.payment.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 import pt.ulisboa.tecnico.bling_bank.account.domain.Account;
@@ -9,6 +10,7 @@ import pt.ulisboa.tecnico.bling_bank.account.domain.Account;
 import java.util.Date;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "payments")
@@ -66,8 +68,5 @@ public class Payment {
 
     public void removeApproval() {
         this.approvedApprovals--;
-        if (this.approvedApprovals < this.requiredApprovals) {
-            this.accepted = false;
-        }
     }
 }
