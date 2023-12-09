@@ -11,14 +11,6 @@
         <input type="number" v-model="amount" id="amount" required />
       </div>
       <div class="form-group">
-        <label for="currency">Currency:</label>
-        <select v-model="currency" id="currency" required>
-          <option value="EUR">EUR</option>
-          <option value="USD">USD</option>
-          <option value="GBP">GBP</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label for="date">Date to be processed:</label>
         <input type="date" v-model="date" id="date" required />
       </div>
