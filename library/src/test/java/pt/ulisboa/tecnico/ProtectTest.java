@@ -31,6 +31,9 @@ public class ProtectTest {
     @Test
     public void protectFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         assertTrue(output.isRight() && output.get().length > 0);
     }
@@ -46,6 +49,9 @@ public class ProtectTest {
     @Test
     public void protectMultipleFiles() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         assertTrue(output1.isRight() && output1.get().length > 0);

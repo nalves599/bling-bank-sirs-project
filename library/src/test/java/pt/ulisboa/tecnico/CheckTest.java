@@ -32,6 +32,9 @@ public class CheckTest {
     @Test
     public void checkFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         assertTrue(lib.check(output.get()));
     }
@@ -39,6 +42,9 @@ public class CheckTest {
     @Test
     public void checkTamperedFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         output.get()[0] = (byte) (output.get()[0] + 1);
         assertFalse(lib.check(output.get()));
@@ -47,6 +53,9 @@ public class CheckTest {
     @Test
     public void checkMultipleFiles() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         assertTrue(lib.check(output1.get()));

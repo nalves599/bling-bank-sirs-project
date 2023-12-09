@@ -33,6 +33,9 @@ public class UnprotectTest {
     @Test
     public void unProtectFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Either<String, byte[]> decrypted = lib.unprotect(output.get());
         assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted.get()));
@@ -41,6 +44,9 @@ public class UnprotectTest {
     @Test
     public void unProtectTamperedFile() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         byte[] encrypted = output.get();
         encrypted[0] = (byte) (encrypted[0] + 1);
@@ -51,6 +57,9 @@ public class UnprotectTest {
     @Test
     public void unProtectMultipleFiles() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Either<String, byte[]> decrypted1 = lib.unprotect(output1.get());
@@ -63,6 +72,9 @@ public class UnprotectTest {
     @Test
     public void unProtectSameFileTwice() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Either<String, byte[]> decrypted1 = lib.unprotect(output.get());
         Either<String, byte[]> decrypted2 = lib.unprotect(output.get());
@@ -74,6 +86,9 @@ public class UnprotectTest {
     @Test
     public void unProtectFileAfterTimeout() throws Exception {
         Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib.receivePublicKey(encryptedPublicKey));
         Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
         Thread.sleep(Constants.MAX_TIMESTAMP_DIFFERENCE + 1000);
         Either<String, byte[]> decrypted = lib.unprotect(output.get());
