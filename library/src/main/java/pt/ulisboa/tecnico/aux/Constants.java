@@ -15,10 +15,9 @@ public class Constants {
     public static String DIGEST_ALGO = "SHA-256";
     public static int DIGEST_SIZE = 32; // 256 bits = 32 bytes
 
-    public static String RANDOM_ALGO = "SHA1PRNG";
-    public static String RANDOM_PROVIDER = "SUN";
-
     public static int INITIAL_SEQUENCE_NUMBER = 0;
 
     public static int INT_SIZE = 4;
+
+    public static int MAX_TIMESTAMP_DIFFERENCE = 3 * 1000; // 3 seconds
 }
