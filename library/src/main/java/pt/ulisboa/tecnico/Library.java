@@ -97,7 +97,6 @@ public class Library {
             return Either.right(prettifyJSON(json));
 
         } catch (Exception e) {
-            System.err.println(e.getMessage());
             return Either.left(e.getMessage());
         }
     }
