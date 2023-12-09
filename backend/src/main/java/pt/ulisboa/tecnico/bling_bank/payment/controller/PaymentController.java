@@ -5,10 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.bling_bank.payment.service.PaymentService;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.Date;
-
 @RestController
 public class PaymentController {
 

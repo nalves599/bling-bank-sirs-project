@@ -84,7 +84,7 @@ public class PaymentService {
 
         JSONArray array = new JSONArray();
         for (Payment payment : payments) {
-            JSONObject json = getPaymentJson(payment)
+            JSONObject json = getPaymentJson(payment);
             array.put(json);
         }
         return array;
