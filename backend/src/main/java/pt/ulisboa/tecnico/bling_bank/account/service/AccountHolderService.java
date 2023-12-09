@@ -19,7 +19,7 @@ public class AccountHolderService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String createAccountHolder(String holderName) {
-        if (accountHolderRepository.existsByHolderName(holderName)) {
+        if (accountHolderRepository.findById(holderName).isPresent()) {
             throw new BlingBankException(ErrorMessage.ACCOUNT_HOLDER_ALREADY_EXISTS);
         }
 
@@ -29,8 +29,8 @@ public class AccountHolderService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public String getAccountHolder(Long id) {
-        AccountHolder accountHolder = accountHolderRepository.findById(id).orElseThrow(
+    public String getAccountHolder(String holderName) {
+        AccountHolder accountHolder = accountHolderRepository.findById(holderName).orElseThrow(
             () -> new BlingBankException(ErrorMessage.ACCOUNT_HOLDER_NOT_FOUND));
 
         return getAccountHolderJson(accountHolder).toString();
@@ -51,7 +51,6 @@ public class AccountHolderService {
 
     private JSONObject getAccountHolderJson(AccountHolder accountHolder) {
         JSONObject json = new JSONObject();
-        json.put("accountHolderId", accountHolder.getId());
         json.put("holderName", accountHolder.getHolderName());
         return json;
     }

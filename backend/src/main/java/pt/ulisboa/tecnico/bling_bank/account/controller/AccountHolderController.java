@@ -18,9 +18,9 @@ public class AccountHolderController {
         return accountHolderService.createAccountHolder(holderName);
     }
 
-    @GetMapping("/holders/{id}")
-    public String getAccountHolder(@PathVariable Long id) {
-        return accountHolderService.getAccountHolder(id);
+    @GetMapping("/holders/{holderName}")
+    public String getAccountHolder(@PathVariable String holderName) {
+        return accountHolderService.getAccountHolder(holderName);
     }
 
     @GetMapping("/holders")

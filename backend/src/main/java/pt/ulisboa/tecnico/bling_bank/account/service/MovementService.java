@@ -98,7 +98,6 @@ public class MovementService {
         JSONArray array = new JSONArray();
         for (AccountHolder accountHolder : account.getAccountHolder()) {
             JSONObject json = new JSONObject();
-            json.put("id", accountHolder.getId());
             json.put("holderName", accountHolder.getHolderName());
             array.put(json);
         }

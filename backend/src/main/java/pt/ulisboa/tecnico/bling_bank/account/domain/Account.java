@@ -19,7 +19,7 @@ public class Account {
     @Column(name = "balance")
     private int balance; // in cents
 
-    @Column(name = "currencyType")
+    @Column(name = "currency_type")
     private String currencyType;
 
     @ManyToMany(mappedBy = "accounts")
