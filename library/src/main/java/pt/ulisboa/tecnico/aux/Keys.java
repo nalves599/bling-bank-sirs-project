@@ -8,8 +8,10 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.spec.X509EncodedKeySpec;
 
 import static pt.ulisboa.tecnico.aux.Constants.*;
 import static pt.ulisboa.tecnico.aux.Constants.SYM_ALGO;
@@ -17,7 +19,6 @@ import static pt.ulisboa.tecnico.aux.FileReader.*;
 import static pt.ulisboa.tecnico.aux.Conversion.*;
 
 @Getter
-@Setter
 public class Keys {
 
     @Setter(lombok.AccessLevel.NONE)
@@ -35,6 +36,7 @@ public class Keys {
 
     public Keys(String secretKeyPath) throws Exception {
         assignSecretKey(secretKeyPath);
+        generateAsymKey();
     }
 
     private void assignSecretKey(String secretKeyPath) throws Exception {
@@ -42,7 +44,7 @@ public class Keys {
         secretKey = new SecretKeySpec(encoded, SYM_ALGO);
     }
 
-    public void generateAsymKey() throws Exception {
+    private void generateAsymKey() throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ASYM_ALGO);
         keyPairGenerator.initialize(ASYM_KEY_SIZE);
         KeyPair keyPair = keyPairGenerator.generateKeyPair();
@@ -82,9 +84,8 @@ public class Keys {
             "Error reading from byte array"));
         byte[] encodedReceiverPublicKey = read(input, INT_SIZE + secretSessionKeyLength + INT_SIZE, publicKeyLength)
             .orElseThrow(() -> new Exception("Error reading from byte array"));
-        receiverPublicKey = new SecretKeySpec(encodedReceiverPublicKey, ASYM_ALGO);
-
-        generateAsymKey();
+        receiverPublicKey = KeyFactory.getInstance(ASYM_ALGO).generatePublic(new X509EncodedKeySpec(
+            encodedReceiverPublicKey));
 
         byte[] encodedPublicKey = publicKey.getEncoded();
         ByteArrayOutputStream payload = new ByteArrayOutputStream();
@@ -99,7 +100,7 @@ public class Keys {
         int publicKeyLength = bytesToInt(input, 0).orElseThrow(() -> new Exception("Error reading from byte array"));
         byte[] encodedPublicKey = read(input, INT_SIZE, publicKeyLength).orElseThrow(() -> new Exception(
             "Error reading from byte array"));
-        receiverPublicKey = new SecretKeySpec(encodedPublicKey, ASYM_ALGO);
+        receiverPublicKey = KeyFactory.getInstance(ASYM_ALGO).generatePublic(new X509EncodedKeySpec(encodedPublicKey));
     }
 
 }

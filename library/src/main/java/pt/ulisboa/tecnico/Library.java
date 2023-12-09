@@ -32,8 +32,6 @@ public class Library {
 
     public Either<String, byte[]> createSessionKeys() {
         try {
-            crypto.CreateTimestamp();
-            keys.generateAsymKey();
             keys.generateSecretSessionKey();
             byte[] payload = keys.creationPayload();
             byte[] encryptedPayload = doProtect(payload, true);
@@ -50,7 +48,6 @@ public class Library {
             byte[] encryptedPayload = doProtect(payload, true);
             return Either.right(encryptedPayload);
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
             return Either.left(e.getMessage());
         }
     }
@@ -68,7 +65,7 @@ public class Library {
 
     public Either<String, byte[]> protect(byte[] input) {
         try {
-            crypto.CreateTimestamp();
+            crypto.createTimestamp();
 
             JSONObject json = new JSONObject(new String(input));
 
@@ -165,6 +162,10 @@ public class Library {
             throw new Exception("Repeated sequence number");
         }
 
+        if (keys.getReceiverPublicKey() == null && sessionCreation) {
+            keys.receiveSessionKey(data);
+        }
+
         int digestEncryptStart = INT_SIZE + payloadLength + INT_SIZE + timestampLength + INT_SIZE;
         int digestEncryptedLength = bytesToInt(payload, digestEncryptStart).orElseThrow(
             () -> new Exception("Check the length of digestEncrypted"));
@@ -172,8 +173,9 @@ public class Library {
         byte[] digestEncrypted = read(payload, digestEncryptStart + INT_SIZE, digestEncryptedLength)
             .orElseThrow(() -> new Exception("Check the digestEncrypted"));
 
-        // TODO: see this
-        byte[] digestDecrypted = crypto.asymDecrypt(digestEncrypted, keys.getPublicKey()).orElseThrow(
+        Key publicKey = sessionCreation ? keys.getReceiverPublicKey() : keys.getPublicKey();
+
+        byte[] digestDecrypted = crypto.asymDecrypt(digestEncrypted, publicKey).orElseThrow(
             () -> new Exception("Check the asymmetric decryption method"));
         byte[] digestCalculated = crypto.digest(Arrays.copyOfRange(payload, 0, digestEncryptStart));
 
