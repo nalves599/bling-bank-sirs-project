@@ -30,7 +30,36 @@ public class AccountHolder {
         this.holderName = holderName;
     }
 
+    public long getId() {
+        return this.id;
+    }
+
+    public String getHolderName() {
+        return this.holderName;
+    }
+
+    public void setHolderName(String holderName) {
+        this.holderName = holderName;
+    }
+
+    public Set<Account> getAccounts() {
+        return this.accounts;
+    }
+
+    public void setAccounts(Set<Account> accounts) {
+        this.accounts = accounts;
+    }
+
     public void addAccount(Account account) {
         this.accounts.add(account);
+    }
+
+    @Override
+    public String toString() {
+        return "AccountHolder{" +
+                "id=" + id +
+                ", holderName='" + holderName + '\'' +
+                ", accounts=" + accounts +
+                '}';
     }
 }

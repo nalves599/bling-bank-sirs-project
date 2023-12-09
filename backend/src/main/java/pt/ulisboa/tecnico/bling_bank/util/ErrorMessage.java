@@ -12,5 +12,7 @@ public enum ErrorMessage {
     ACCOUNT_NOT_FOUND("Account not found"),
     MOVEMENT_NOT_FOUND("Movement not found");
 
+    PAYMENT_NOT_FOUND("Payment not found");
+
     private final String label;
 }
