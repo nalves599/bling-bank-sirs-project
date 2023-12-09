@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.bling_bank.account.domain;
 
+import pt.ulisboa.tecnico.bling_bank.payment.domain.Payment;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,5 +55,9 @@ public class Account {
 
     public void addPayment(Payment payment) {
         this.payments.add(payment);
+    }
+
+    public void setBalance(int balance) {
+        this.balance = balance;
     }
 }

@@ -5,6 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import pt.ulisboa.tecnico.bling_bank.payment.service.PaymentService;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 @RestController
 public class PaymentController {
 
@@ -19,7 +24,12 @@ public class PaymentController {
         Long accountId = json.getLong("accountId");
         int amount = json.getInt("amount");
         String description = json.getString("description");
-        String date = formatter.parse(json.getString("date"));
+        Date date = null;
+        try {
+            date = formatter.parse(json.getString("date"));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         return paymentService.createPayment(accountId, date, amount, description);
 
     }

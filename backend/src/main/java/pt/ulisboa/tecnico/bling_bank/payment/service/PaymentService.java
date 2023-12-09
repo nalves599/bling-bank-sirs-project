@@ -8,8 +8,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.bling_bank.account.domain.Account;
 import pt.ulisboa.tecnico.bling_bank.account.domain.Movement;
-import pt.ulisboa.tecnico.bling_bank.account.payment.Payment;
+import pt.ulisboa.tecnico.bling_bank.payment.domain.Payment;
 import pt.ulisboa.tecnico.bling_bank.account.repository.AccountRepository;
+import pt.ulisboa.tecnico.bling_bank.payment.repository.PaymentRepository;
 import pt.ulisboa.tecnico.bling_bank.util.BlingBankException;
 import pt.ulisboa.tecnico.bling_bank.util.ErrorMessage;
 
@@ -30,12 +31,12 @@ public class PaymentService {
         Account account = accountRepository.findById(accountId).orElseThrow(
             () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
 
-        int requiredApprovals = account.getAccountHolders().size();
+        int requiredApprovals = account.getAccountHolder().size();
         String currencyType = account.getCurrencyType();
 
         Payment payment = new Payment(account, date, amount, currencyType, description, requiredApprovals);
 
-        return getPaymentJson(Payment).toString();
+        return getPaymentJson(payment).toString();
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
@@ -55,7 +56,7 @@ public class PaymentService {
 
         payment.addApproval();
 
-        if (payment.isApproved()) {
+        if (payment.isAccepted()) {
             Account account = payment.getAccount();
             account.setBalance(account.getBalance() - payment.getAmount());
             account.addPayment(payment);
@@ -66,7 +67,7 @@ public class PaymentService {
         return getPaymentJson(payment).toString();
     }
 
-    private JSONObject getPaymentJson(Payment Payment) {
+    private JSONObject getPaymentJson(Payment payment) {
         JSONObject json = new JSONObject();
         json.put("id", payment.getId());
         json.put("account", payment.getAccount().getId());
@@ -76,7 +77,7 @@ public class PaymentService {
         json.put("description", payment.getDescription());
         json.put("requiredApprovals", payment.getRequiredApprovals());
         json.put("approvedApprovals", payment.getApprovedApprovals());
-        json.put("approved", payment.isApproved());
+        json.put("approved", payment.isAccepted());
         return json;
     }
 
