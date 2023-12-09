@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vavr.control.Either;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import pt.ulisboa.tecnico.aux.Cryptography;
 import pt.ulisboa.tecnico.aux.Keys;
@@ -30,6 +31,8 @@ public class Library {
 
     public Either<String, byte[]> protect(byte[] input) {
         try {
+            crypto.CreateTimestamp();
+
             JSONObject json = new JSONObject(new String(input));
 
             iterateJSON(json, true);
@@ -42,6 +45,8 @@ public class Library {
 
     public Either<String, byte[]> unprotect(byte[] input) {
         try {
+            crypto.cleanStructure();
+
             JSONObject json = new JSONObject(new String(input));
 
             iterateJSON(json, false);
@@ -67,11 +72,11 @@ public class Library {
         if (!write(intToBytes(input.length), payload)) throw new Exception("Check the payload length");
         if (!write(input, payload)) throw new Exception("Check the payload");
 
-        int randomNumber = crypto.getRandomNumber();
-        int sequenceNumber = crypto.getAndSetSequenceNumber();
-
-        if (!write(intToBytes(randomNumber), payload)) throw new Exception("Check the random number");
-        if (!write(intToBytes(sequenceNumber), payload)) throw new Exception("Check the sequence number");
+        if (!write(intToBytes(crypto.getTimestamp().length()), payload)) throw new Exception(
+            "Check the length of the timestamp");
+        if (!write(crypto.getTimestamp().getBytes(), payload)) throw new Exception("Check the timestamp");
+        if (!write(intToBytes(crypto.getAndIncrementSequenceNumber()), payload)) throw new Exception(
+            "Check the sequence number");
 
         byte[] digestEncrypted = crypto.asymEncrypt(crypto.digest(payload.toByteArray()), keys.privateKey).orElseThrow(
             () -> new Exception("Check the asymmetric encryption method"));
@@ -101,12 +106,23 @@ public class Library {
         int payloadLength = bytesToInt(payload, 0).orElseThrow(() -> new Exception("Check the payload length"));
         byte[] data = read(payload, INT_SIZE, payloadLength).orElseThrow(() -> new Exception("Check the payload"));
 
-        int randomNumber = bytesToInt(payload, INT_SIZE + payloadLength).orElseThrow(
-            () -> new Exception("Check the random number"));
-        int sequenceNumber = bytesToInt(payload, INT_SIZE + payloadLength + INT_SIZE).orElseThrow(
+        int timestampLength = bytesToInt(payload, INT_SIZE + payloadLength).orElseThrow(
+            () -> new Exception("Check the length of the timestamp"));
+        String timestamp = new String(read(payload, INT_SIZE + payloadLength + INT_SIZE, timestampLength).orElseThrow(
+            () -> new Exception("Check the timestamp")));
+
+        int sequenceNumber = bytesToInt(payload, INT_SIZE + payloadLength + INT_SIZE + timestampLength).orElseThrow(
             () -> new Exception("Check the sequence number"));
 
-        int digestEncryptStart = INT_SIZE + payloadLength + INT_SIZE + INT_SIZE;
+        if (MAX_TIMESTAMP_DIFFERENCE < System.currentTimeMillis() - Long.parseLong(timestamp)) {
+            throw new Exception("Timestamps don't match");
+        }
+
+        if (!crypto.addSequenceNumber(Long.parseLong(timestamp), sequenceNumber)) {
+            throw new Exception("Repeated sequence number");
+        }
+
+        int digestEncryptStart = INT_SIZE + payloadLength + INT_SIZE + timestampLength + INT_SIZE;
         int digestEncryptedLength = bytesToInt(payload, digestEncryptStart).orElseThrow(
             () -> new Exception("Check the length of digestEncrypted"));
 
@@ -158,7 +174,7 @@ public class Library {
                 } else {
                     iterateJSON(json.getJSONObject(k), encryption);
                 }
-            } catch (Exception e) {
+            } catch (JSONException e) {
                 operate(json, k, json.get(k).toString().getBytes(), encryption);
             }
         }

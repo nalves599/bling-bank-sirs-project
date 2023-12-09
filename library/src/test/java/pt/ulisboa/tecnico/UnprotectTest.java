@@ -4,6 +4,7 @@ import io.vavr.control.Either;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import pt.ulisboa.tecnico.aux.Constants;
 import pt.ulisboa.tecnico.auxTests.TestConfig;
 
 import java.io.File;
@@ -57,5 +58,26 @@ public class UnprotectTest {
         assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted1.get()));
         assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted2.get()));
         assertNotEquals(decrypted1.get(), decrypted2.get());
+    }
+
+    @Test
+    public void unProtectSameFileTwice() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> decrypted1 = lib.unprotect(output.get());
+        Either<String, byte[]> decrypted2 = lib.unprotect(output.get());
+        assertEquals(TestConfig.SOURCE_1_JSON, new String(decrypted1.get()));
+        assertTrue(decrypted2.isLeft());
+        assertTrue(decrypted2.getLeft().contains("Repeated sequence number"));
+    }
+
+    @Test
+    public void unProtectFileAfterTimeout() throws Exception {
+        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Thread.sleep(Constants.MAX_TIMESTAMP_DIFFERENCE + 1000);
+        Either<String, byte[]> decrypted = lib.unprotect(output.get());
+        assertTrue(decrypted.isLeft());
+        assertTrue(decrypted.getLeft().contains("Timestamps don't match"));
     }
 }

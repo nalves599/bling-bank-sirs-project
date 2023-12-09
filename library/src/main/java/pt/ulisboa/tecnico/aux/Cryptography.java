@@ -1,15 +1,14 @@
 package pt.ulisboa.tecnico.aux;
 
-import lombok.Getter;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.*;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
 
 import static pt.ulisboa.tecnico.aux.Constants.*;
 
-@Getter
 public class Cryptography {
 
     private final Cipher symCipher = Cipher.getInstance(SYM_CYPHER);
@@ -18,9 +17,12 @@ public class Cryptography {
 
     private final MessageDigest messageDigest = MessageDigest.getInstance(DIGEST_ALGO);
 
-    SecureRandom random = SecureRandom.getInstance(RANDOM_ALGO, RANDOM_PROVIDER);
+    private long timestamp;
 
     private int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
+
+    // <timestamp, <sequenceNumber>>
+    private final HashMap<Long, HashSet<Integer>> sequenceNumbers = new HashMap<>();
 
     public Cryptography() throws Exception {}
 
@@ -65,7 +67,28 @@ public class Cryptography {
         return messageDigest.digest(input);
     }
 
-    public int getRandomNumber() { return random.nextInt(); }
+    public void CreateTimestamp() {
+        timestamp = System.currentTimeMillis();
+        sequenceNumber = 0;
+    }
 
-    public int getAndSetSequenceNumber() { return sequenceNumber++; }
+    public String getTimestamp() { return String.valueOf(timestamp); }
+
+    public int getAndIncrementSequenceNumber() { return sequenceNumber++; }
+
+    public void cleanStructure() {
+        sequenceNumbers.entrySet().removeIf(entry -> entry.getKey() < System.currentTimeMillis() -
+                                                                      MAX_TIMESTAMP_DIFFERENCE);
+    }
+
+    public boolean addSequenceNumber(long timestamp, int sequenceNumber) {
+        if (!sequenceNumbers.containsKey(timestamp)) {
+            sequenceNumbers.put(timestamp, new HashSet<>());
+        }
+        if (sequenceNumbers.get(timestamp).contains(sequenceNumber)) {
+            return false;
+        }
+        sequenceNumbers.get(timestamp).add(sequenceNumber);
+        return true;
+    }
 }
