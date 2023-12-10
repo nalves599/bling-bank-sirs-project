@@ -1,10 +1,14 @@
 package pt.ulisboa.tecnico.aux;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static pt.ulisboa.tecnico.aux.Constants.INT_SIZE;
+import static pt.ulisboa.tecnico.aux.Constants.*;
 
 public class Conversion {
 
@@ -18,5 +22,17 @@ public class Conversion {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    public static SecretKeySpec bytesToSecretKey(byte[] bytes) {
+        return new SecretKeySpec(bytes, SYM_ALGO);
+    }
+
+    public static PublicKey bytesToPublicKey(byte[] bytes) throws Exception {
+        return KeyFactory.getInstance(ASYM_ALGO).generatePublic(new X509EncodedKeySpec(bytes));
+    }
+
+    public static PrivateKey bytesToPrivateKey(byte[] bytes) throws Exception {
+        return KeyFactory.getInstance(ASYM_ALGO).generatePrivate(new X509EncodedKeySpec(bytes));
     }
 }

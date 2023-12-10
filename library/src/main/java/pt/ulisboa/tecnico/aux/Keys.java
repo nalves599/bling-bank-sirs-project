@@ -111,4 +111,39 @@ public class Keys {
         receiverPublicKey = null;
     }
 
+    public Key getPrivateKey() {
+        return privateKey;
+    }
+
+    public Key getSecretKey() {
+        return secretKey;
+    }
+
+    public Key getSecretSessionKey() {
+        return secretSessionKey;
+    }
+
+    public Key getReceiverPublicKey() {
+        return receiverPublicKey;
+    }
+
+    public void setPrivateKey(Key privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public void setSecretSessionKey(Key secretSessionKey) {
+        this.secretSessionKey = secretSessionKey;
+    }
+
+    public void setReceiverPublicKey(Key receiverPublicKey) {
+        this.receiverPublicKey = receiverPublicKey;
+    }
+
+    public void setSecretKey(Key secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public Key getPublicKey() {
+        return publicKey;
+    }
 }

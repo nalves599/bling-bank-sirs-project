@@ -72,6 +72,18 @@ public class Library {
         }
     }
 
+    public void setPrivateKey(byte[] key) throws Exception {
+        keys.setPrivateKey(bytesToPrivateKey(key));
+    }
+
+    public void setSecretSessionKey(byte[] key) {
+        keys.setSecretSessionKey(bytesToSecretKey(key));
+    }
+
+    public void setReceiverPublicKey(byte[] key) throws Exception {
+        keys.setReceiverPublicKey(bytesToPublicKey(key));
+    }
+
     public Either<String, byte[]> protect(byte[] input) {
         try {
             crypto.createTimestamp();
