@@ -163,7 +163,7 @@ public class Library {
         int sequenceNumber = bytesToInt(payload, INT_SIZE + payloadLength + INT_SIZE + timestampLength).orElseThrow(
             () -> new Exception("Check the sequence number"));
 
-        if (MAX_TIMESTAMP_DIFFERENCE < System.currentTimeMillis() - Long.parseLong(timestamp)) {
+        if (Long.parseLong(timestamp) < System.currentTimeMillis() - crypto.getTimestampDifference()) {
             throw new Exception("Timestamps don't match");
         }
 

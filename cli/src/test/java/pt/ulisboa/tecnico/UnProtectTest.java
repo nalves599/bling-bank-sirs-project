@@ -22,6 +22,12 @@ public class UnProtectTest {
 
     static Path secretKeyFile;
 
+    static Path privateKeyFile;
+
+    static Path publicKeyFile;
+
+    static Path secretSessionKeyFile;
+
     @BeforeAll
     static void init() throws Exception {
         tempPath = tempFolder.getAbsolutePath() + "/";
@@ -30,7 +36,16 @@ public class UnProtectTest {
         Files.write(tempFile, TestConfig.SOURCE_1_JSON.getBytes());
 
         secretKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_KEY_TEST_PATH_1));
-        Files.write(secretKeyFile, TestConfig.SECRET_KEY_1.getBytes());
+        Files.write(secretKeyFile, TestConfig.base64Decode(TestConfig.SECRET_KEY_1));
+
+        privateKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.PRIVATE_KEY_TEST_PATH_1));
+        Files.write(privateKeyFile, TestConfig.base64Decode(TestConfig.PRIVATE_KEY_1));
+
+        publicKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.PUBLIC_KEY_TEST_PATH_1));
+        Files.write(publicKeyFile, TestConfig.base64Decode(TestConfig.PUBLIC_KEY_1));
+
+        secretSessionKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_SESSION_KEY_TEST_PATH_1));
+        Files.write(secretSessionKeyFile, TestConfig.base64Decode(TestConfig.SECRET_SESSION_KEY_1));
     }
 
     @BeforeEach
@@ -42,9 +57,13 @@ public class UnProtectTest {
     @Test
     void unProtectTest() throws Exception {
         String command = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
                          "unprotect " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + "\n" +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                         tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
                          "exit";
 
         ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
@@ -63,7 +82,9 @@ public class UnProtectTest {
     @Test
     void unProtectNonExistentFileTest() {
         String command = "unprotect " + tempPath + TestConfig.NON_EXISTENT_FILE + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                         tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
                          "exit";
 
         ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
@@ -78,21 +99,31 @@ public class UnProtectTest {
 
         assertFalse(Files.exists(Path.of(tempPath + TestConfig.DEST_TEST_PATH_1)));
         assertTrue(output.contains("Could not unprotect file"));
-        assertTrue(output.contains("Error: Could not read file"));
     }
 
     @Test
     void unProtectMultipleFilesTest() throws Exception {
-        String command = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "protect " +
-                         tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + "\n" +
-                         "unprotect " + tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "2" + "\n" +
-                         "unprotect " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "3" + "\n" +
-                         "exit";
+        String protect1 = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String protect2 = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                          tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String unprotect1 = "unprotect " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                            tempPath + TestConfig.DEST_TEST_PATH_1 + "2" + " " +
+                            tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                            tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String unprotect2 = "unprotect " + tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                            tempPath + TestConfig.DEST_TEST_PATH_1 + "3" + " " +
+                            tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                            tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String command = protect1 + protect2 + unprotect2 + unprotect1 + "exit";
 
         ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -124,6 +155,6 @@ public class UnProtectTest {
         Cli.main(new String[] { secretKeyFile.toString() });
 
         String output = os.toString();
-        assertTrue(output.contains("Usage: (blingbank) unprotect <input-file> <output-file> <...>"));
+        assertTrue(output.contains("Usage: (blingbank) unprotect"));
     }
 }

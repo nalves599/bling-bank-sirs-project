@@ -21,6 +21,12 @@ public class CheckTest {
 
     static Path secretKeyFile;
 
+    static Path privateKeyFile;
+
+    static Path publicKeyFile;
+
+    static Path secretSessionKeyFile;
+
     @BeforeAll
     static void init() throws Exception {
         tempPath = tempFolder.getAbsolutePath() + "/";
@@ -29,15 +35,31 @@ public class CheckTest {
         Files.write(tempFile, TestConfig.SOURCE_1_JSON.getBytes());
 
         secretKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_KEY_TEST_PATH_1));
-        Files.write(secretKeyFile, TestConfig.SECRET_KEY_1.getBytes());
+        Files.write(secretKeyFile, TestConfig.base64Decode(TestConfig.SECRET_KEY_1));
+
+        privateKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.PRIVATE_KEY_TEST_PATH_1));
+        Files.write(privateKeyFile, TestConfig.base64Decode(TestConfig.PRIVATE_KEY_1));
+
+        publicKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.PUBLIC_KEY_TEST_PATH_1));
+        Files.write(publicKeyFile, TestConfig.base64Decode(TestConfig.PUBLIC_KEY_1));
+
+        secretSessionKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_SESSION_KEY_TEST_PATH_1));
+        Files.write(secretSessionKeyFile, TestConfig.base64Decode(TestConfig.SECRET_SESSION_KEY_1));
     }
 
     @Test
     void checkTest() {
-        String command = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "exit";
+        String protect = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String check = "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                       tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                       tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
+                       "exit";
+
+        String command = protect + check;
 
         ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -53,7 +75,9 @@ public class CheckTest {
 
     @Test
     void checkNonExistentFileTest() {
-        String command = "check " + tempPath + TestConfig.NON_EXISTENT_FILE + "\n" +
+        String command = "check " + tempPath + TestConfig.NON_EXISTENT_FILE + " " +
+                         tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
                          "exit";
 
         ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
@@ -66,17 +90,29 @@ public class CheckTest {
 
         String output = os.toString();
         assertTrue(output.contains("Could not check file"));
-        assertTrue(output.contains("Error: Could not read file"));
     }
 
     @Test
     void checkMultipleFilesTest() {
-        String command = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
-                         tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + "\n" +
-                         "exit";
+        String protect = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String protect2 = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                          tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                          tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String check = "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                       tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                       tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String check2 = "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                        tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                        tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String command = protect + protect2 + check2 + check + "exit";
 
         ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -88,6 +124,34 @@ public class CheckTest {
 
         String output = os.toString();
         assertTrue(output.contains("File protected"));
+    }
+
+    @Test
+    void checkWithTimeout() {
+        String timeout = "timeout -10000\n";
+
+        String protect = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n";
+
+        String check = "check " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                       tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                       tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
+                       "exit";
+
+        String command = timeout + protect + check;
+
+        ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        System.setIn(is);
+        System.setOut(new PrintStream(os));
+
+        Cli.main(new String[] { secretKeyFile.toString() });
+
+        String output = os.toString();
+        assertTrue(output.contains("File not protected"));
     }
 
     @Test
@@ -104,6 +168,6 @@ public class CheckTest {
         Cli.main(new String[] { secretKeyFile.toString() });
 
         String output = os.toString();
-        assertTrue(output.contains("Usage: (blingbank) check <input-file>"));
+        assertTrue(output.contains("Usage: (blingbank) check"));
     }
 }

@@ -57,7 +57,7 @@ class Commands {
                 "Could not read Session Secret Key file"));
             library.setPrivateKey(privateKey);
             library.setSecretSessionKey(sessionSecretKey);
-            byte[] output = library.protect(input).get();
+            byte[] output = library.protect(input).getOrElseThrow((e) -> new Exception(e));
             Utils.writeFile(outputFilePath, output);
         } catch (Exception e) {
             System.out.println("Could not protect file " + inputFilePath);
@@ -109,7 +109,7 @@ class Commands {
                 "Could not read Session Secret Key file"));
             library.setReceiverPublicKey(receiverPublicKey);
             library.setSecretSessionKey(sessionSecretKey);
-            byte[] output = library.unprotect(input).get();
+            byte[] output = library.unprotect(input).getOrElseThrow((e) -> new Exception(e));
             Utils.writeFile(outputFilePath, output);
         } catch (Exception e) {
             System.out.println("Could not unprotect file " + inputFilePath);

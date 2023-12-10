@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.aux;
 
+import lombok.Getter;
 import lombok.Setter;
 
 import javax.crypto.Cipher;
@@ -24,6 +25,7 @@ public class Cryptography {
     private int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
 
     @Setter
+    @Getter
     private int timestampDifference = MAX_TIMESTAMP_DIFFERENCE;
 
     // <timestamp, <sequenceNumber>>
