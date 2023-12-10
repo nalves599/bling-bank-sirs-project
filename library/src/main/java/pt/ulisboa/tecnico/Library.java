@@ -188,9 +188,7 @@ public class Library {
         byte[] digestEncrypted = read(payload, digestEncryptStart + INT_SIZE, digestEncryptedLength)
             .orElseThrow(() -> new Exception("Check the digestEncrypted"));
 
-        Key publicKey = keys.getReceiverPublicKey();
-
-        byte[] digestDecrypted = crypto.asymDecrypt(digestEncrypted, publicKey).orElseThrow(
+        byte[] digestDecrypted = crypto.asymDecrypt(digestEncrypted, keys.getReceiverPublicKey()).orElseThrow(
             () -> new Exception("Check the asymmetric decryption method"));
         byte[] digestCalculated = crypto.digest(Arrays.copyOfRange(payload, 0, digestEncryptStart));
 
