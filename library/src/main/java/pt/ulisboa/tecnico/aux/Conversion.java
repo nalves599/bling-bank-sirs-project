@@ -3,7 +3,7 @@ package pt.ulisboa.tecnico.aux;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Optional;
@@ -33,6 +33,6 @@ public class Conversion {
     }
 
     public static PrivateKey bytesToPrivateKey(byte[] bytes) throws Exception {
-        return KeyFactory.getInstance(ASYM_ALGO).generatePrivate(new X509EncodedKeySpec(bytes));
+        return KeyFactory.getInstance(ASYM_ALGO).generatePrivate(new PKCS8EncodedKeySpec(bytes));
     }
 }

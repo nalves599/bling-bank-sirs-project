@@ -50,6 +50,10 @@ public class Cli {
                 case "u":
                     commands.unprotect(line_args);
                     break;
+                case "timeout":
+                case "t":
+                    commands.timeout(line_args);
+                    break;
                 case "exit":
                 case "e":
                     out.println("Exiting...");

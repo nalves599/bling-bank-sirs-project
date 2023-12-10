@@ -72,18 +72,6 @@ public class Library {
         }
     }
 
-    public void setPrivateKey(byte[] key) throws Exception {
-        keys.setPrivateKey(bytesToPrivateKey(key));
-    }
-
-    public void setSecretSessionKey(byte[] key) {
-        keys.setSecretSessionKey(bytesToSecretKey(key));
-    }
-
-    public void setReceiverPublicKey(byte[] key) throws Exception {
-        keys.setReceiverPublicKey(bytesToPublicKey(key));
-    }
-
     public Either<String, byte[]> protect(byte[] input) {
         try {
             crypto.createTimestamp();
@@ -267,4 +255,19 @@ public class Library {
         return mapper.readTree(json.toString()).toPrettyString().getBytes();
     }
 
+    public void setPrivateKey(byte[] key) throws Exception {
+        keys.setPrivateKey(bytesToPrivateKey(key));
+    }
+
+    public void setSecretSessionKey(byte[] key) {
+        keys.setSecretSessionKey(bytesToSecretKey(key));
+    }
+
+    public void setReceiverPublicKey(byte[] key) throws Exception {
+        keys.setReceiverPublicKey(bytesToPublicKey(key));
+    }
+
+    public void setTimeout(int timeout) {
+        crypto.setTimestampDifference(timeout);
+    }
 }

@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.aux;
 
+import lombok.Setter;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.*;
@@ -20,6 +22,9 @@ public class Cryptography {
     private long timestamp;
 
     private int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
+
+    @Setter
+    private int timestampDifference = MAX_TIMESTAMP_DIFFERENCE;
 
     // <timestamp, <sequenceNumber>>
     private final HashMap<Long, HashSet<Integer>> sequenceNumbers = new HashMap<>();
@@ -79,7 +84,7 @@ public class Cryptography {
 
     public void cleanStructure() {
         sequenceNumbers.entrySet().removeIf(entry -> entry.getKey() < System.currentTimeMillis() -
-                                                                      MAX_TIMESTAMP_DIFFERENCE);
+                                                                      timestampDifference);
     }
 
     public boolean addSequenceNumber(long timestamp, int sequenceNumber) {
