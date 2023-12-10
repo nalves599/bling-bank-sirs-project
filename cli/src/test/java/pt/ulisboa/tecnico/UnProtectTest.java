@@ -142,6 +142,33 @@ public class UnProtectTest {
     }
 
     @Test
+    void unProtectWrongKeysTest() throws Exception {
+        String command = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.SECRET_SESSION_KEY_TEST_PATH_1 + "\n" +
+                         "unprotect " + tempPath + TestConfig.DEST_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.DEST_TEST_PATH_1 + "1" + " " +
+                         tempPath + TestConfig.PUBLIC_KEY_TEST_PATH_1 + " " +
+                         tempPath + TestConfig.PRIVATE_KEY_TEST_PATH_1 + "\n" +
+                         "exit";
+
+        ByteArrayInputStream is = new ByteArrayInputStream(command.getBytes());
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        System.setIn(is);
+        System.setOut(new PrintStream(os));
+
+        Cli.main(new String[] { secretKeyFile.toString() });
+
+        String output = os.toString();
+
+        assertTrue(Files.exists(Path.of(tempPath + TestConfig.DEST_TEST_PATH_1)));
+        assertFalse(Files.exists(Path.of(tempPath + TestConfig.DEST_TEST_PATH_1 + "1")));
+        assertTrue(output.contains("Could not unprotect file"));
+    }
+
+    @Test
     void unProtectWrongNumArgsTest() {
         String command = "unprotect" + "\n" +
                          "exit";

@@ -127,7 +127,7 @@ public class CheckTest {
     }
 
     @Test
-    void checkWithTimeout() {
+    void checkWithLowTimeout() {
         String timeout = "timeout -10000\n";
 
         String protect = "protect " + tempPath + TestConfig.SOURCE_TEST_PATH_1 + " " +
