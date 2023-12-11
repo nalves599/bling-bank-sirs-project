@@ -2,8 +2,9 @@
   <div class="accounts">
     <h1>This is a accounts page</h1>
     <v-data-table :items="accounts" :headers="headers"> </v-data-table>
-    <BottomBar />
     <LogoutButton />
+
+    <BottomBar />
   </div>
 </template>
 
@@ -11,7 +12,8 @@
 import { ref } from 'vue'
 import { getAccountsFromHolder } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
-import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
 
@@ -41,10 +43,11 @@ const headers = [
   }
 ]
 
-const name = useRoute().params.name[0]
+const authStore = useAuthStore()
+const { username } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(name)
+  accounts.value = await getAccountsFromHolder(username.value)
 }
 
 fetchAccountsFromHolder()

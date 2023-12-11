@@ -1,14 +1,13 @@
 <template>
-  <v-app>
-    <div class="main-page">
+  <v-app class="main-page">
+    <div class="main-page" height="100vh" width="100vw">
       <h1>BlingBank</h1>
       <h2>The safest bank on the planet</h2>
       <router-link to="/login" class="login-button">Login</router-link>
-
-      <v-app-bar density="compact">
-        <bottom-bar />
-      </v-app-bar>
     </div>
+    <v-app-bar density="compact">
+      <bottom-bar />
+    </v-app-bar>
   </v-app>
 </template>
 

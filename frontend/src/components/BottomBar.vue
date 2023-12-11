@@ -15,25 +15,7 @@
         title="Login"
       ></v-list-item>
 
-      <!-- TODO: fix this-->
-      <v-list-item
-        v-if="token"
-        :to="{ name: `/accounts/${username}` }"
-        title="Accounts"
-      ></v-list-item>
-
-      <v-list-item
-        v-if="token"
-        :to="{ name: `movements/${username}` }"
-        title="Movements"
-      ></v-list-item>
-
-      <v-list-item
-        v-if="token"
-        prepend-icon="mdi-logout"
-        :to="{ name: `payments/${username}` }"
-        title="Payments"
-      ></v-list-item>
+      <v-list-item v-if="token" :to="{ name: `accounts` }" title="Accounts"></v-list-item>
     </v-list>
   </v-menu>
 </template>

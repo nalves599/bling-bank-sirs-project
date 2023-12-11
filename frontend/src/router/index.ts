@@ -19,8 +19,8 @@ const router = createRouter({
       component: () => import('../views/MovementsView.vue')
     },
     {
-      path: '/accounts/:name',
-      name: 'accountsById',
+      path: '/accounts',
+      name: 'accounts',
       component: () => AccountViewVue
     },
     {
