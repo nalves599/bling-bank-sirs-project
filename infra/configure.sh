@@ -38,6 +38,9 @@ function setup() {
 
   # Add NAT rule
   sudo iptables -A POSTROUTING -s 10.69.0.2/32 ! -o br-world -j MASQUERADE -t nat
+
+  # Allow ipv4 forwarding
+  sudo sysctl -w net.ipv4.ip_forward=1
 }
 
 function destroy() {

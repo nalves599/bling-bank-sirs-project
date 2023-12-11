@@ -8,11 +8,6 @@
     microvm
   ];
 
-  environment.systemPackages = with pkgs; [
-    python3
-    tcpdump
-  ];
-
   microvm.interfaces = [
     {
       type = "tap";
@@ -38,6 +33,15 @@
     externalInterface = "eth0";
     internalInterfaces = ["eth1" "eth2"];
     internalIPs = ["10.69.1.0/24" "10.69.2.0/24"];
+  };
+
+  networking.firewall = {
+    extraCommands = ''
+      iptables -A FORWARD -p tcp -i eth2 -s 10.69.2.2 -d 10.69.1.2 --dport 3306 -j ACCEPT
+
+      # Drop all traffic to the private network
+      iptables -A FORWARD -m conntrack --ctstate UNTRACKED -d 10.69.1.0/24 -j DROP
+    '';
   };
 
   networking.interfaces = {

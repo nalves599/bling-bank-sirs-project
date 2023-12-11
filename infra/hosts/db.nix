@@ -8,12 +8,6 @@
     microvm
   ];
 
-  environment.systemPackages = with pkgs; [
-    python3
-    tcpdump
-    mysql
-  ];
-
   microvm.interfaces = [
     {
       type = "tap";
@@ -44,8 +38,7 @@
     '';
     settings = {
       # TODO: Fix SSL
-      # mysqld = {
-      #   "ssl" = true;
+      # mariadb = {
       #   "ssl_ca" = toString(../certs/CA.pem);
       #   "ssl_cert" = toString(../certs/db.crt);
       #   "ssl_key" = toString(../certs/db.key);

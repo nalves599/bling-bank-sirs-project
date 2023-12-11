@@ -9,12 +9,6 @@
     webserver
   ];
 
-  environment.systemPackages = with pkgs; [
-    python3
-    tcpdump
-    mysql
-  ];
-
   microvm.interfaces = [
     {
       type = "tap";
