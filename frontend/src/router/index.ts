@@ -11,17 +11,32 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/holders',
-      name: 'holders',
+      path: '/movements/:id',
+      name: 'movements',
       // route level code-splitting
       // this generates a separate chunk (Holders.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/HoldersView.vue')
+      component: () => import('../views/MovementsView.vue')
     },
     {
       path: '/accounts/:id',
       name: 'accountsById',
       component: () => AccountViewVue
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue')
+    },
+    {
+      path: '/homepage/:id',
+      name: 'homepage',
+      component: () => import('../views/HomepageView.vue')
+    },
+    {
+      path: '/payments/:id',
+      name: 'payments',
+      component: () => import('../views/PaymentsView.vue')
     }
   ]
 })
