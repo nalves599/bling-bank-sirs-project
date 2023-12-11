@@ -1,46 +1,58 @@
 <template>
-  <div class="login">
-    <h1>Welcome to BlingBank!</h1>
-    <form @submit.prevent="login">
-      <div class="form-group">
-        <input type="text" v-model="id" id="id" placeholder="Enter your ID" />
-      </div>
-      <div class="form-group">
-        <div class="password-input">
-          <input
-            :type="showPassword ? 'text' : 'password'"
+  <div class="d-flex fill-height align-center justify-center">
+    <v-card width="400" class="mx-auto">
+      <v-card-title>Login</v-card-title>
+      <v-card-text>
+        <v-form v-model="form" @submit.prevent="onSubmit">
+          <v-text-field v-model="holderName" label="Holder Name" required></v-text-field>
+          <v-text-field
             v-model="password"
-            id="password"
-            placeholder="Enter your password"
-          />
-          <input type="checkbox" id="showPassword" v-model="showPassword" />
-          <label for="showPassword">Show Password</label>
-        </div>
-      </div>
-      <button type="submit">Login</button>
-    </form>
+            :type="showPassword ? 'text' : 'password'"
+            name="password"
+            label="Password"
+            :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="showPassword = !showPassword"
+            required
+          >
+          </v-text-field>
+
+          <v-btn type="submit" color="primary" class="mr-4">Login</v-btn>
+        </v-form>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  data() {
-    return {
-      id: '',
-      password: '',
-      showPassword: false
+<script setup lang="ts">
+import { ref } from 'vue'
+import { login } from '@/services/api'
+import { LoginRequestDto } from '@/models/LoginRequestDto'
+import router from '@/router'
+import { useRedirectStore } from '@/stores/redirect'
+
+const { url, setUrl } = useRedirectStore()
+const holderName = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const form = ref(null)
+
+async function onSubmit() {
+  try {
+    const loginRequestDto: LoginRequestDto = {
+      holderName: holderName.value,
+      password: password.value
     }
-  },
-  methods: {
-    login() {
-      // Simulate authentication (replace with your actual authentication logic)
-      if (this.id === 'user123' && this.password === 'password123') {
-        // Redirect to the homepage or perform other actions
-        this.$router.push('/homepage/1') // Assuming you're using Vue Router
-      } else {
-        alert('Invalid credentials. Please try again.')
-      }
+
+    await login(loginRequestDto)
+
+    if (url) {
+      await router.push(url) // redirect to url
+      setUrl(undefined)
+    } else {
+      await router.push('/') // redirect to home page
     }
+  } catch (error) {
+    console.log(error)
   }
 }
 </script>

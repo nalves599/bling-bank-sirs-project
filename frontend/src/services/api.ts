@@ -2,13 +2,29 @@ import axios from 'axios'
 
 import { HolderDto } from '@/models/HolderDto'
 import { AccountDto } from '@/models/AccountDto'
+import type { LoginRequestDto } from '@/models/LoginRequestDto'
+import { useAuthStore } from '@/stores/auth'
+import { LoginResponseDto } from '@/models/LoginResponseDto'
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
+  // TODO: change this to a more secure way
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
   }
 })
+
+export async function login(loginRequest: LoginRequestDto) {
+  try {
+    const response = await http.post('/auth/authenticate', loginRequest)
+    const responseData = new LoginResponseDto(response.data)
+    const { setToken } = useAuthStore()
+    setToken(responseData.token)
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 export async function getHolders(): Promise<HolderDto[]> {
   const response = await http.get('/holders')

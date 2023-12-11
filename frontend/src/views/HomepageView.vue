@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import LogoutButton from '@/components/LogoutButton.vue';
+import LogoutButton from '@/components/LogoutButton.vue'
 
 export default {
   data() {
@@ -27,8 +27,8 @@ export default {
     }
   },
   components: {
-    LogoutButton,
-  },
+    LogoutButton
+  }
 }
 </script>
 

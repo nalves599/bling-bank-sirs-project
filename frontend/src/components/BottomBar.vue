@@ -1,50 +1,47 @@
 <template>
-  <div class="menu">
-    <router-link :to="'/homepage/' + user.id">Homepage</router-link>
-    <span class="separator"></span>
-    <router-link :to="'/accounts/' + user.id">Accounts</router-link>
-    <span class="separator"></span>
-    <router-link :to="'/movements/' + user.id">Movements</router-link>
-    <span class="separator"></span>
-    <router-link :to="'/payments/' + user.id">Payments</router-link>
-  </div>
+  <v-menu>
+    <template #activator="{ props }">
+      <v-btn v-bind="props">
+        <v-avatar icon="mdi-account" size="32" />
+        {{ token ? `Welcome ${username} ` : "You're not logged in" }}
+      </v-btn>
+    </template>
+
+    <v-list>
+      <v-list-item
+        v-if="!token"
+        prepend-icon="mdi-login"
+        :to="{ name: 'login' }"
+        title="Login"
+      ></v-list-item>
+
+      <!-- TODO: fix this-->
+      <v-list-item
+        v-if="token"
+        :to="{ name: `/accounts/${username}` }"
+        title="Accounts"
+      ></v-list-item>
+
+      <v-list-item
+        v-if="token"
+        :to="{ name: `movements/${username}` }"
+        title="Movements"
+      ></v-list-item>
+
+      <v-list-item
+        v-if="token"
+        prepend-icon="mdi-logout"
+        :to="{ name: `payments/${username}` }"
+        title="Payments"
+      ></v-list-item>
+    </v-list>
+  </v-menu>
 </template>
 
-<script lang="ts">
-export default {
-  name: 'BottomBar',
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
 
-  data() {
-    return {
-      user: {
-        id: 1, // Replace with the actual user's ID
-        name: 'John Doe' // Replace with the actual user's name
-      }
-    }
-  }
-}
+const authStore = useAuthStore()
+const { token, username } = storeToRefs(authStore)
 </script>
-
-<style scoped>
-.menu {
-  margin-top: 20px;
-  font-size: 25px;
-  text-align: center;
-}
-
-.menu-option {
-  font-size: 30px;
-  margin-right: 20px;
-  text-decoration: none;
-  color: #333;
-  display: inline-block;
-}
-
-.separator {
-  margin-right: 10px;
-  margin-left: 10px;
-  border-left: 1px solid #ccc;
-  height: 20px;
-  display: inline-block;
-}
-</style>

@@ -1,15 +1,19 @@
 <template>
-  <div class="main-page">
-    <h1>BlingBank</h1>
-    <h2>The safest bank on the planet</h2>
-    <router-link to="/login" class="login-button">Login</router-link>
-  </div>
+  <v-app>
+    <div class="main-page">
+      <h1>BlingBank</h1>
+      <h2>The safest bank on the planet</h2>
+      <router-link to="/login" class="login-button">Login</router-link>
+
+      <v-app-bar density="compact">
+        <bottom-bar />
+      </v-app-bar>
+    </div>
+  </v-app>
 </template>
 
-<script lang="ts">
-export default {
-  // Add any necessary logic here
-};
+<script setup lang="ts">
+import BottomBar from '@/components/BottomBar.vue'
 </script>
 
 <style scoped>

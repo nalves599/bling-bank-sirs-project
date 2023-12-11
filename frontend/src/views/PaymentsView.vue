@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import BottomBar from '@/components/BottomBar.vue'
-import LogoutButton from '@/components/LogoutButton.vue';
+import LogoutButton from '@/components/LogoutButton.vue'
 export default {
   data() {
     return {

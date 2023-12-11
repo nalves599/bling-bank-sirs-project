@@ -13,7 +13,7 @@ import { getAccountsFromHolder } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import { useRoute } from 'vue-router'
 import BottomBar from '@/components/BottomBar.vue'
-import LogoutButton from '@/components/LogoutButton.vue';
+import LogoutButton from '@/components/LogoutButton.vue'
 
 const accounts = ref<AccountDto[]>([])
 
@@ -41,10 +41,10 @@ const headers = [
   }
 ]
 
-const id = useRoute().params.id[0]
+const name = useRoute().params.name[0]
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(id)
+  accounts.value = await getAccountsFromHolder(name)
 }
 
 fetchAccountsFromHolder()
