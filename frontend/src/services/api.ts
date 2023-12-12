@@ -23,6 +23,7 @@ export async function login(loginRequest: LoginRequestDto) {
     setToken(responseData.token)
   } catch (error) {
     console.error(error)
+    throw new Error('Login failed'); // Throw an error on login failure
   }
 }
 

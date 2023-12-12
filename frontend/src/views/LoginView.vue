@@ -1,7 +1,9 @@
 <template>
   <div class="d-flex fill-height align-center justify-center">
     <v-card width="400" class="mx-auto">
-      <v-card-title>Login</v-card-title>
+      <!-- add Welcome to blingbank text -->
+      <v-card-title>Welcome to BlingBank!</v-card-title>
+      <v-card-title></v-card-title>
       <v-card-text>
         <v-form v-model="form" @submit.prevent="onSubmit">
           <v-text-field v-model="holderName" label="Holder Name" required></v-text-field>
@@ -11,12 +13,13 @@
             name="password"
             label="Password"
             :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-            @click:append-inner="showPassword = !showPassword"
+            @click:append-inner="togglePasswordVisibility"
             required
           >
           </v-text-field>
-
-          <v-btn type="submit" color="primary" class="mr-4">Login</v-btn>
+          <div v-if="error" class="error-message">{{ error }}</div>
+          <v-btn type="submit" color="green" class="mr-4">Login</v-btn>
+          <v-btn color="blue" @click="togglePasswordVisibility">View Password</v-btn>
         </v-form>
       </v-card-text>
     </v-card>
@@ -35,6 +38,15 @@ const holderName = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const form = ref(null)
+const error = ref('');
+
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
+
+function setError(message: string) {
+  error.value = message;
+}
 
 async function onSubmit() {
   try {
@@ -45,14 +57,10 @@ async function onSubmit() {
 
     await login(loginRequestDto)
 
-    if (url) {
-      await router.push(url) // redirect to url
-      setUrl(undefined)
-    } else {
-      await router.push('/') // redirect to home page
-    }
+    router.push(`/homepage/${holderName.value}`)
   } catch (error) {
     console.log(error)
+    setError('Invalid credentials');
   }
 }
 </script>
@@ -107,5 +115,11 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+
+.error-message {
+  color: red;
+  margin-top: 0px;
+  margin-bottom: 10px;
 }
 </style>

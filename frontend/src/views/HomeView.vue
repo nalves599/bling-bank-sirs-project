@@ -5,14 +5,10 @@
       <h2>The safest bank on the planet</h2>
       <router-link to="/login" class="login-button">Login</router-link>
     </div>
-    <v-app-bar density="compact">
-      <bottom-bar />
-    </v-app-bar>
   </v-app>
 </template>
 
 <script setup lang="ts">
-import BottomBar from '@/components/BottomBar.vue'
 </script>
 
 <style scoped>
@@ -22,7 +18,8 @@ import BottomBar from '@/components/BottomBar.vue'
   align-items: center;
   justify-content: center;
   height: 100vh; /* Set to 100% of the viewport height */
-  color: #fff; /* Light text color */
+  color: #ffffff; /* Light text color */
+  background-color: transparent; /* Fallback color */
 }
 
 h1 {

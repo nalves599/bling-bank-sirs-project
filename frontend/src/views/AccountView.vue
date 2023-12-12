@@ -3,7 +3,6 @@
     <h1>This is a accounts page</h1>
     <v-data-table :items="accounts" :headers="headers"> </v-data-table>
     <LogoutButton />
-
     <BottomBar />
   </div>
 </template>

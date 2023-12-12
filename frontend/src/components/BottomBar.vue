@@ -1,29 +1,46 @@
 <template>
-  <v-menu>
-    <template #activator="{ props }">
-      <v-btn v-bind="props">
-        <v-avatar icon="mdi-account" size="32" />
-        {{ token ? `Welcome ${username} ` : "You're not logged in" }}
-      </v-btn>
-    </template>
-
-    <v-list>
-      <v-list-item
-        v-if="!token"
-        prepend-icon="mdi-login"
-        :to="{ name: 'login' }"
-        title="Login"
-      ></v-list-item>
-
-      <v-list-item v-if="token" :to="{ name: `accounts` }" title="Accounts"></v-list-item>
-    </v-list>
-  </v-menu>
+  <div class="menu">
+    <router-link :to="'/homepage/' + user.name">Homepage</router-link>
+    <span class="separator"></span>
+    <router-link :to="'/accounts/' + user.name">Accounts</router-link>
+    <span class="separator"></span>
+    <router-link :to="'/movements/' + user.name">Movements</router-link>
+    <span class="separator"></span>
+    <router-link :to="'/payments/' + user.name">Payments</router-link>
+  </div>
 </template>
 
-<script setup lang="ts">
-import { useAuthStore } from '@/stores/auth'
-import { storeToRefs } from 'pinia'
-
-const authStore = useAuthStore()
-const { token, username } = storeToRefs(authStore)
+<script lang="ts">
+export default {
+  name: 'BottomBar',
+  data() {
+    return {
+      user: {
+        name: this.$route.params.name
+      }
+    }
+  }
+}
 </script>
+
+<style scoped>
+.menu {
+  margin-top: 20px;
+  font-size: 25px;
+  text-align: center;
+}
+.menu-option {
+  font-size: 30px;
+  margin-right: 20px;
+  text-decoration: none;
+  color: #333;
+  display: inline-block;
+}
+.separator {
+  margin-right: 10px;
+  margin-left: 10px;
+  border-left: 1px solid #ccc;
+  height: 20px;
+  display: inline-block;
+}
+</style>

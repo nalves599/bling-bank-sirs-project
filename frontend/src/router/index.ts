@@ -7,11 +7,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
       component: HomeView
     },
     {
-      path: '/movements/:id',
+      path: '/movements/:name',
       name: 'movements',
       // route level code-splitting
       // this generates a separate chunk (Holders.[hash].js) for this route
@@ -19,7 +18,7 @@ const router = createRouter({
       component: () => import('../views/MovementsView.vue')
     },
     {
-      path: '/accounts',
+      path: '/accounts/:name',
       name: 'accounts',
       component: () => AccountViewVue
     },
@@ -29,12 +28,12 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue')
     },
     {
-      path: '/homepage/:id',
+      path: '/homepage/:name',
       name: 'homepage',
       component: () => import('../views/HomepageView.vue')
     },
     {
-      path: '/payments/:id',
+      path: '/payments/:name',
       name: 'payments',
       component: () => import('../views/PaymentsView.vue')
     }

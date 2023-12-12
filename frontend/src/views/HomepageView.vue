@@ -1,13 +1,13 @@
 <template>
   <div class="homepage">
-    <h2 class="greeting">Hello {{ user.name }}!</h2>
+    <h2 class="greeting">hello {{ user.name }}!</h2>
     <h3>What would you like to do today?</h3>
     <div class="menu">
-      <router-link :to="'/accounts/' + user.id">Accounts</router-link>
+      <router-link :to="'/accounts/' + user.name">Accounts</router-link>
       <span class="separator"></span>
-      <router-link :to="'/movements/' + user.id">Movements</router-link>
+      <router-link :to="'/movements/' + user.name">Movements</router-link>
       <span class="separator"></span>
-      <router-link :to="'/payments/' + user.id">Payments</router-link>
+      <router-link :to="'/payments/' + user.name">Payments</router-link>
     </div>
     <router-view></router-view>
     <LogoutButton />
@@ -21,8 +21,7 @@ export default {
   data() {
     return {
       user: {
-        id: 1, // Replace with the actual user's ID
-        name: 'John Doe' // Replace with the actual user's name
+        name: this.$route.params.name
       }
     }
   },

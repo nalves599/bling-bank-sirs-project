@@ -1,11 +1,6 @@
 <template>
   <div class="movements">
-    <h1>This is a holders page</h1>
-    <div v-for="(holder, index) in holders" :key="index">
-      <h2>{{ holder.holderName }}</h2>
-      <!-- Replace 'name' with actual property names -->
-      <!-- Add more properties here -->
-    </div>
+    
     <BottomBar />
     <LogoutButton />
   </div>
@@ -20,7 +15,6 @@ import LogoutButton from '@/components/LogoutButton.vue'
 
 const holders = ref<HolderDto[]>([])
 
-// TODO - CHANGE INFO TO MOVEMENTS INSTEAD OF HOLDERS
 async function fetchHolders() {
   holders.value = await getHolders()
 }
