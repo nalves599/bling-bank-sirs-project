@@ -3,6 +3,8 @@ package pt.ulisboa.tecnico.bling_bank.account.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import pt.ulisboa.tecnico.bling_bank.crypto.IntEncryptor;
+import pt.ulisboa.tecnico.bling_bank.crypto.StringEncryptor;
 
 import java.util.Set;
 
@@ -16,9 +18,11 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(name = "balance")
+    @Convert(converter = IntEncryptor.class)
+    @Column(name = "balance", columnDefinition = "varchar(255)")
     private int balance; // in cents
 
+    @Convert(converter = StringEncryptor.class)
     @Column(name = "currency_type")
     private String currencyType;
 

@@ -3,6 +3,8 @@ package pt.ulisboa.tecnico.bling_bank.account.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pt.ulisboa.tecnico.bling_bank.crypto.IntEncryptor;
+import pt.ulisboa.tecnico.bling_bank.crypto.StringEncryptor;
 
 import java.util.Date;
 
@@ -19,9 +21,11 @@ public class Movement {
     @Column(name = "date")
     private Date date; // DD/MM/YYYY
 
-    @Column(name = "value")
+    @Convert(converter = IntEncryptor.class)
+    @Column(name = "value", columnDefinition = "varchar(255)")
     private int value; // in cents
 
+    @Convert(converter = StringEncryptor.class)
     @Column(name = "description")
     private String description;
 
