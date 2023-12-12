@@ -8,10 +8,8 @@ import { LoginResponseDto } from '@/models/LoginResponseDto'
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  // TODO: change this to a more secure way
   headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
+    'Content-Type': 'application/json'
   }
 })
 
@@ -19,7 +17,6 @@ http.interceptors.request.use(
   (config) => {
     if (config.headers && !config.headers.Authorization) {
       const { token } = useAuthStore()
-      console.log('token', token)
       if (token) config.headers.Authorization = `Bearer ${token}`
     }
 
