@@ -19,7 +19,7 @@ public class JwtService {
 
     private static final String SECRET_KEY = "jISUwJ9i45/Ay4OoqO5o6XPHBjPZe3v8+7X6oFCe2f8="; // TODO: change
 
-    private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
+    private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 1000; // 5 hours
 
     public String getHolderName(String token) {
         return extractClaim(token, Claims::getSubject);

@@ -1,7 +1,11 @@
 <template>
   <div class="accounts">
     <h1>Accounts of user {{ username }}</h1>
-    <v-data-table :items="accounts" :headers="headers"> </v-data-table>
+    <v-data-table :items="accounts" :headers="headers">
+      <template #item.holders="{ item }">
+        {{ item.holders.sort().join(', ') }}
+      </template>
+    </v-data-table>
     <LogoutButton />
     <BottomBar />
   </div>
@@ -46,7 +50,11 @@ const authStore = useAuthStore()
 const { username } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(username.value)
+  const response = await getAccountsFromHolder(username.value)
+  accounts.value = response.map(item => ({
+    ...item,
+    holders: item.holders.sort() // Sort holders alphabetically
+  }))
 }
 
 fetchAccountsFromHolder()

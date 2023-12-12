@@ -15,11 +15,11 @@ import java.security.Key;
 @Converter
 public class IntEncryptor implements AttributeConverter<Integer, String> {
 
-    private final String SECRET = "1234567812345678"; // TODO: change this
+    private final String SECRET = "C3F0E109F251D6C7BA0E300820A660D2"; // TODO: change this
     private final String initVector = "1234567812345678"; // TODO: change this
-    private final String algo = "AES/CBC/PKCS5PADDING";
+    private final String algo = "AES/CBC/PKCS5Padding";
 
-    private final Key key = new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), algo);
+    private final Key key = new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "AES");
 
     private final Cipher cipher = Cipher.getInstance(algo);
 
@@ -36,6 +36,7 @@ public class IntEncryptor implements AttributeConverter<Integer, String> {
             byte[] encrypted = cipher.doFinal(attribute.toString().getBytes());
             return Base64.encodeBase64String(encrypted);
         } catch (Exception ex) {
+            System.err.println(ex);
             throw new IllegalStateException(ex);
         }
     }
