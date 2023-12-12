@@ -15,6 +15,21 @@ const http = axios.create({
   }
 })
 
+http.interceptors.request.use(
+  (config) => {
+    if (config.headers && !config.headers.Authorization) {
+      const { token } = useAuthStore()
+      console.log('token', token)
+      if (token) config.headers.Authorization = `Bearer ${token}`
+    }
+
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
 export async function login(loginRequest: LoginRequestDto) {
   try {
     const response = await http.post('/auth/authenticate', loginRequest)
@@ -23,7 +38,7 @@ export async function login(loginRequest: LoginRequestDto) {
     setToken(responseData.token)
   } catch (error) {
     console.error(error)
-    throw new Error('Login failed'); // Throw an error on login failure
+    throw new Error('Login failed') // Throw an error on login failure
   }
 }
 

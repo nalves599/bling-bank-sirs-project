@@ -38,14 +38,14 @@ const holderName = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const form = ref(null)
-const error = ref('');
+const error = ref('')
 
 function togglePasswordVisibility() {
-  showPassword.value = !showPassword.value;
+  showPassword.value = !showPassword.value
 }
 
 function setError(message: string) {
-  error.value = message;
+  error.value = message
 }
 
 async function onSubmit() {
@@ -60,7 +60,7 @@ async function onSubmit() {
     router.push(`/homepage/${holderName.value}`)
   } catch (error) {
     console.log(error)
-    setError('Invalid credentials');
+    setError('Invalid credentials')
   }
 }
 </script>

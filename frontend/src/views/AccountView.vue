@@ -1,6 +1,6 @@
 <template>
   <div class="accounts">
-    <h1>This is a accounts page</h1>
+    <h1>Accounts of user {{ username }}</h1>
     <v-data-table :items="accounts" :headers="headers"> </v-data-table>
     <LogoutButton />
     <BottomBar />
@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import router from '@/router'
 
 const accounts = ref<AccountDto[]>([])
 
