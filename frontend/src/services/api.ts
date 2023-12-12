@@ -29,9 +29,10 @@ http.interceptors.request.use(
 
 export async function login(loginRequest: LoginRequestDto) {
   try {
+    const { setToken } = useAuthStore()
+    setToken('')
     const response = await http.post('/auth/authenticate', loginRequest)
     const responseData = new LoginResponseDto(response.data)
-    const { setToken } = useAuthStore()
     setToken(responseData.token)
   } catch (error) {
     console.error(error)

@@ -19,6 +19,8 @@ public class JwtService {
 
     private static final String SECRET_KEY = "jISUwJ9i45/Ay4OoqO5o6XPHBjPZe3v8+7X6oFCe2f8="; // TODO: change
 
+    private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
+
     public String getHolderName(String token) {
         return extractClaim(token, Claims::getSubject);
     }
@@ -29,7 +31,7 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        return generateToken(new HashMap<>(), userDetails, JWT_TOKEN_VALIDITY);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -45,10 +47,10 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateToken(Map<String, Object> claims, UserDetails userDetails, long validity) {
         return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours TODO: change
+            .setExpiration(new Date(System.currentTimeMillis() + validity))
             .signWith(SignatureAlgorithm.HS256, getSigningKey()).compact();
     }
 
