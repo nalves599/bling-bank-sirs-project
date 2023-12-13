@@ -1,8 +1,10 @@
 <template>
   <div class="account-selector">
-    <h1 style="color: white;">Movements</h1>
+    <h1 style="color: white">Movements</h1>
 
-    <label for="accountDropdown" style="color: white; font-size: 18px; margin-bottom: 10px;">Select Account:</label>
+    <label for="accountDropdown" style="color: white; font-size: 18px; margin-bottom: 10px"
+      >Select Account:</label
+    >
     <select
       v-model="selectedAccountId"
       id="accountDropdown"
@@ -101,17 +103,17 @@ watch(
   () => selectedAccount.value,
   () => {
     if (selectedAccount.value) {
-      fetchAccountMovements();
+      fetchAccountMovements()
     }
   }
-);
+)
 
 const headers = [
   { title: 'Movement ID', key: 'movementId', sortable: true },
   { title: 'Date', key: 'movementDate', sortable: true },
   { title: 'Description', key: 'movementDescription', sortable: false },
-  { title: 'Value', key: 'movementValue', sortable: true },
-];
+  { title: 'Value', key: 'movementValue', sortable: true }
+]
 </script>
 
 <style>

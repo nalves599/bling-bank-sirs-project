@@ -2,20 +2,15 @@
   <div class="homepage">
     <h2 class="greeting">hello {{ user.name }}!</h2>
     <h3>What would you like to do today?</h3>
-    <div class="menu">
-      <router-link :to="'/accounts/' + user.name">Accounts</router-link>
-      <span class="separator"></span>
-      <router-link :to="'/movements/' + user.name">Movements</router-link>
-      <span class="separator"></span>
-      <router-link :to="'/payments/' + user.name">Payments</router-link>
-    </div>
-    <router-view></router-view>
+    
+    <BottomBar />
     <LogoutButton />
   </div>
 </template>
 
 <script lang="ts">
 import LogoutButton from '@/components/LogoutButton.vue'
+import BottomBar from '@/components/BottomBar.vue'
 
 export default {
   data() {
@@ -26,7 +21,8 @@ export default {
     }
   },
   components: {
-    LogoutButton
+    LogoutButton,
+    BottomBar
   }
 }
 </script>
@@ -42,18 +38,5 @@ export default {
 .greeting {
   font-size: 70px;
   color: #ffffff;
-}
-
-.menu {
-  margin-top: 20px;
-  font-size: 30px;
-}
-
-.separator {
-  margin-right: 10px;
-  margin-left: 10px;
-  border-left: 1px solid #ccc;
-  height: 20px;
-  display: inline-block;
 }
 </style>
