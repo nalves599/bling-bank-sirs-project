@@ -36,7 +36,6 @@ public class IntEncryptor implements AttributeConverter<Integer, String> {
             byte[] encrypted = cipher.doFinal(attribute.toString().getBytes());
             return Base64.encodeBase64String(encrypted);
         } catch (Exception ex) {
-            System.err.println(ex);
             throw new IllegalStateException(ex);
         }
     }
