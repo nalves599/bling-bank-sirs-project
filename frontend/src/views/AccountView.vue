@@ -7,7 +7,9 @@
       </template>
     </v-data-table>
 
-    <button @click="createAccount">Create Account</button>
+    <div class="create-account-container">
+      <router-link to="/create-account" class="create-account-button">Create Account</router-link>
+    </div>
 
     <LogoutButton />
     <BottomBar />
@@ -67,3 +69,22 @@ async function createAccount() {
 
 fetchAccountsFromHolder()
 </script>
+<style scoped>
+.create-account-container {
+  margin-top: 20px; /* Add some margin to separate the button from the table */
+}
+
+.create-account-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 15px;
+  border-radius: 5px;
+  margin-right: 30px; /* Margin between buttons */
+}
+
+.create-account-button:hover {
+  background-color: #45a049;
+}
+</style>
