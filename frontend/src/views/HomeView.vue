@@ -3,7 +3,10 @@
     <div class="main-page" height="100vh" width="100vw">
       <h1>BlingBank</h1>
       <h2>The safest bank on the planet</h2>
-      <router-link to="/login" class="login-button">Login</router-link>
+      <div>
+        <router-link to="/register" class="login-button">Register</router-link>
+        <router-link to="/login" class="login-button">Login</router-link>
+      </div>
     </div>
   </v-app>
 </template>

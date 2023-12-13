@@ -18,7 +18,7 @@
           >
           </v-text-field>
           <div v-if="error" class="error-message">{{ error }}</div>
-          <v-btn type="submit" color="green" class="mr-4">Login</v-btn>
+          <v-btn type="submit" color="green" class="mr-4">Register</v-btn>
           <v-btn color="blue" @click="togglePasswordVisibility">View Password</v-btn>
         </v-form>
       </v-card-text>
@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { login } from '@/services/api'
+import { register } from '@/services/api'
 import { LoginRequestDto } from '@/models/LoginRequestDto'
 import router from '@/router'
 
@@ -53,12 +53,12 @@ async function onSubmit() {
       password: password.value
     }
 
-    await login(loginRequestDto)
+    await register(loginRequestDto)
 
     router.push(`/homepage/${holderName.value}`)
   } catch (error) {
     console.log(error)
-    setError('Invalid credentials')
+    setError('Could not register. Please try again.')
   }
 }
 </script>

@@ -51,7 +51,7 @@ const { username } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
   const response = await getAccountsFromHolder(username.value)
-  accounts.value = response.map(item => ({
+  accounts.value = response.map((item) => ({
     ...item,
     holders: item.holders.sort() // Sort holders alphabetically
   }))

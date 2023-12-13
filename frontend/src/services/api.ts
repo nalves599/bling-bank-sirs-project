@@ -27,6 +27,18 @@ http.interceptors.request.use(
   }
 )
 
+export async function register(loginRequest: LoginRequestDto) {
+  try {
+    const response = await http.post('/auth/register', loginRequest)
+    const responseData = new LoginResponseDto(response.data)
+    const { setToken } = useAuthStore()
+    setToken(responseData.token)
+  } catch (error) {
+    console.error(error)
+    throw new Error('Register failed') // Throw an error on register failure
+  }
+}
+
 export async function login(loginRequest: LoginRequestDto) {
   try {
     const { setToken } = useAuthStore()
