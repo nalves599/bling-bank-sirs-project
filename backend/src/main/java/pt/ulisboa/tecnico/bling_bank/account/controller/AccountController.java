@@ -19,7 +19,7 @@ public class AccountController {
         JSONObject json = new JSONObject(body);
         int balance = json.getInt("balance");
         String currency = json.getString("currency");
-        Set<String> holders = json.getJSONArray("holderName").toList().stream().map(Object::toString).collect(Collectors
+        Set<String> holders = json.getJSONArray("holders").toList().stream().map(Object::toString).collect(Collectors
             .toSet());
         return accountService.createAccount(balance, currency, holders);
 

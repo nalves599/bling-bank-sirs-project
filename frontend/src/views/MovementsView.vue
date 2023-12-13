@@ -1,10 +1,28 @@
 <template>
   <div class="account-selector">
-    <label for="accountDropdown" style="color: white; font-size: 18px;">Select Account:</label>
-    <select v-model="selectedAccountId" id="accountDropdown" @change="fetchAccountsFromHolder" style="width: 500px; background-color: #fff; color: #333; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+    <label for="accountDropdown" style="color: white; font-size: 18px">Select Account:</label>
+    <select
+      v-model="selectedAccountId"
+      id="accountDropdown"
+      @change="fetchAccountsFromHolder"
+      style="
+        width: 500px;
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+      "
+    >
       <option value="" disabled>Select an account</option>
-      <option v-for="account in sortedAccounts" :key="account.accountId" :value="account.accountId" style="background-color: #f8f8f8;">
-        {{ account.accountId }} - Balance: {{ account.balance }} - Holders: {{ account.holders.join(', ') }}
+      <option
+        v-for="account in sortedAccounts"
+        :key="account.accountId"
+        :value="account.accountId"
+        style="background-color: #f8f8f8"
+      >
+        {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
+        {{ account.holders.join(', ') }}
       </option>
     </select>
 
@@ -41,25 +59,27 @@ async function fetchAccountsFromHolder() {
 
 onMounted(() => {
   fetchAccountsFromHolder()
-});
+})
 
 const sortedAccounts = computed(() => {
   return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId);
-    const idB = parseInt(b.accountId);
-    return idA - idB;
-  });
-});
+    const idA = parseInt(a.accountId)
+    const idB = parseInt(b.accountId)
+    return idA - idB
+  })
+})
 
 // Watcher to ensure selected option stays in the dropdown
-watch(() => selectedAccountId.value, (newVal) => {
-  if (newVal) {
-    selectedAccount.value = accounts.value.find(account => account.accountId === newVal) || null;
+watch(
+  () => selectedAccountId.value,
+  (newVal) => {
+    if (newVal) {
+      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+    }
   }
-});
+)
 
-const selectedAccount = ref<AccountDto | null>(null);
-
+const selectedAccount = ref<AccountDto | null>(null)
 </script>
 
 <style>

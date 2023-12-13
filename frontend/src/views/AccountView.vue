@@ -6,6 +6,9 @@
         {{ item.holders.sort().join(', ') }}
       </template>
     </v-data-table>
+
+    <button @click="createAccount">Create Account</button>
+
     <LogoutButton />
     <BottomBar />
   </div>
@@ -19,6 +22,7 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import router from '@/router'
 
 const accounts = ref<AccountDto[]>([])
 
@@ -55,6 +59,10 @@ async function fetchAccountsFromHolder() {
     ...item,
     holders: item.holders.sort() // Sort holders alphabetically
   }))
+}
+
+async function createAccount() {
+  router.push('/create-account')
 }
 
 fetchAccountsFromHolder()
