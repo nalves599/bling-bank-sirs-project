@@ -1,6 +1,8 @@
 <template>
   <div class="account-selector">
-    <label for="accountDropdown" style="color: white; font-size: 18px">Select Account:</label>
+    <h1 style="color: white;">Movements</h1>
+
+    <label for="accountDropdown" style="color: white; font-size: 18px; margin-bottom: 10px;">Select Account:</label>
     <select
       v-model="selectedAccountId"
       id="accountDropdown"
@@ -12,6 +14,7 @@
         border: 1px solid #ccc;
         padding: 10px;
         border-radius: 5px;
+        margin-bottom: 20px;
       "
     >
       <option value="" disabled>Select an account</option>
@@ -22,16 +25,23 @@
         style="background-color: #f8f8f8"
       >
         {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-        {{ account.holders.join(', ') }}
+        {{ account.holders.sort().join(', ') }}
       </option>
     </select>
 
-    <!-- Display movements or other components based on selected account -->
+    <!-- Display movements of selected account -->
     <div v-if="selectedAccount" class="account-details">
-      <h2>Details for Account {{ selectedAccount.accountId }}</h2>
-      <p>Balance: {{ selectedAccount.balance }}</p>
-      <p>Holders: {{ selectedAccount.holders.join(', ') }}</p>
-      <!-- Add code to display movements or other details here -->
+      <h2>Movements of Account {{ selectedAccount.accountId }}</h2>
+      <v-data-table :headers="headers" :items="movements">
+        <template v-slot:item="{ item }">
+          <tr>
+            <td>{{ item.movementId }}</td>
+            <td>{{ item.movementDate }}</td>
+            <td>{{ item.movementDescription }}</td>
+            <td>{{ item.movementValue }}</td>
+          </tr>
+        </template>
+      </v-data-table>
     </div>
 
     <BottomBar />
@@ -43,12 +53,14 @@
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
-import { getAccountsFromHolder } from '@/services/api'
+import { getAccountsFromHolder, getAccountMovements } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
+import type { MovementDto } from '@/models/MovementDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
 
-const accounts = ref<AccountDto[]>([]) // Add AccountDto type definition
+const accounts = ref<AccountDto[]>([])
+const movements = ref<MovementDto[]>([])
 const selectedAccountId = ref<string | null>(null)
 const authStore = useAuthStore()
 const { username } = storeToRefs(authStore)
@@ -80,6 +92,26 @@ watch(
 )
 
 const selectedAccount = ref<AccountDto | null>(null)
+// get account movements
+async function fetchAccountMovements() {
+  movements.value = await getAccountMovements(selectedAccount.value?.accountId)
+}
+
+watch(
+  () => selectedAccount.value,
+  () => {
+    if (selectedAccount.value) {
+      fetchAccountMovements();
+    }
+  }
+);
+
+const headers = [
+  { title: 'Movement ID', key: 'movementId', sortable: true },
+  { title: 'Date', key: 'movementDate', sortable: true },
+  { title: 'Description', key: 'movementDescription', sortable: false },
+  { title: 'Value', key: 'movementValue', sortable: true },
+];
 </script>
 
 <style>
@@ -89,7 +121,7 @@ const selectedAccount = ref<AccountDto | null>(null)
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center; /* Center content vertically */
+    justify-content: center;
   }
 
   .account-details {

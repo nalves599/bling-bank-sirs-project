@@ -33,6 +33,8 @@ public class MovementService {
         Movement movement = new Movement(date, value, description, account);
         movementRepository.save(movement);
 
+        account.addMovement(movement);
+
         JSONObject json = new JSONObject();
 
         JSONArray movements = new JSONArray();

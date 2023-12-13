@@ -5,6 +5,7 @@ import { AccountDto } from '@/models/AccountDto'
 import type { LoginRequestDto } from '@/models/LoginRequestDto'
 import { useAuthStore } from '@/stores/auth'
 import { LoginResponseDto } from '@/models/LoginResponseDto'
+import { MovementDto } from '@/models/MovementDto'
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -72,4 +73,12 @@ export async function createAccount(account: AccountDto): Promise<AccountDto> {
   const response = await http.post('/accounts/create', account)
 
   return new AccountDto(response.data)
+}
+
+export async function getAccountMovements(accountId: string) {
+  const response = await http.get(`/movements/account/${accountId}`)
+
+  const movements = response.data.movements
+
+  return movements.map((movement: any) => new MovementDto(movement))
 }
