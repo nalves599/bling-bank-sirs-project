@@ -69,8 +69,8 @@ export async function getAccountsFromHolder(holderId: string): Promise<AccountDt
   return accounts.map((account: any) => new AccountDto(account))
 }
 
-export async function createAccount(account: AccountDto): Promise<AccountDto> {
-  const response = await http.post('/accounts/create', account)
+export async function createAccount(account: AccountDto, holderName: string): Promise<AccountDto> {
+  const response = await http.post('/accounts/create/' + holderName, account)
 
   return new AccountDto(response.data)
 }

@@ -33,6 +33,8 @@ import { ref, onMounted } from 'vue'
 import { AccountDto } from '@/models/AccountDto'
 import router from '@/router'
 import { createAccount } from '@/services/api'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
 
 export default {
   setup() {
@@ -70,7 +72,10 @@ export default {
         currency: this.currency
       }
 
-      await createAccount(accountDto)
+      const authStore = useAuthStore()
+      const { username } = storeToRefs(authStore)
+
+      await createAccount(accountDto, username.value)
 
       router.push('/accounts/${holderName.value}')
     }

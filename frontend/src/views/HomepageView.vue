@@ -2,7 +2,7 @@
   <div class="homepage">
     <h2 class="greeting">hello {{ user.name }}!</h2>
     <h3>What would you like to do today?</h3>
-    
+
     <BottomBar />
     <LogoutButton />
   </div>
