@@ -19,12 +19,13 @@
       </div>
       <button type="submit">Create</button>
     </form>
+    <div v-if="error" class="error-message">{{ error }}</div>
     <BottomBar />
+    <LogoutButton />
   </div>
-  <LogoutButton />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
 import VueMultiselect from 'vue-multiselect'
@@ -36,49 +37,36 @@ import { createAccount } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 
-export default {
-  setup() {
-    const selected = ref(null)
-    const options = ref([])
+const selected = ref(null)
+const options = ref([])
+const balance = ref(null)
+const currency = ref('')
+const error = ref('')
 
-    onMounted(async () => {
-      options.value = await getHolders().then((response) => {
-        return response.map((item) => item.holderName)
-      })
-    })
+onMounted(async () => {
+  options.value = await getHolders().then((response) => {
+    return response.map((item) => item.holderName)
+  })
+})
 
-    return {
-      selected,
-      options
+const authStore = useAuthStore()
+const { username } = storeToRefs(authStore)
+
+async function createAcc() {
+  try {
+    const accountDto: AccountDto = {
+      holders: selected.value.map((item) => item),
+      balance: balance.value,
+      currency: currency.value
     }
-  },
-  data() {
-    return {
-      balance: null,
-      currency: ''
-    }
-  },
-  components: {
-    BottomBar,
-    LogoutButton,
-    VueMultiselect
-  },
-  methods: {
-    async createAcc() {
-      // Implement your logic to submit the account details to the server
-      const accountDto: AccountDto = {
-        holders: this.selected.map((item) => item),
-        balance: this.balance,
-        currency: this.currency
-      }
 
-      const authStore = useAuthStore()
-      const { username } = storeToRefs(authStore)
+    await createAccount(accountDto, username.value)
 
-      await createAccount(accountDto, username.value)
-
-      router.push('/accounts/${holderName.value}')
-    }
+    router.push(`/accounts/${username.value}`)
+  } catch (e) {
+    // Set the error message if there's an issue
+    error.value = 'Failed to create the account. You must include your user as one of the holders.'
+    console.error(e)
   }
 }
 </script>
@@ -120,16 +108,6 @@ VueMultiselect {
   color: #fff; /* Light text color */
 }
 
-/* Style the placeholder text of the date input */
-input[type='date']::placeholder {
-  color: #fff; /* Light text color */
-}
-
-/* Style the calendar icon in the date input */
-input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(1); /* Invert the color (white) */
-}
-
 button {
   background-color: #4caf50;
   color: white;
@@ -141,5 +119,11 @@ button {
 button:hover {
   background-color: #45a049;
 }
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+}
 </style>
+
 <style src="vue-multiselect/dist/vue-multiselect.css"></style>
