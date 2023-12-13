@@ -1,11 +1,11 @@
 <template>
   <v-app class="main-page">
-    <div class="main-page" height="100vh" width="100vw">
+    <div class="main-page">
       <h1>BlingBank</h1>
       <h2>The safest bank on the planet</h2>
       <div>
         <router-link to="/register" class="login-button">Register</router-link>
-        <router-link to="/login" class="login-button">Login</router-link>
+        <router-link to="/login" class="login-button login-button-margin">Login</router-link>
       </div>
     </div>
   </v-app>
@@ -19,9 +19,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh; /* Set to 100% of the viewport height */
-  color: #ffffff; /* Light text color */
-  background-color: transparent; /* Fallback color */
+  height: 100vh;
+  color: #ffffff;
+  background-color: transparent;
 }
 
 h1 {
@@ -41,9 +41,14 @@ h2 {
   text-decoration: none;
   font-size: 20px;
   border-radius: 5px;
+  margin-right: 30px; /* Margin between buttons */
 }
 
 .login-button:hover {
   background-color: #45a049;
+}
+
+.login-button-margin {
+  margin-right: 10px; /* Adjust the margin as needed */
 }
 </style>
