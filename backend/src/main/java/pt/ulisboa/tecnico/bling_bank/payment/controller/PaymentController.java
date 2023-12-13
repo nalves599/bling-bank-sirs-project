@@ -34,9 +34,9 @@ public class PaymentController {
 
     }
 
-    @GetMapping("/payments/{id}")
-    public String getAccountPayments(@PathVariable Long id) {
-        return paymentService.getAccountPayments(id);
+    @GetMapping("/payments/{accountId}")
+    public String getAccountPayments(@PathVariable Long accountId) {
+        return paymentService.getAccountPayments(accountId);
     }
 
     @PostMapping("/payments/{id}/approve")

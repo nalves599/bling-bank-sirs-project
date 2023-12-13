@@ -35,6 +35,9 @@ public class PaymentService {
         String currencyType = account.getCurrencyType();
 
         Payment payment = new Payment(account, date, amount, currencyType, description, requiredApprovals);
+        paymentRepository.save(payment);
+
+        account.addPayment(payment);
 
         return getPaymentJson(payment).toString();
     }
@@ -43,8 +46,6 @@ public class PaymentService {
     public String getAccountPayments(Long id) {
         Account account = accountRepository.findById(id).orElseThrow(
             () -> new BlingBankException(ErrorMessage.ACCOUNT_NOT_FOUND));
-
-        Set<Payment> payments = account.getPayments();
 
         return getAccountPaymentsJson(account).toString();
     }

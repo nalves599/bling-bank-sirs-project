@@ -31,16 +31,20 @@
       </option>
     </select>
 
-    <!-- Display movements of selected account -->
+    <!-- Display payments of selected account -->
     <div v-if="selectedAccount" class="account-details">
-      <h2>Pending payments of Account {{ selectedAccount.accountId }}</h2>
-      <v-data-table :headers="headers" :items="movements">
+      <h2>Payments of Account {{ selectedAccount.accountId }}</h2>
+      <v-data-table :headers="headers" :items="payments">
         <template v-slot:item="{ item }">
           <tr>
-            <td>{{ item.movementId }}</td>
-            <td>{{ item.movementDate }}</td>
-            <td>{{ item.movementDescription }}</td>
-            <td>{{ item.movementValue }}</td>
+            <td>{{ item.paymentId }}</td>
+            <td>{{ item.paymentDate }}</td>
+            <td>{{ item.paymentDescription }}</td>
+            <td>{{ item.paymentAmount }}</td>
+            <td>{{ item.paymentCurrencyType }}</td>
+            <td>{{ item.paymentApprovedApprovals }}</td>
+            <td>{{ item.paymentRequiredApprovals }}</td>
+            <td>{{ item.paymentApproved }}</td>
           </tr>
         </template>
       </v-data-table>
@@ -60,14 +64,14 @@
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
-import { getAccountsFromHolder, getAccountMovements } from '@/services/api'
+import { getAccountsFromHolder, getAccountPayments } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
-import type { MovementDto } from '@/models/MovementDto'
+import type { PaymentDto } from '@/models/PaymentDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
 
 const accounts = ref<AccountDto[]>([])
-const movements = ref<MovementDto[]>([])
+const payments = ref<PaymentDto[]>([])
 const selectedAccountId = ref<string | null>(null)
 const authStore = useAuthStore()
 const { username } = storeToRefs(authStore)
@@ -99,25 +103,29 @@ watch(
 )
 
 const selectedAccount = ref<AccountDto | null>(null)
-// get account movements
-async function fetchAccountMovements() {
-  movements.value = await getAccountMovements(selectedAccount.value?.accountId)
+// get account payments
+async function fetchAccountpayments() {
+  payments.value = await getAccountPayments(selectedAccount.value?.accountId)
 }
 
 watch(
   () => selectedAccount.value,
   () => {
     if (selectedAccount.value) {
-      fetchAccountMovements()
+      fetchAccountpayments()
     }
   }
 )
 
 const headers = [
-  { title: 'Movement ID', key: 'movementId', sortable: true },
-  { title: 'Date', key: 'movementDate', sortable: true },
-  { title: 'Description', key: 'movementDescription', sortable: false },
-  { title: 'Value', key: 'movementValue', sortable: true }
+  { title: 'payment ID', key: 'paymentId', sortable: true },
+  { title: 'Date', key: 'paymentDate', sortable: true },
+  { title: 'Description', key: 'paymentDescription', sortable: false },
+  { title: 'Amount', key: 'paymentAmount', sortable: true },
+  { title: 'Currency', key: 'paymentCurrencyType', sortable: true },
+  { title: 'Approvals', key: 'paymentApprovedApprovals', sortable: true },
+  { title: 'Required', key: 'paymentRequiredApprovals', sortable: true },
+  { title: 'Approved', key: 'paymentApproved', sortable: true }
 ]
 </script>
 
