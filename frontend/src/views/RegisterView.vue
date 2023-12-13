@@ -55,7 +55,7 @@ async function onSubmit() {
 
     await register(loginRequestDto)
 
-    router.push(`/homepage/${holderName.value}`)
+    router.push('/register-success')
   } catch (error) {
     console.log(error)
     setError('Could not register. Please try again.')

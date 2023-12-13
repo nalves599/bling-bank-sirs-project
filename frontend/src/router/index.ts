@@ -33,6 +33,11 @@ const router = createRouter({
       component: () => import('../views/RegisterView.vue')
     },
     {
+      path: '/register-success',
+      name: 'register-success',
+      component: () => import('../views/RegisterSuccessView.vue')
+    },
+    {
       path: '/homepage/:name',
       name: 'homepage',
       component: () => import('../views/HomepageView.vue')
