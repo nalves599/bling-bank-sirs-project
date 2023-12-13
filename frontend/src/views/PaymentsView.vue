@@ -1,116 +1,139 @@
 <template>
-  <div class="create-payment">
-    <h2>Create Payment</h2>
-    <form @submit.prevent="createPayment">
-      <div class="form-group">
-        <label for="destination">Destination:</label>
-        <input type="text" v-model="destination" id="destination" required />
-      </div>
-      <div class="form-group">
-        <label for="amount">Amount:</label>
-        <input type="number" v-model="amount" id="amount" required />
-      </div>
-      <div class="form-group">
-        <label for="date">Date to be processed:</label>
-        <input type="date" v-model="date" id="date" required />
-      </div>
-      <div class="form-group">
-        <label for="description">Description:</label>
-        <textarea v-model="description" id="description" required></textarea>
-      </div>
-      <div class="form-group">
-        <label for="sourceAccount">Source Account:</label>
-        <select v-model="sourceAccount" id="sourceAccount" required>
-          <option value="account1">Account 1</option>
-          <option value="account2">Account 2</option>
-          <!-- Add options dynamically based on user accounts from the backend -->
-        </select>
-      </div>
-      <button type="submit">Submit Payment</button>
-    </form>
+  <div class="account-selector">
+    <h1 style="color: white">Payments</h1>
+
+    <label for="accountDropdown" style="color: white; font-size: 18px; margin-bottom: 10px"
+      >Select Account:</label
+    >
+    <select
+      v-model="selectedAccountId"
+      id="accountDropdown"
+      @change="fetchAccountsFromHolder"
+      style="
+        width: 500px;
+        background-color: #fff;
+        color: #333;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      "
+    >
+      <option value="" disabled>Select an account</option>
+      <option
+        v-for="account in sortedAccounts"
+        :key="account.accountId"
+        :value="account.accountId"
+        style="background-color: #f8f8f8"
+      >
+        {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
+        {{ account.holders.sort().join(', ') }}
+      </option>
+    </select>
+
+    <!-- Display movements of selected account -->
+    <div v-if="selectedAccount" class="account-details">
+      <h2>Pending payments of Account {{ selectedAccount.accountId }}</h2>
+      <v-data-table :headers="headers" :items="movements">
+        <template v-slot:item="{ item }">
+          <tr>
+            <td>{{ item.movementId }}</td>
+            <td>{{ item.movementDate }}</td>
+            <td>{{ item.movementDescription }}</td>
+            <td>{{ item.movementValue }}</td>
+          </tr>
+        </template>
+      </v-data-table>
+    </div>
+
+    <div class="create-account-container">
+      <router-link :to="'/create-payment/' + username" class="create-account-button"
+        >Create Payment</router-link
+      >
+    </div>
     <BottomBar />
+    <LogoutButton />
   </div>
-  <LogoutButton />
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+import { ref, onMounted, computed, watch } from 'vue'
+import { getAccountsFromHolder, getAccountMovements } from '@/services/api'
+import type { AccountDto } from '@/models/AccountDto'
+import type { MovementDto } from '@/models/MovementDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
-export default {
-  data() {
-    return {
-      destination: '',
-      amount: null,
-      currency: '',
-      date: '',
-      description: '',
-      sourceAccount: '' // Added for source account selection
-    }
-  },
-  methods: {
-    createPayment() {
-      // Implement your logic to submit the payment details to the server
-      console.log('Payment details submitted:', {
-        destination: this.destination,
-        amount: this.amount,
-        currency: this.currency,
-        date: this.date,
-        description: this.description,
-        sourceAccount: this.sourceAccount
-      })
-    }
-  },
-  components: {
-    BottomBar,
-    LogoutButton
-  }
+
+const accounts = ref<AccountDto[]>([])
+const movements = ref<MovementDto[]>([])
+const selectedAccountId = ref<string | null>(null)
+const authStore = useAuthStore()
+const { username } = storeToRefs(authStore)
+
+async function fetchAccountsFromHolder() {
+  accounts.value = await getAccountsFromHolder(username.value)
 }
+
+onMounted(() => {
+  fetchAccountsFromHolder()
+})
+
+const sortedAccounts = computed(() => {
+  return [...accounts.value].sort((a, b) => {
+    const idA = parseInt(a.accountId)
+    const idB = parseInt(b.accountId)
+    return idA - idB
+  })
+})
+
+// Watcher to ensure selected option stays in the dropdown
+watch(
+  () => selectedAccountId.value,
+  (newVal) => {
+    if (newVal) {
+      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+    }
+  }
+)
+
+const selectedAccount = ref<AccountDto | null>(null)
+// get account movements
+async function fetchAccountMovements() {
+  movements.value = await getAccountMovements(selectedAccount.value?.accountId)
+}
+
+watch(
+  () => selectedAccount.value,
+  () => {
+    if (selectedAccount.value) {
+      fetchAccountMovements()
+    }
+  }
+)
+
+const headers = [
+  { title: 'Movement ID', key: 'movementId', sortable: true },
+  { title: 'Date', key: 'movementDate', sortable: true },
+  { title: 'Description', key: 'movementDescription', sortable: false },
+  { title: 'Value', key: 'movementValue', sortable: true }
+]
 </script>
 
-<style scoped>
-.create-payment {
-  font-size: 20px;
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  text-align: center;
-  color: #fff; /* Light text color */
-}
+<style>
+@media (min-width: 1024px) {
+  .account-selector {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
-h2 {
-  color: #fff; /* Light text color */
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  color: #ccc; /* Light text color */
-}
-
-input,
-textarea,
-select {
-  width: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  border: 1px solid #555; /* Darker border color */
-  border-radius: 4px;
-  background-color: #444; /* Darker background color */
-  color: #fff; /* Light text color */
-}
-
-/* Style the placeholder text of the date input */
-input[type='date']::placeholder {
-  color: #fff; /* Light text color */
-}
-
-/* Style the calendar icon in the date input */
-input[type='date']::-webkit-calendar-picker-indicator {
-  filter: invert(1); /* Invert the color (white) */
+  .account-details {
+    text-align: center;
+  }
 }
 
 button {
