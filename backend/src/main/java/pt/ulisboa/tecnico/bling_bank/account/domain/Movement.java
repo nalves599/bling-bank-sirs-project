@@ -2,12 +2,16 @@ package pt.ulisboa.tecnico.bling_bank.account.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 import pt.ulisboa.tecnico.bling_bank.crypto.IntEncryptor;
 import pt.ulisboa.tecnico.bling_bank.crypto.StringEncryptor;
 
 import java.util.Date;
 
+@Getter
+@Setter
 @Data
 @NoArgsConstructor
 @Entity
