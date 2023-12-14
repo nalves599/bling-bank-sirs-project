@@ -32,29 +32,32 @@
     </select>
 
     <!-- Display payments of selected account -->
-    <div v-if="selectedAccount" class="account-details">
-      <h2>Payments of Account {{ selectedAccount.accountId }}</h2>
-      <v-data-table :headers="headers" :items="payments">
-        <template v-slot:item="{ item }">
-          <tr>
-            <td>{{ item.paymentId }}</td>
-            <td>{{ item.paymentDate }}</td>
-            <td>{{ item.paymentDescription }}</td>
-            <td>{{ item.paymentAmount }}</td>
-            <td>{{ item.paymentCurrencyType }}</td>
-            <td>{{ item.paymentApprovedApprovals }}</td>
-            <td>{{ item.paymentRequiredApprovals }}</td>
-            <td>{{ item.paymentApproved }}</td>
-          </tr>
-        </template>
-      </v-data-table>
-    </div>
-
-    <div class="create-account-container">
-      <router-link :to="'/create-payment/' + username" class="create-account-button"
+    <div class="create-payment-container">
+      <router-link :to="'/create-payment/' + username" class="create-payment-button"
         >Create Payment</router-link
       >
     </div>
+
+    <div class="payment-table-container">
+      <div v-if="selectedAccount" class="account-details">
+        <h2>Payments of Account {{ selectedAccount.accountId }}</h2>
+        <v-data-table :headers="headers" :items="payments">
+          <template v-slot:item="{ item }">
+            <tr>
+              <td>{{ item.paymentId }}</td>
+              <td>{{ item.paymentDate }}</td>
+              <td>{{ item.paymentDescription }}</td>
+              <td>{{ item.paymentAmount }}</td>
+              <td>{{ item.paymentCurrencyType }}</td>
+              <td>{{ item.paymentApprovedApprovals }}</td>
+              <td>{{ item.paymentRequiredApprovals }}</td>
+              <td>{{ item.paymentApproved }}</td>
+            </tr>
+          </template>
+        </v-data-table>
+      </div>
+    </div>
+
     <BottomBar />
     <LogoutButton />
   </div>
@@ -144,15 +147,26 @@ const headers = [
   }
 }
 
-button {
+.create-payment-button {
   background-color: #4caf50;
   color: white;
-  padding: 10px 15px;
-  border: none;
-  cursor: pointer;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 15px;
+  border-radius: 5px;
+  margin-right: 10px; /* Adjusted margin value */
 }
 
-button:hover {
+.create-payment-button:hover {
   background-color: #45a049;
+}
+
+/* Add the following styles to create space between the button and the table */
+.create-payment-container {
+  margin-bottom: 20px;
+}
+
+.payment-table-container {
+  margin-top: 20px;
 }
 </style>
