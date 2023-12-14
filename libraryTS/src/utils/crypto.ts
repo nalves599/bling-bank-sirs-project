@@ -195,3 +195,11 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
   };
 }
 
+export const check = async (data: ArrayBuffer, props: UnprotectProps, nonceCheck: (nonce: ArrayBuffer) => boolean) => {
+  try {
+    const { nonce } = await unprotect(data, props);
+    return nonceCheck(nonce);
+  } catch (e) {
+    return false;
+  }
+}
