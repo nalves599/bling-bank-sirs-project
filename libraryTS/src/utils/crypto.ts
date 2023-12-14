@@ -78,7 +78,7 @@ export const verifyHMAC = async (
   key: CryptoKey,
 ) => {
   const verified = await crypto.verify({ name: "HMAC" }, key, hmac, message);
-  return verified;
+  return verified; // true if HMAC is valid
 };
 
 // Encrypt a message with a key
@@ -223,15 +223,17 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
   if (verifyingKey) {
     const signatureLength = new Uint32Array(message.slice(0, 4))[0];
     const signature = message.slice(4, 4 + signatureLength);
+    const verify = concatBuffers(payload, nonce);
 
-    if (!(await verifySignature(message, signature, verifyingKey))) {
+    if (!(await verifySignature(verify, signature, verifyingKey))) {
       throw new Error("Invalid signature");
     }
   } else if (hmacKey) {
     const hmacLength = new Uint32Array(message.slice(0, 4))[0];
     const hmac = message.slice(4, 4 + hmacLength);
+    const verify = concatBuffers(payload, nonce);
 
-    if (!(await verifyHMAC(message, hmac, hmacKey))) {
+    if (!(await verifyHMAC(verify, hmac, hmacKey))) {
       throw new Error("Invalid HMAC");
     }
   }
