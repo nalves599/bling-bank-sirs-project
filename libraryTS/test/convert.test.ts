@@ -28,7 +28,7 @@ describe("convert module", () => {
   });
 
   test("Test big int", () => {
-    const number: bigint = BigInt("9223372036854775807")
+    const number: bigint = BigInt("9223372036854775807");
     const buffer = toBytesInt64(number);
 
     const output = fromBytesInt64(buffer);

@@ -153,6 +153,7 @@ export type ProtectProps = {
 export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
   let { aesKey, hmacKey, signingKey, nonce } = props;
   let signature: ArrayBuffer | null = null;
+  let hmac: ArrayBuffer | null = null;
 
   const payloadLength = new Uint32Array([data.byteLength]).buffer;
 
@@ -175,7 +176,7 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
       signature,
     );
   } else if (hmacKey) {
-    const hmac = await generateHMAC(message, hmacKey);
+    hmac = await generateHMAC(message, hmacKey);
     const hmacLength = new Uint32Array([hmac.byteLength]).buffer;
     data = concatBuffers(
       payloadLength,
@@ -190,7 +191,7 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
   }
 
   const { iv, ciphertext } = await encryptMessage(data, aesKey);
-  return { iv, ciphertext, signature, nonce };
+  return { iv, ciphertext, signature, hmac, nonce };
 };
 
 export type UnprotectProps = {
@@ -271,7 +272,7 @@ export function fromBytesInt64(buffer: ArrayBuffer) {
   return view.getBigInt64(0, false); // byteOffset = 0; litteEndian = false
 }
 
-export function toBytesInt64(num: bigint ) {
+export function toBytesInt64(num: bigint) {
   const arr = new ArrayBuffer(8); // an Int64 takes 8 bytes
   const view = new DataView(arr);
   view.setBigInt64(0, num, false); // byteOffset = 0; litteEndian = false
