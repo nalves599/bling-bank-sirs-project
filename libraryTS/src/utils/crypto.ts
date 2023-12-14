@@ -4,8 +4,8 @@ else { webcrypto = require('crypto').webcrypto; }
 const crypto = webcrypto.subtle;
 
 export const createAESKey = async (length?: 256) => {
-  const key = await crypto.generateKey(
-    { name: "AES-CBC", length: length || 256 },
+const key = await crypto.generateKey(
+    { name: "AES-CBC", length: length ?? 256 },
     true,
     ['encrypt', 'decrypt']
   );
@@ -15,7 +15,7 @@ export const createAESKey = async (length?: 256) => {
 // Create ECDSA key pair to sign and verify
 export const createECDSAKey = async (namedCurve?: 'P-521') => {
   const {publicKey, privateKey} = await crypto.generateKey(
-    { name: "ECDSA", namedCurve: namedCurve || 'P-521' },
+    { name: "ECDSA", namedCurve: namedCurve ?? 'P-521' },
     true,
     ['sign', 'verify']
   );
@@ -97,7 +97,20 @@ export const decryptMessage = async (ciphertext: ArrayBuffer, key: CryptoKey, iv
 
 export const generateNonce = async () => {
   const nonce = new BigUint64Array([BigInt(Date.now())]);
-  return nonce
+  return bigUint64ArrayToUint8Array(nonce);
+}
+
+function bigUint64ArrayToUint8Array(bigUintArray: BigUint64Array): Uint8Array {
+  const uint8Array = new Uint8Array(bigUintArray.length * 8); // Each BigUint64 occupies 8 bytes
+
+  bigUintArray.forEach((bigUintValue, i) => {
+      for (let j = 0; j < 8; j++) {
+          const byteOffset = i * 8 + j;
+          uint8Array[byteOffset] = Number((bigUintValue >> (BigInt(j) * 8n)) & 255n);
+      }
+  });
+
+  return uint8Array;
 }
 
 function concatBuffers(...buffers: ArrayBuffer[]) {
@@ -141,7 +154,10 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
     const hmacLength = new Uint32Array([hmac.byteLength]).buffer;
     data = concatBuffers(payloadLength, data, nonceLength, nonce, hmacLength, hmac);
   }
-
+  else {
+    data = concatBuffers(payloadLength, data, nonceLength, nonce);
+  }
+  
   const { iv, ciphertext } = await encryptMessage(data, aesKey);
   return { iv, ciphertext, signature, nonce };
 }
