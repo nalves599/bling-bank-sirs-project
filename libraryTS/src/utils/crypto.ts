@@ -218,4 +218,28 @@ export const check = async (data: ArrayBuffer, props: UnprotectProps, nonceCheck
   } catch (e) {
     return false;
   }
+};
+
+export function toBytesInt32(num: number) {
+  const arr = new ArrayBuffer(4); // an Int32 takes 4 bytes
+  const view = new DataView(arr);
+  view.setUint32(0, num, false); // byteOffset = 0; litteEndian = false
+  return arr;
+}
+
+export function fromBytesInt32(buffer: ArrayBuffer) {
+  const view = new DataView(buffer);
+  return view.getInt32(0, false); // byteOffset = 0; litteEndian = false
+}
+
+export function fromBytesInt64(buffer: ArrayBuffer) {
+  const view = new DataView(buffer);
+  return view.getBigInt64(0, false); // byteOffset = 0; litteEndian = false
+}
+
+export function toBytesInt64(num: bigint ) {
+  const arr = new ArrayBuffer(8); // an Int64 takes 8 bytes
+  const view = new DataView(arr);
+  view.setBigInt64(0, num, false); // byteOffset = 0; litteEndian = false
+  return arr;
 }
