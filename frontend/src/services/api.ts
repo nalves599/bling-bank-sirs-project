@@ -91,3 +91,9 @@ export async function getAccountPayments(accountId: string) {
 
   return payments.map((payment: any) => new PaymentDto(payment))
 }
+
+export async function createPayment(payment: PaymentDto) {
+  const response = await http.post('/payments/create', payment)
+
+  return new PaymentDto(response.data)
+}

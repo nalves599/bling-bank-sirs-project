@@ -19,7 +19,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     private Account account;
 
     @Column(name = "date")

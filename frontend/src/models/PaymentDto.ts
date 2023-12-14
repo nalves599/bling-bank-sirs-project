@@ -1,26 +1,27 @@
 export class PaymentDto {
-  paymentId!: string
+  id!: string
 
-  paymentDate!: Date
-  paymentAmount!: number
-  paymentDescription!: string
-  paymentCurrencyType!: string
+  date!: Date
+  amount!: number
+  description!: string
+  currencyType!: string
+  accountId!: number
 
-  paymentRequiredApprovals!: number
-  paymentApprovedApprovals!: number
+  requiredApprovals!: number
+  approvedApprovals!: number
 
-  paymentApproved!: boolean
+  approved!: boolean
 
   constructor(jsonObj?: PaymentDto) {
     if (jsonObj) {
-      this.paymentId = jsonObj.id
-      this.paymentDate = jsonObj.date
-      this.paymentAmount = jsonObj.amount
-      this.paymentDescription = jsonObj.description
-      this.paymentCurrencyType = jsonObj.currencyType
-      this.paymentRequiredApprovals = jsonObj.requiredApprovals
-      this.paymentApprovedApprovals = jsonObj.approvedApprovals
-      this.paymentApproved = jsonObj.approved
+      this.id = jsonObj.id
+      this.date = jsonObj.date
+      this.amount = jsonObj.amount
+      this.description = jsonObj.description
+      this.currencyType = jsonObj.currencyType
+      this.requiredApprovals = jsonObj.requiredApprovals
+      this.approvedApprovals = jsonObj.approvedApprovals
+      this.approved = jsonObj.approved
     }
   }
 }

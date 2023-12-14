@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulisboa.tecnico.bling_bank.account.domain.Account;
 import pt.ulisboa.tecnico.bling_bank.account.domain.Movement;
+import pt.ulisboa.tecnico.bling_bank.account.repository.MovementRepository;
 import pt.ulisboa.tecnico.bling_bank.payment.domain.Payment;
 import pt.ulisboa.tecnico.bling_bank.account.repository.AccountRepository;
 import pt.ulisboa.tecnico.bling_bank.payment.repository.PaymentRepository;
@@ -26,6 +27,9 @@ public class PaymentService {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private MovementRepository movementRepository;
+
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public String createPayment(long accountId, Date date, int amount, String description) {
         Account account = accountRepository.findById(accountId).orElseThrow(
@@ -38,6 +42,16 @@ public class PaymentService {
         paymentRepository.save(payment);
 
         account.addPayment(payment);
+
+        if (payment.isAccepted()) {
+            Movement movement = new Movement(payment.getDate(), payment.getAmount(), payment.getDescription(),
+                account);
+
+            movementRepository.save(movement);
+
+            account.addMovement(movement);
+            account.setBalance(account.getBalance() - payment.getAmount());
+        }
 
         return getPaymentJson(payment).toString();
     }

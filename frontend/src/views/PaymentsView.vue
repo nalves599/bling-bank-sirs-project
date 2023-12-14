@@ -44,14 +44,14 @@
         <v-data-table :headers="headers" :items="payments">
           <template v-slot:item="{ item }">
             <tr>
-              <td>{{ item.paymentId }}</td>
-              <td>{{ item.paymentDate }}</td>
-              <td>{{ item.paymentDescription }}</td>
-              <td>{{ item.paymentAmount }}</td>
-              <td>{{ item.paymentCurrencyType }}</td>
-              <td>{{ item.paymentApprovedApprovals }}</td>
-              <td>{{ item.paymentRequiredApprovals }}</td>
-              <td>{{ item.paymentApproved }}</td>
+              <td>{{ item.id }}</td>
+              <td>{{ item.date }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.amount }}</td>
+              <td>{{ item.currencyType }}</td>
+              <td>{{ item.approvedApprovals }}</td>
+              <td>{{ item.requiredApprovals }}</td>
+              <td>{{ item.approved }}</td>
             </tr>
           </template>
         </v-data-table>

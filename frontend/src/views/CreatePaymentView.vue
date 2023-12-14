@@ -1,18 +1,14 @@
 <template>
   <div class="create-payment">
     <h2>Create Payment</h2>
-    <form @submit.prevent="createPayment">
-      <div class="form-group">
-        <label for="destination">Destination:</label>
-        <input type="text" v-model="destination" id="destination" required />
-      </div>
+    <form @submit.prevent="paymentCreate">
       <div class="form-group">
         <label for="amount">Amount:</label>
         <input type="number" v-model="amount" id="amount" required />
       </div>
       <div class="form-group">
         <label for="date">Date to be processed:</label>
-        <input type="date" v-model="date" id="date" required />
+        <input type="date" v-model="date" id="date" @input="formatDate" />
       </div>
       <div class="form-group">
         <label for="description">Description:</label>
@@ -25,14 +21,16 @@
           <option
             v-for="account in sortedAccounts"
             :key="account.accountId"
-            :value="account.accountId"
+            :value="parseInt(account.accountId)"
           >
             {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
             {{ account.holders.sort().join(', ') }}
           </option>
         </select>
       </div>
-      <button type="submit">Submit Payment</button>
+      <div class="form-group">
+        <button type="submit">Create Payment</button>
+      </div>
     </form>
     <BottomBar />
     <LogoutButton />
@@ -43,16 +41,18 @@
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
-import { getAccountsFromHolder } from '@/services/api'
+import { getAccountsFromHolder, createPayment } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import { PaymentDto } from '@/models/PaymentDto'
+import router from '@/router'
 
 const destination = ref('')
 const amount = ref(0)
 const date = ref('')
 const description = ref('')
-const selectedAccountId = ref<string | null>(null)
+const selectedAccountId = ref<number | null>(null)
 
 const authStore = useAuthStore()
 const { username } = storeToRefs(authStore)
@@ -75,19 +75,31 @@ const sortedAccounts = computed(() => {
   })
 })
 
+const selectedAccount = ref<AccountDto | null>(null)
+
 watch(
   () => selectedAccountId.value,
   (newVal) => {
-    if (newVal) {
+    if (newVal !== null) {
       selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
     }
   }
 )
 
-const selectedAccount = ref<AccountDto | null>(null)
+const formatDate = () => {
+  const formattedDate = new Date(date.value).toISOString().split('T')[0]
+  date.value = formattedDate
+}
 
-const createPayment = () => {
-  console.log(destination, amount, date, description, selectedAccountId)
+const paymentCreate = () => {
+  const paymentDto: PaymentDto = {
+    amount: amount.value,
+    date: new Date(date.value),
+    description: description.value,
+    accountId: selectedAccountId.value || 0
+  }
+  createPayment(paymentDto)
+  router.push(`/payments/${username.value}`)
 }
 </script>
 
