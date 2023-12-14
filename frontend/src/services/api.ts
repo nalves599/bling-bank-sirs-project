@@ -97,3 +97,9 @@ export async function createPayment(payment: PaymentDto) {
 
   return new PaymentDto(response.data)
 }
+
+export async function approvePayment(paymentId: number) {
+  const response = await http.post(`/payments/${paymentId}/approve`)
+
+  return new PaymentDto(response.data)
+}

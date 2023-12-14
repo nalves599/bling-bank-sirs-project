@@ -73,11 +73,14 @@ public class PaymentService {
 
         if (payment.isAccepted()) {
             Account account = payment.getAccount();
+            Movement movement = new Movement(payment.getDate(), payment.getAmount(), payment.getDescription(),
+                account);
+            movementRepository.save(movement);
+            account.addMovement(movement);
             account.setBalance(account.getBalance() - payment.getAmount());
-            account.addPayment(payment);
-            account.addMovement(new Movement(payment.getDate(), payment.getAmount(), payment.getDescription(),
-                account));
         }
+
+        paymentRepository.save(payment);
 
         return getPaymentJson(payment).toString();
     }

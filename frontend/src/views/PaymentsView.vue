@@ -52,6 +52,12 @@
               <td>{{ item.approvedApprovals }}</td>
               <td>{{ item.requiredApprovals }}</td>
               <td>{{ item.approved }}</td>
+              <td>
+                <button v-if="!item.approved" @click="acceptPayment(Number(item.id))">
+                  Accept Payment
+                </button>
+                <span v-else>Accepted</span>
+              </td>
             </tr>
           </template>
         </v-data-table>
@@ -67,7 +73,7 @@
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
-import { getAccountsFromHolder, getAccountPayments } from '@/services/api'
+import { getAccountsFromHolder, getAccountPayments, approvePayment } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import type { PaymentDto } from '@/models/PaymentDto'
 import BottomBar from '@/components/BottomBar.vue'
@@ -108,7 +114,7 @@ watch(
 const selectedAccount = ref<AccountDto | null>(null)
 // get account payments
 async function fetchAccountpayments() {
-  payments.value = await getAccountPayments(selectedAccount.value?.accountId)
+  payments.value = await getAccountPayments(selectedAccount.value?.accountId ?? '')
 }
 
 watch(
@@ -121,15 +127,21 @@ watch(
 )
 
 const headers = [
-  { title: 'payment ID', key: 'paymentId', sortable: true },
-  { title: 'Date', key: 'paymentDate', sortable: true },
-  { title: 'Description', key: 'paymentDescription', sortable: false },
-  { title: 'Amount', key: 'paymentAmount', sortable: true },
-  { title: 'Currency', key: 'paymentCurrencyType', sortable: true },
-  { title: 'Approvals', key: 'paymentApprovedApprovals', sortable: true },
-  { title: 'Required', key: 'paymentRequiredApprovals', sortable: true },
-  { title: 'Approved', key: 'paymentApproved', sortable: true }
+  { title: 'payment ID', key: 'id', sortable: true },
+  { title: 'Date', key: 'Date', sortable: true },
+  { title: 'Description', key: 'description', sortable: false },
+  { title: 'Amount', key: 'amount', sortable: true },
+  { title: 'Currency', key: 'currencyType', sortable: true },
+  { title: 'Approvals', key: 'approvedApprovals', sortable: true },
+  { title: 'Required', key: 'requiredApprovals', sortable: true },
+  { title: 'Approved', key: 'approved', sortable: true }
 ]
+
+const acceptPayment = async (paymentId: number) => {
+  approvePayment(paymentId)
+  // reload table
+  fetchAccountpayments()
+}
 </script>
 
 <style>
