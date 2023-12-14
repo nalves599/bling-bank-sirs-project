@@ -1,4 +1,3 @@
-class Payment {
-}
+class Payment {}
 
 export default Payment;

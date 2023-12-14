@@ -1,10 +1,9 @@
 class Movement {
-
   date: Date;
   value: number;
   description: string;
 
-  constructor({date, value, description}: Movement) {
+  constructor({ date, value, description }: Movement) {
     this.date = date;
     this.value = value;
     this.description = description;

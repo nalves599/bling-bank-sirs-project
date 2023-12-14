@@ -1,5 +1,3 @@
-class PaymentSignature {
-
-}
+class PaymentSignature {}
 
 export default PaymentSignature;

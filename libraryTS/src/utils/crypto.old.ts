@@ -1,95 +1,107 @@
-import * as crypto from 'node:crypto';
+import * as crypto from "node:crypto";
 
-export type SymmetricAlgorithm = 'aes-256-cbc';
+export type SymmetricAlgorithm = "aes-256-cbc";
 
 // Create a symmetric AES key
 export const createSymmetricKey = (length?: 256) => {
-  const key = crypto.generateKeySync('aes', { length: length || 256 });
+  const key = crypto.generateKeySync("aes", { length: length || 256 });
   return key;
-}
+};
 
 // Create a key pair
-export const createKeyPair = (length?: 2048|4096) => {
-  const keys = crypto.generateKeyPairSync('rsa', {
-    modulusLength: length||2048,
+export const createKeyPair = (length?: 2048 | 4096) => {
+  const keys = crypto.generateKeyPairSync("rsa", {
+    modulusLength: length || 2048,
     publicKeyEncoding: {
-      type: 'spki',
-      format: 'pem'
+      type: "spki",
+      format: "pem",
     },
     privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'pem'
-    }
+      type: "pkcs8",
+      format: "pem",
+    },
   });
 
   const publicKey = crypto.createPublicKey(keys.privateKey);
   const privateKey = crypto.createPrivateKey(keys.privateKey);
 
   return { publicKey, privateKey };
-}
+};
 
 // Generate a public key from a private key
 export const getPublicKey = (privateKey: string) => {
   const publicKey = crypto.createPublicKey(privateKey);
   return publicKey;
-}
+};
 
 // Sign a message with a private key
 export const signMessage = (message: Buffer, privateKey: crypto.KeyObject) => {
   const signature = crypto.sign(null, message, privateKey);
   return signature;
-}
+};
 
 // Generate HMAC
 export const generateHMAC = (message: Buffer, key: crypto.KeyObject) => {
-  const hmac = crypto.createHmac('sha256', key);
+  const hmac = crypto.createHmac("sha256", key);
   hmac.update(message);
   const hmacDigest = hmac.digest();
   return hmacDigest;
-}
+};
 
 // Verify signature with public key
-export const verifySignature = (message: Buffer, signature: Buffer, publicKey: crypto.KeyObject) => {
+export const verifySignature = (
+  message: Buffer,
+  signature: Buffer,
+  publicKey: crypto.KeyObject,
+) => {
   const verified = crypto.verify(null, message, publicKey, signature);
   return verified;
-}
+};
 
 // Encrypt a message with a symmetric key
-export const encryptMessage = (message: Buffer, key: crypto.KeyObject, algorithm?: SymmetricAlgorithm) => {
+export const encryptMessage = (
+  message: Buffer,
+  key: crypto.KeyObject,
+  algorithm?: SymmetricAlgorithm,
+) => {
   const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(algorithm || 'aes-256-cbc', key, iv);
+  const cipher = crypto.createCipheriv(algorithm || "aes-256-cbc", key, iv);
   const ciphertext = Buffer.concat([cipher.update(message), cipher.final()]);
   return { iv, ciphertext };
-}
+};
 
 // Decrypt a message with a symmetric key
-export const decryptMessage = (encrypted: Buffer, key: crypto.KeyObject, iv: Buffer, algorithm?: SymmetricAlgorithm) => {
-  const decipher = crypto.createDecipheriv(algorithm || 'aes-256-cbc', key, iv);
+export const decryptMessage = (
+  encrypted: Buffer,
+  key: crypto.KeyObject,
+  iv: Buffer,
+  algorithm?: SymmetricAlgorithm,
+) => {
+  const decipher = crypto.createDecipheriv(algorithm || "aes-256-cbc", key, iv);
   const message = Buffer.concat([decipher.update(encrypted), decipher.final()]);
   return message;
-}
+};
 
 // Hash a message
 export const hashMessage = (message: Buffer, algorithm?: string) => {
-  const hash = crypto.createHash(algorithm || 'sha256');
+  const hash = crypto.createHash(algorithm || "sha256");
   hash.update(message);
   const digest = hash.digest();
   return digest;
-}
+};
 
 // Generate timestamp nonce
 export const generateNonce = () => {
-    const nonce = Buffer.alloc(8);
-    nonce.writeBigInt64BE(BigInt(Date.now()));
-    return nonce;
-}
-
+  const nonce = Buffer.alloc(8);
+  nonce.writeBigInt64BE(BigInt(Date.now()));
+  return nonce;
+};
 
 export type ProtectProps = {
-  key: crypto.KeyObject,
-  signingKey?: crypto.KeyObject,
-  nonce?: Buffer,
-}
+  key: crypto.KeyObject;
+  signingKey?: crypto.KeyObject;
+  nonce?: Buffer;
+};
 
 // Protect data
 // Structure of the protected data:
@@ -102,7 +114,9 @@ export const protect = (data: Buffer, props: ProtectProps) => {
   payloadLength.writeUInt32BE(data.length);
   data = Buffer.concat([payloadLength, data]);
 
-  if (!nonce) { nonce = generateNonce(); }
+  if (!nonce) {
+    nonce = generateNonce();
+  }
   const nonceLength = Buffer.alloc(4);
   nonceLength.writeUInt32BE(nonce.length);
   data = Buffer.concat([data, nonceLength, nonce]);
@@ -121,12 +135,12 @@ export const protect = (data: Buffer, props: ProtectProps) => {
 
   const { iv, ciphertext } = encryptMessage(data, key);
   return { iv, ciphertext, signature, nonce };
-}
+};
 
 export type UnprotectProps = {
-  key: crypto.KeyObject,
-  verifyingKey?: crypto.KeyObject
-}
+  key: crypto.KeyObject;
+  verifyingKey?: crypto.KeyObject;
+};
 
 // Unprotect data
 export const unprotect = (data: Buffer, props: UnprotectProps) => {
@@ -145,14 +159,13 @@ export const unprotect = (data: Buffer, props: UnprotectProps) => {
   const nonce = message.subarray(4, 4 + nonceLength);
   message = message.subarray(4 + nonceLength);
 
-
   if (verifyingKey) {
     const signatureLength = message.readUInt32BE(0);
     const signature = message.subarray(4, signatureLength + 4);
 
     const payloadHash = hashMessage(Buffer.concat([payload, nonce]));
     if (!verifySignature(payloadHash, signature, verifyingKey)) {
-      throw new Error('Invalid signature');
+      throw new Error("Invalid signature");
     }
   } else {
     const hmacLength = message.readUInt32BE(0);
@@ -160,9 +173,9 @@ export const unprotect = (data: Buffer, props: UnprotectProps) => {
 
     const hmac2 = generateHMAC(Buffer.concat([payload, nonce]), key);
     if (!hmac.equals(hmac2)) {
-      throw new Error('Invalid HMAC');
+      throw new Error("Invalid HMAC");
     }
   }
 
   return { payload, nonce };
-}
+};
