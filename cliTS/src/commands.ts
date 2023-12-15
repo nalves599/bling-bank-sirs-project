@@ -3,6 +3,7 @@ import {
   UnprotectProps,
   protect,
   unprotect,
+  check,
 } from "../../libraryTS/src/utils/crypto";
 import {
   bytesToAesKey,
@@ -66,19 +67,32 @@ export class Commands {
 
     const inputPath = args[1];
     const aesKeyPath = args[2];
-    const signKeyPath = args[3];
+    const verifyKeyPath = args[3];
 
     try {
       const input = Utils.readFile(inputPath);
       const aesKey = await bytesToAesKey(Utils.readFile(aesKeyPath));
-      const signKey = await bytesToSigningKey(Utils.readFile(signKeyPath));
+      const verifyKey = await bytesToVerificationKey(
+        Utils.readFile(verifyKeyPath),
+      );
 
-      const protectProps: ProtectProps = {
-        aesKey: aesKey,
-        signingKey: signKey,
+      const verifyNonce = function (nonce: ArrayBuffer): boolean {
+        const ts = parseInt(new TextDecoder().decode(nonce));
+        const now = Date.now();
+
+        return ts > now - 10000; // 10 seconds of tolerance
       };
 
-      await protect(input, protectProps);
+      const unprotectedProps: UnprotectProps = {
+        iv: undefined,
+        aesKey: aesKey,
+        hmacKey: undefined,
+        verifyingKey: verifyKey,
+        nonceVerification: verifyNonce,
+      };
+
+      const valid = await check(input, unprotectedProps);
+      console.log("File is protected: " + valid);
     } catch (error: any) {
       console.log("File is not protected");
     }
@@ -102,11 +116,20 @@ export class Commands {
         Utils.readFile(verifyKeyPath),
       );
 
+      const verifyNonce = function (nonce: ArrayBuffer): boolean {
+        const ts = parseInt(new TextDecoder().decode(nonce));
+        const now = Date.now();
+
+        return ts > now - 10000; // 10 seconds of tolerance
+      };
+
+
       const unProtectProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
+        nonceVerification: verifyNonce,
       };
 
       const output = await unprotect(input, unProtectProps);
