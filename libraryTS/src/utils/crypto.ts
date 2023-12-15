@@ -239,7 +239,7 @@ export const check = async (
 ) => {
   try {
     const { nonce } = await unprotect(data, props);
-    return nonceCheck(nonce);
+    return nonceCheck(nonce.buffer);
   } catch (e) {
     return false;
   }
