@@ -179,7 +179,9 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
   }
 
   const { iv, ciphertext } = await encryptMessage(data, aesKey);
-  return { iv, ciphertext, signature, hmac, nonce };
+  const payload = concatBuffers(iv, ciphertext);
+
+  return { iv, payload, signature, hmac, nonce };
 };
 
 export type UnprotectProps = {

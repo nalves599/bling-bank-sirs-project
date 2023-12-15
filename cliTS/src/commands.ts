@@ -1,54 +1,115 @@
+import {ProtectProps, UnprotectProps, protect, unprotect} from "../../libraryTS/src/utils/crypto";
+import { bytesToAesKey, bytesToSigningKey, bytesToVerificationKey } from "./converter";
 import { Utils } from "./utils";
-import {ProtectProps} from "../../libraryTS/src/utils/crypto";
+import { help, helpUsage, protectUsage, checkUsage, unprotectUsage, timeoutUsage, unknownCommand } from "./messages"; 
 
 export class Commands {
 
     help(args: string[]): void {
-        const help = "Available commands:\n\n" +
-            "./blingbank help: display all available commands and their description\n\n\n" +
-            "./blingbank protect: protect a message\n\n" +
-            "Usage: ./blingbank protect <input-file> <output-file> <aes-key> <priv-key>\n\n\n" +
-            "./blingbank check: check if a message is protected\n\n" +
-            "Usage: ./blingbank check <input-file> <receiver-public-key> <session-secret-key>\n\n\n" +
-            "./blingbank unprotect: unprotect a message\n\n" +
-            "Usage: ./blingbank unprotect <input-file> <output-file> <receiver-public-key> <session-secret-key>\n\n\n" +
-            "./blingbank timeout: set the timeout for the nonces (in seconds)\n\n" +
-            "Usage: ./blingbank timeout <seconds>";
-
         if (args.length != 1) {
-            console.log("Usage: ./blingbank help");
+            console.log(helpUsage);
             return
         }
 
         console.log(help);
     }
 
-    protect(args: string[]): void {
+    async protect(args: string[]): Promise<void> {
         if (args.length != 5) {
-            console.log("Usage: ./blingbank protect <input-file> <output-file> <aes-key> <priv-key>");
+            console.log(protectUsage);
             return;
         }
 
         const inputPath = args[1];
         const outputPath = args[2];
         const aesKeyPath = args[3];
-        const privKeyPath = args[4];
+        const signKeyPath = args[4];
 
         try {
-            const input = Utils.readFile(inputPath) ?? (() => { throw new Error("Could not read input file"); })();
-            const privateKey = Utils.readFile(aesKeyPath) ?? (() => { throw new Error("Could not read public key file"); })();
-            const sessionSecretKey = Utils.readFile(privKeyPath) ?? (() => { throw new Error("Could not read Session Secret Key file"); });
-
+            const input = Utils.readFile(inputPath)
+            const aesKey  = await bytesToAesKey(Utils.readFile(aesKeyPath));
+            const signKey = await bytesToSigningKey(Utils.readFile(signKeyPath));
+            
             const protectProps : ProtectProps = {
-              aesKey: ,
-                hmacKey: null,
-                signingKey: privateKey,
-                nonce: null
+                aesKey: aesKey,
+                signingKey: signKey
             }
+            
+            const output = await protect(input, protectProps);
+            Utils.writeFile(outputPath, output.payload);
 
         } catch (error: any) {
             console.log("Could not protect file " + inputPath + ": " + error.message);
         }
+    }
 
+    async check(args: string[]): Promise<void> {
+        if (args.length != 4) {
+            console.log(checkUsage);
+            return;
+        }
+        
+        const inputPath = args[1];
+        const aesKeyPath = args[2];
+        const signKeyPath = args[3];
+        
+        try {
+            const input = Utils.readFile(inputPath)
+            const aesKey  = await bytesToAesKey(Utils.readFile(aesKeyPath));
+            const signKey = await bytesToSigningKey(Utils.readFile(signKeyPath));
+            
+            const protectProps : ProtectProps = {
+                aesKey: aesKey,
+                signingKey: signKey
+            }
+            
+            await protect(input, protectProps);
+        } catch (error: any) {
+            console.log("File is not protected");
+        }
+    }
+
+    async unprotect(args: string[]): Promise<void> {
+        if (args.length != 5) {
+            console.log(unprotectUsage);
+            return;
+        }
+    
+        const inputPath = args[1];
+        const outputPath = args[2];
+        const aesKeyPath = args[3];
+        const verifyKeyPath = args[4];
+
+        try {
+            const input = Utils.readFile(inputPath)
+            const aesKey  = await bytesToAesKey(Utils.readFile(aesKeyPath));
+            const verifyKey = await bytesToVerificationKey(Utils.readFile(verifyKeyPath));
+            
+            const unProtectProps : UnprotectProps = {
+                iv: undefined,
+                aesKey: aesKey,
+                hmacKey: undefined,
+                verifyingKey: verifyKey
+            }
+            
+            const output = await unprotect(input, unProtectProps);
+            Utils.writeFile(outputPath, output.payload);
+
+        } catch (error: any) {
+            console.log("Could not unprotect file " + inputPath + ": " + error.message);
+        }
+
+    }
+
+    async timeout(args: string[]): Promise<void> {
+        if (args.length != 2) {
+            console.log(timeoutUsage);
+            return;
+        }
+        console.log("Timeout set");
+    }
+
+    async unknown(): Promise<void> {
+        console.log(unknownCommand);
     }
 }
