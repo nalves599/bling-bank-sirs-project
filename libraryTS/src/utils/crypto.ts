@@ -198,8 +198,8 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
 
   if (!iv) {
     iv = data.slice(0, 16);
-    data = data.slice(16);
   }
+  data = data.slice(16);
 
   let message = await decryptMessage(data, aesKey, iv);
 

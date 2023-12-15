@@ -20,7 +20,7 @@ describe("check module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext } = await protect(arrayBuf, props);
+    const { iv, messageEncrypted } = await protect(arrayBuf, props);
 
     const nonceCheck = function (nonce: ArrayBuffer | undefined) {
       if (nonce === undefined) {
@@ -43,7 +43,7 @@ describe("check module", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const valid = await check(ciphertext, unprotectProps);
+    const valid = await check(messageEncrypted, unprotectProps);
 
     expect(valid).toBe(true);
   });
@@ -59,7 +59,7 @@ describe("check module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext } = await protect(arrayBuf, props);
+    const { messageEncrypted } = await protect(arrayBuf, props);
 
     const nonceCheck = function (nonce: ArrayBuffer | undefined) {
       if (nonce === undefined) {
@@ -73,7 +73,6 @@ describe("check module", () => {
     };
 
     const unprotectProps: UnprotectProps = {
-      iv: iv,
       aesKey: aesKey,
       hmacKey: undefined,
       verifyingKey: undefined,
@@ -82,7 +81,7 @@ describe("check module", () => {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const valid = await check(ciphertext, unprotectProps);
+    const valid = await check(messageEncrypted, unprotectProps);
 
     expect(valid).toBe(false);
   });
