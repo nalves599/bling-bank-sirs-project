@@ -3,10 +3,12 @@ package pt.ulisboa.tecnico.bling_bank.account.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @Entity
 @Table(name = "accountHolders")
