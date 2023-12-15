@@ -1,10 +1,13 @@
-import exp = require("constants");
-
 let webcrypto: Crypto;
-if (window) {
-  webcrypto = window.crypto;
-} else {
+let UTF8Encoder: TextEncoder;
+if (require("is-node")) {
+  //console.log("Using Node.js WebCrypto");
   webcrypto = require("crypto").webcrypto;
+  UTF8Encoder = new (require("util").TextEncoder)();
+} else {
+  //console.log("Using WebCrypto API");
+  webcrypto = window.crypto;
+  UTF8Encoder = new TextEncoder();
 }
 const crypto = webcrypto.subtle;
 
@@ -106,25 +109,12 @@ export const decryptMessage = async (
   return new Uint8Array(plaintext);
 };
 
+// Generate nonce
 export const generateNonce = async () => {
-  const nonce = new BigUint64Array([BigInt(Date.now())]);
-  return bigUint64ArrayToUint8Array(nonce);
+  const timestamp = new Date().getTime().toString();
+  const nonce = UTF8Encoder.encode(timestamp);
+  return nonce;
 };
-
-function bigUint64ArrayToUint8Array(bigUintArray: BigUint64Array): Uint8Array {
-  const uint8Array = new Uint8Array(bigUintArray.length * 8); // Each BigUint64 occupies 8 bytes
-
-  bigUintArray.forEach((bigUintValue, i) => {
-    for (let j = 0; j < 8; j++) {
-      const byteOffset = i * 8 + j;
-      uint8Array[byteOffset] = Number(
-        (bigUintValue >> (BigInt(j) * 8n)) & 255n,
-      );
-    }
-  });
-
-  return uint8Array;
-}
 
 function concatBuffers(...buffers: ArrayBuffer[]) {
   const totalLength = buffers.reduce(
@@ -137,7 +127,7 @@ function concatBuffers(...buffers: ArrayBuffer[]) {
     result.set(new Uint8Array(buffer), offset);
     offset += buffer.byteLength;
   }
-  return result.buffer;
+  return result;
 }
 
 export type ProtectProps = {
@@ -155,18 +145,16 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
   let signature: ArrayBuffer | null = null;
   let hmac: ArrayBuffer | null = null;
 
-  const payloadLength = new Uint32Array([data.byteLength]).buffer;
+  const payloadLength = toBytesInt32(data.byteLength);
 
-  if (!nonce) {
-    nonce = await generateNonce();
-  }
-  const nonceLength = new Uint32Array([nonce.byteLength]).buffer;
+  if (!nonce) nonce = await generateNonce();
+  const nonceLength = toBytesInt32(nonce.byteLength);
 
   let message = concatBuffers(data, nonce);
 
   if (signingKey) {
     signature = await signMessage(message, signingKey);
-    const signatureLength = new Uint32Array([signature.byteLength]).buffer;
+    const signatureLength = toBytesInt32(signature.byteLength);
     data = concatBuffers(
       payloadLength,
       data,
@@ -177,7 +165,7 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
     );
   } else if (hmacKey) {
     hmac = await generateHMAC(message, hmacKey);
-    const hmacLength = new Uint32Array([hmac.byteLength]).buffer;
+    const hmacLength = toBytesInt32(hmac.byteLength);
     data = concatBuffers(
       payloadLength,
       data,
@@ -212,16 +200,16 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
 
   let message = await decryptMessage(data, aesKey, iv);
 
-  const payloadLength = new Uint32Array(message.slice(0, 4))[0];
+  const payloadLength = fromBytesInt32(message.slice(0, 4).buffer);
   const payload = message.slice(4, 4 + payloadLength);
   message = message.slice(4 + payloadLength);
 
-  const nonceLength = new Uint32Array(message.slice(0, 4))[0];
+  const nonceLength = fromBytesInt32(message.slice(0, 4).buffer);
   const nonce = message.slice(4, 4 + nonceLength);
   message = message.slice(4 + nonceLength);
 
   if (verifyingKey) {
-    const signatureLength = new Uint32Array(message.slice(0, 4))[0];
+    const signatureLength = fromBytesInt32(message.slice(0, 4).buffer);
     const signature = message.slice(4, 4 + signatureLength);
     const verify = concatBuffers(payload, nonce);
 
@@ -229,7 +217,7 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
       throw new Error("Invalid signature");
     }
   } else if (hmacKey) {
-    const hmacLength = new Uint32Array(message.slice(0, 4))[0];
+    const hmacLength = fromBytesInt32(message.slice(0, 4).buffer);
     const hmac = message.slice(4, 4 + hmacLength);
     const verify = concatBuffers(payload, nonce);
 
