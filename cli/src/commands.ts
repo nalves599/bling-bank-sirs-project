@@ -4,7 +4,7 @@ import {
   protect,
   unprotect,
   check,
-} from "../../libraryTS/src/utils/crypto";
+} from "../../library/src/utils/crypto";
 import {
   bytesToAesKey,
   bytesToSigningKey,

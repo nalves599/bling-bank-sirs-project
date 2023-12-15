@@ -15,14 +15,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-      - name: LibraryTS
+      - name: Library
         run: |
-          cd libraryTS
+          cd library
           npm ci
           npm run test
           npm run build
-      - name: cliTS
+      - name: cli
         run: |
-          cd cliTS
+          cd cli
           npm ci
           npm run build

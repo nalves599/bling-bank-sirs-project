@@ -9,7 +9,7 @@
       "strict": true,
       "paths": {
         "@/*": ["./src/*"],
-        "@@/*": ["../../libraryTS/src/*"],
+        "@@/*": ["../../library/src/*"],
       }
   },
   "include": ["src/**/*.ts"],
