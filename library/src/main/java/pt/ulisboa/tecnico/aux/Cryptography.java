@@ -1,5 +1,8 @@
 package pt.ulisboa.tecnico.aux;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import java.security.*;
@@ -21,10 +24,16 @@ public class Cryptography {
 
     private int sequenceNumber = INITIAL_SEQUENCE_NUMBER;
 
+    @Setter
+    @Getter
+    private int timestampDifference = MAX_TIMESTAMP_DIFFERENCE;
+
     // <timestamp, <sequenceNumber>>
     private final HashMap<Long, HashSet<Integer>> sequenceNumbers = new HashMap<>();
 
-    public Cryptography() throws Exception {}
+    public Cryptography() throws Exception {
+        createTimestamp();
+    }
 
     public Optional<byte[]> symEncrypt(byte[] input, Key key, IvParameterSpec iv) {
         try {
@@ -40,7 +49,6 @@ public class Cryptography {
             symCipher.init(Cipher.DECRYPT_MODE, key, iv);
             return Optional.of(symCipher.doFinal(input));
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
             return Optional.empty();
         }
     }
@@ -67,7 +75,7 @@ public class Cryptography {
         return messageDigest.digest(input);
     }
 
-    public void CreateTimestamp() {
+    public void createTimestamp() {
         timestamp = System.currentTimeMillis();
         sequenceNumber = 0;
     }
@@ -78,7 +86,7 @@ public class Cryptography {
 
     public void cleanStructure() {
         sequenceNumbers.entrySet().removeIf(entry -> entry.getKey() < System.currentTimeMillis() -
-                                                                      MAX_TIMESTAMP_DIFFERENCE);
+                                                                      timestampDifference);
     }
 
     public boolean addSequenceNumber(long timestamp, int sequenceNumber) {

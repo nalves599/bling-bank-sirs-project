@@ -1,0 +1,20 @@
+{
+  "account" : {
+    "accountHolder" : [ "Alice" ],
+    "balance" : 872.22,
+    "currency" : "EUR",
+    "movements" : [ {
+      "date" : "09/11/2023",
+      "description" : "Salary",
+      "value" : 1000
+    }, {
+      "date" : "15/11/2023",
+      "description" : "Electricity bill",
+      "value" : -77.78
+    }, {
+      "date" : "22/11/2023",
+      "description" : "ATM Withdrawal",
+      "value" : -50
+    } ]
+  }
+}

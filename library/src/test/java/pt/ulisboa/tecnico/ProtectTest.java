@@ -17,6 +17,10 @@ public class ProtectTest {
     static File tempFolder;
     static String tempPath;
 
+    static Library lib1;
+
+    static Library lib2;
+
     @BeforeAll
     static void init() throws Exception {
         tempPath = tempFolder.getAbsolutePath() + "/";
@@ -26,28 +30,34 @@ public class ProtectTest {
 
         Path secretKeyFile = Files.createFile(tempFolder.toPath().resolve(TestConfig.SECRET_KEY_TEST_PATH_1));
         Files.write(secretKeyFile, TestConfig.SECRET_KEY_1.getBytes());
+
+        lib1 = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        lib2 = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
+        byte[] encryptedKeys = lib1.createSessionKeys().get();
+        byte[] encryptedPublicKey = lib2.receiveSessionKeys(encryptedKeys).get();
+        assertTrue(lib1.receivePublicKey(encryptedPublicKey));
     }
 
     @Test
     public void protectFile() throws Exception {
-        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        Either<String, byte[]> output = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output = lib1.protect(TestConfig.SOURCE_1_JSON.getBytes());
         assertTrue(output.isRight() && output.get().length > 0);
+
+        Either<String, byte[]> output2 = lib2.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        assertTrue(output2.isRight() && output2.get().length > 0);
     }
 
     @Test
     public void protectEmptyFile() throws Exception {
-        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        Either<String, byte[]> output = lib.protect("".getBytes());
+        Either<String, byte[]> output = lib1.protect("".getBytes());
         assertTrue(output.isLeft());
         assertTrue(output.getLeft().contains("A JSONObject text must begin with '{'"));
     }
 
     @Test
     public void protectMultipleFiles() throws Exception {
-        Library lib = new Library(tempPath + TestConfig.SECRET_KEY_TEST_PATH_1);
-        Either<String, byte[]> output1 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
-        Either<String, byte[]> output2 = lib.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output1 = lib1.protect(TestConfig.SOURCE_1_JSON.getBytes());
+        Either<String, byte[]> output2 = lib1.protect(TestConfig.SOURCE_1_JSON.getBytes());
         assertTrue(output1.isRight() && output1.get().length > 0);
         assertTrue(output2.isRight() && output2.get().length > 0);
     }
