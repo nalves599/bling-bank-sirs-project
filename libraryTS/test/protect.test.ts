@@ -21,13 +21,13 @@ describe("protect module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext, signature, hmac, nonce } = await protect(
+    const { iv, messageEncrypted, signature, hmac, nonce } = await protect(
       arrayBuf,
       props,
     );
 
     expect(iv).toBeDefined();
-    expect(ciphertext).toBeDefined();
+    expect(messageEncrypted).toBeDefined();
     expect(signature).toBeNull();
     expect(hmac).toBeNull();
     expect(nonce).toBeDefined();
@@ -45,13 +45,13 @@ describe("protect module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext, signature, hmac, nonce } = await protect(
+    const { iv, messageEncrypted, signature, hmac, nonce } = await protect(
       arrayBuf,
       props,
     );
 
     expect(iv).toBeDefined();
-    expect(ciphertext).toBeDefined();
+    expect(messageEncrypted).toBeDefined();
     expect(signature).toBeNull();
     expect(hmac).toBeDefined();
     expect(nonce).toBeDefined();
@@ -69,13 +69,13 @@ describe("protect module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext, signature, hmac, nonce } = await protect(
+    const { iv, messageEncrypted, signature, hmac, nonce } = await protect(
       arrayBuf,
       props,
     );
 
     expect(iv).toBeDefined();
-    expect(ciphertext).toBeDefined();
+    expect(messageEncrypted).toBeDefined();
     expect(signature).toBeDefined();
     expect(hmac).toBeNull();
     expect(nonce).toBeDefined();
@@ -93,13 +93,13 @@ describe("protect module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext, signature, hmac, nonce } = await protect(
+    const { iv, messageEncrypted, signature, hmac, nonce } = await protect(
       arrayBuf,
       props,
     );
 
     expect(iv).toBeDefined();
-    expect(ciphertext).toBeDefined();
+    expect(messageEncrypted).toBeDefined();
     expect(signature).toBeNull();
     expect(hmac).toBeNull();
     expect(nonce).toBeDefined();

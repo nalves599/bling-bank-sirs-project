@@ -6,11 +6,12 @@
   "scripts": {
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
+    "prettier": "prettier --write \"src/**/*.ts\""
   },
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.4",
+    "prettier": "3.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

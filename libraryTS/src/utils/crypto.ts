@@ -92,7 +92,7 @@ export const encryptMessage = async (message: ArrayBuffer, key: CryptoKey) => {
     key,
     message,
   );
-  return { iv, ciphertext: new Uint8Array(ciphertext) };
+  return { iv, encrypted: new Uint8Array(ciphertext) };
 };
 
 // Decrypt a message with a key
@@ -178,10 +178,10 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
     data = concatBuffers(payloadLength, data, nonceLength, nonce);
   }
 
-  const { iv, ciphertext } = await encryptMessage(data, aesKey);
-  const payload = concatBuffers(iv, ciphertext);
+  const { iv, encrypted } = await encryptMessage(data, aesKey);
+  const messageEncrypted = concatBuffers(iv, encrypted);
 
-  return { iv, payload, signature, hmac, nonce };
+  return { iv, messageEncrypted, signature, hmac, nonce };
 };
 
 export type UnprotectProps = {

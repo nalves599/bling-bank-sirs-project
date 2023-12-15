@@ -22,15 +22,14 @@ describe("unprotect module", () => {
 
     const word = "Hello World";
     const arrayBuf = new TextEncoder().encode(word).buffer;
-    const { iv, ciphertext } = await protect(arrayBuf, props);
+    const { messageEncrypted } = await protect(arrayBuf, props);
 
     const props2: UnprotectProps = {
-      iv: iv,
       aesKey: aesKey,
       hmacKey: undefined,
       verifyingKey: undefined,
     };
-    const { payload } = await unprotect(ciphertext, props2);
+    const { payload } = await unprotect(messageEncrypted, props2);
 
     expect(word).toEqual(new TextDecoder().decode(payload));
   });
@@ -47,15 +46,14 @@ describe("unprotect module", () => {
 
     const word = "Hello World";
     const arrayBuf = new TextEncoder().encode(word).buffer;
-    const { iv, ciphertext } = await protect(arrayBuf, props);
+    const { messageEncrypted } = await protect(arrayBuf, props);
 
     const props2: UnprotectProps = {
-      iv: iv,
       aesKey: aesKey,
       hmacKey: hmacKey,
       verifyingKey: undefined,
     };
-    const { payload } = await unprotect(ciphertext, props2);
+    const { payload } = await unprotect(messageEncrypted, props2);
 
     expect(word).toEqual(new TextDecoder().decode(payload));
   });
@@ -72,15 +70,14 @@ describe("unprotect module", () => {
 
     const word = "Hello World";
     const arrayBuf = new TextEncoder().encode(word).buffer;
-    const { iv, ciphertext } = await protect(arrayBuf, props);
+    const { messageEncrypted } = await protect(arrayBuf, props);
 
     const props2: UnprotectProps = {
-      iv: iv,
       aesKey: aesKey,
       hmacKey: undefined,
       verifyingKey: publicKey,
     };
-    const { payload } = await unprotect(ciphertext, props2);
+    const { payload } = await unprotect(messageEncrypted, props2);
 
     expect(word).toEqual(new TextDecoder().decode(payload));
   });
