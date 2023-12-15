@@ -1,0 +1,7 @@
+#!/bin/bash
+
+NODE_PATH=node
+
+NODE_SCRIPT=dist/index.js
+
+$NODE_PATH $NODE_SCRIPT "$@"
