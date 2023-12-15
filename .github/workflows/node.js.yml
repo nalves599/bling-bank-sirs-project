@@ -15,22 +15,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-
-  libraryTS:
-    runs-on: self-hosted
-    needs: setup-node
-    steps:
       - name: LibraryTS
         run: |
           cd libraryTS
           npm ci
           npm run test
           npm run build
-
-  cliTS:
-    runs-on: self-hosted
-    needs: setup-node
-    steps:
       - name: cliTS
         run: |
           cd cliTS
