@@ -25,6 +25,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "is-node": "^1.0.2"
+    "is-node": "^1.0.2",
+    "shamirs-secret-sharing-ts": "^1.0.2"
   }
 }
