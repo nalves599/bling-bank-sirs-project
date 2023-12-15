@@ -17,7 +17,6 @@ import {
   protectUsage,
   checkUsage,
   unprotectUsage,
-  timeoutUsage,
   unknownCommand,
 } from "./messages";
 
@@ -60,7 +59,7 @@ export class Commands {
   }
 
   async check(args: string[]): Promise<void> {
-    if (args.length != 4) {
+    if (args.length != 4 && args.length != 5) {
       console.log(checkUsage);
       return;
     }
@@ -75,20 +74,15 @@ export class Commands {
       const verifyKey = await bytesToVerificationKey(
         Utils.readFile(verifyKeyPath),
       );
-
-      const verifyNonce = function (nonce: ArrayBuffer): boolean {
-        const ts = parseInt(new TextDecoder().decode(nonce));
-        const now = Date.now();
-
-        return ts > now - 10000; // 10 seconds of tolerance
-      };
+      const threshold = args.length == 5 ? parseInt(args[4]) : undefined;
+      const nonceVerification = Utils.getVerificationNonce(threshold);
 
       const unprotectedProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
-        nonceVerification: verifyNonce,
+        nonceVerification: nonceVerification,
       };
 
       const valid = await check(input, unprotectedProps);
@@ -99,7 +93,7 @@ export class Commands {
   }
 
   async unprotect(args: string[]): Promise<void> {
-    if (args.length != 5) {
+    if (args.length != 5 && args.length != 6) {
       console.log(unprotectUsage);
       return;
     }
@@ -115,21 +109,15 @@ export class Commands {
       const verifyKey = await bytesToVerificationKey(
         Utils.readFile(verifyKeyPath),
       );
-
-      const verifyNonce = function (nonce: ArrayBuffer): boolean {
-        const ts = parseInt(new TextDecoder().decode(nonce));
-        const now = Date.now();
-
-        return ts > now - 10000; // 10 seconds of tolerance
-      };
-
+      const threshold = args.length == 6 ? parseInt(args[5]) : undefined;
+      const nonceVerification = Utils.getVerificationNonce(threshold);
 
       const unProtectProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
-        nonceVerification: verifyNonce,
+        nonceVerification: nonceVerification,
       };
 
       const output = await unprotect(input, unProtectProps);
@@ -139,14 +127,6 @@ export class Commands {
         "Could not unprotect file " + inputPath + ": " + error.message,
       );
     }
-  }
-
-  async timeout(args: string[]): Promise<void> {
-    if (args.length != 2) {
-      console.log(timeoutUsage);
-      return;
-    }
-    console.log("Timeout set");
   }
 
   async unknown(): Promise<void> {
