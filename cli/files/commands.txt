@@ -1,5 +1,0 @@
-t 100000
-p files/a.json files/b.json keys/priv.key keys/secretSession.key
-
-u files/b.json files/c.json keys/receiverPub.key keys/secretSession.key
-```
