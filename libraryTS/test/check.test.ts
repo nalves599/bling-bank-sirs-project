@@ -20,20 +20,10 @@ describe("check module", () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext, } = await protect(
-      arrayBuf,
-      props,
-    );
-
-    const unprotectProps: UnprotectProps = {
-      iv: iv,
-      aesKey: aesKey,
-      hmacKey: undefined,
-      verifyingKey: undefined,
-    };
+    const { iv, ciphertext } = await protect(arrayBuf, props);
 
     const nonceCheck = function (nonce: ArrayBuffer | undefined) {
-        if (nonce === undefined) {
+      if (nonce === undefined) {
         return false;
       }
 
@@ -43,14 +33,22 @@ describe("check module", () => {
       return ts > now - 3000; // 3 seconds of tolerance
     };
 
+    const unprotectProps: UnprotectProps = {
+      iv: iv,
+      aesKey: aesKey,
+      hmacKey: undefined,
+      verifyingKey: undefined,
+      nonceVerification: nonceCheck,
+    };
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const valid = await check(ciphertext, unprotectProps, nonceCheck);
+    const valid = await check(ciphertext, unprotectProps);
 
     expect(valid).toBe(true);
-});
+  });
 
-test("check file unsuccessfully", async () => {
+  test("check file unsuccessfully", async () => {
     const aesKey = await createAESKey();
     const props: ProtectProps = {
       aesKey: aesKey,
@@ -61,20 +59,10 @@ test("check file unsuccessfully", async () => {
 
     const file = "Hello World";
     const arrayBuf = new TextEncoder().encode(file).buffer;
-    const { iv, ciphertext, } = await protect(
-      arrayBuf,
-      props,
-    );
-
-    const unprotectProps: UnprotectProps = {
-      iv: iv,
-      aesKey: aesKey,
-      hmacKey: undefined,
-      verifyingKey: undefined,
-    };
+    const { iv, ciphertext } = await protect(arrayBuf, props);
 
     const nonceCheck = function (nonce: ArrayBuffer | undefined) {
-        if (nonce === undefined) {
+      if (nonce === undefined) {
         return false;
       }
 
@@ -84,10 +72,18 @@ test("check file unsuccessfully", async () => {
       return ts > now - 500; // 0.5 seconds of tolerance
     };
 
+    const unprotectProps: UnprotectProps = {
+      iv: iv,
+      aesKey: aesKey,
+      hmacKey: undefined,
+      verifyingKey: undefined,
+      nonceVerification: nonceCheck,
+    };
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const valid = await check(ciphertext, unprotectProps, nonceCheck);
+    const valid = await check(ciphertext, unprotectProps);
 
     expect(valid).toBe(false);
-});
+  });
 });

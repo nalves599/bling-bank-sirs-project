@@ -187,11 +187,12 @@ export type UnprotectProps = {
   aesKey: CryptoKey;
   hmacKey?: CryptoKey;
   verifyingKey?: CryptoKey;
+  nonceVerification?: (nonce: ArrayBuffer) => boolean;
 };
 
 // Unprotect data
 export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
-  let { iv, aesKey, hmacKey, verifyingKey } = props;
+  let { iv, aesKey, hmacKey, verifyingKey, nonceVerification } = props;
 
   if (!iv) {
     iv = data.slice(0, 16);
@@ -226,20 +227,19 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
     }
   }
 
+  if (nonceVerification)
+    if (!nonceVerification(nonce.buffer)) throw new Error("Invalid nonce");
+
   return {
     payload: new Uint8Array(payload),
     nonce: new Uint8Array(nonce),
   };
 };
 
-export const check = async (
-  data: ArrayBuffer,
-  props: UnprotectProps,
-  nonceCheck: (nonce: ArrayBuffer) => boolean,
-) => {
+export const check = async (data: ArrayBuffer, props: UnprotectProps) => {
   try {
-    const { nonce } = await unprotect(data, props);
-    return nonceCheck(nonce.buffer);
+    await unprotect(data, props);
+    return true;
   } catch (e) {
     return false;
   }
