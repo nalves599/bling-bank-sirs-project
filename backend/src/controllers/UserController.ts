@@ -2,6 +2,10 @@ import { Request, Response } from 'express';
 import * as UserService from '../services/UserService';
 import * as SecurityService from '../services/SecurityService';
 import * as EmailService from '../services/EmailService';
+import {
+  generateSharedSecret,
+  generateSessionKey,
+} from '../services/KeyGenerator';
 
 type POWChallenge = {
   content: string;
@@ -21,8 +25,7 @@ export const register = async (req: Request, res: Response) => {
       password,
     });
 
-    const { friendlySharedSecret, sharedSecret } =
-      SecurityService.generateSharedSecret();
+    const { friendlySharedSecret, sharedSecret } = generateSharedSecret();
     await SecurityService.saveSharedSecret(user.id, sharedSecret);
     // EmailService.sendSharedSecret(email, friendlySharedSecret); // TODO: Uncomment this line
     console.log(friendlySharedSecret);
@@ -106,7 +109,10 @@ export const generateToken = async (req: Request, res: Response) => {
     const token = UserService.generateToken(user.id);
     challenges.delete(user.id);
 
-    // FIXME: Add session key
+    const sessionKey = await generateSessionKey();
+    SecurityService.saveSessionKey(user.id, sessionKey);
+
+    // TODO:  add to json sessionKey
 
     res.json({ token });
   } catch (error) {

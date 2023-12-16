@@ -1,13 +1,19 @@
-import { generate, generate as randomWords } from 'random-words';
 import { crypto } from 'blingbank-lib';
 
 import db from '../database';
+import { createProtectProp, createUnprotectProp } from './PropCreator';
 import {
-  createKeyEncryptionKey,
-  createProtectProp,
-  createUnprotectProp,
   stringToAESKey,
-} from './EncryptionService';
+  AESKeytoBuffer,
+  bufferToAESKey,
+  bufferToString,
+  stringToBuffer,
+} from './KeyConverter';
+import {
+  createHMACKey,
+  createKeyEncryptionKey,
+  createMasterKey,
+} from './KeyGenerator';
 
 enum SecretType {
   SHARED_SECRET = 'SHARED_SECRET',
@@ -23,27 +29,18 @@ let masterKey: CryptoKey;
 let keyEncryptionKey: CryptoKey;
 let hmacKey: CryptoKey;
 
-export const generateSharedSecret = () => {
-  const friendlySharedSecret = 'cao-gato-aviao'; // FIXME: Generate 3 random words
-  const sharedSecret = friendlySharedSecret;
-
-  return {
-    friendlySharedSecret,
-    sharedSecret,
-  };
-};
-
 export const saveSharedSecret = async (
   userID: string,
   sharedSecret: string,
 ) => {
   const protectProp = createProtectProp(keyEncryptionKey, hmacKey);
   const { messageEncrypted } = await crypto.protect(
-    Buffer.from(sharedSecret, 'utf8'),
+    await stringToBuffer(sharedSecret),
     protectProp,
   );
-  const encryptedSharedSecret =
-    Buffer.from(messageEncrypted).toString('base64');
+  const encryptedSharedSecret = await bufferToString(
+    Buffer.from(messageEncrypted),
+  );
 
   await db.secret.create({
     data: {
@@ -83,9 +80,8 @@ export const getSharedSecret = async (userID: string) => {
     Buffer.from(encryptedSharedSecret, 'base64'),
     unprotectProp,
   );
-  const sharedSecret = Buffer.from(payload).toString('utf8');
 
-  return sharedSecret;
+  return await bufferToString(Buffer.from(payload));
 };
 
 export const generatePOWChallenge = () => {
@@ -106,27 +102,22 @@ export const encryptWithSharedSecret = async (
   const protectProp = createProtectProp(sharedKey);
 
   const { messageEncrypted } = await crypto.protect(
-    Buffer.from(data, 'utf8'),
+    await stringToBuffer(data),
     protectProp,
   );
 
-  return Buffer.from(messageEncrypted).toString('base64');
+  return await bufferToString(Buffer.from(messageEncrypted));
 };
 
-export const generateSessionKey = async () => {
-  const sessionKey = await crypto.createAESKey();
-
-  return sessionKey;
-};
-
-export const saveSessionKey = async (userID: string, sessionKey: string) => {
+export const saveSessionKey = async (userID: string, sessionKey: CryptoKey) => {
   const protectProp = createProtectProp(keyEncryptionKey, hmacKey);
   const { messageEncrypted } = await crypto.protect(
-    Buffer.from(sessionKey, 'utf8'),
+    await AESKeytoBuffer(sessionKey),
     protectProp,
   );
-  const encryptedSessionKey = Buffer.from(messageEncrypted).toString('base64');
-
+  const encryptedSessionKey = await bufferToString(
+    Buffer.from(messageEncrypted),
+  );
   await db.secret.create({
     data: {
       type: SecretType.SESSION_KEY,
@@ -162,18 +153,17 @@ export const getSessionKey = async (userID: string) => {
     hmacKey,
   );
   const { payload } = await crypto.unprotect(
-    Buffer.from(encryptedSessionKey, 'base64'),
+    await stringToBuffer(encryptedSessionKey),
     unprotectProp,
   );
-  const sessionKey = Buffer.from(payload).toString('utf8');
 
-  return sessionKey;
+  return await bufferToAESKey(Buffer.from(payload));
 };
 
 async function startSecurity() {
-  masterKey = await crypto.createAESKey();
+  masterKey = await createMasterKey();
   keyEncryptionKey = await createKeyEncryptionKey();
-  hmacKey = await crypto.createHMACKey();
+  hmacKey = await createHMACKey();
 }
 
 startSecurity();
