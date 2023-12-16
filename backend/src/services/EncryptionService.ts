@@ -1,4 +1,7 @@
 import { crypto } from 'blingbank-lib';
+import { webcrypto } from 'crypto';
+
+const keyCrypto = webcrypto.subtle;
 
 export const createProtectProp = (
   aesKey: CryptoKey,
@@ -39,5 +42,18 @@ export const createKeyEncryptionKey = async () => {
   } catch (error) {
     console.error(error);
     throw error; // Re-throw the error to handle it elsewhere if needed
+  }
+};
+
+export const stringToAESKey = async (aes: string) => {
+  const data = Buffer.from(aes, 'utf8');
+  try {
+    return await keyCrypto.importKey('raw', data, 'AES-CBC', true, [
+      'encrypt',
+      'decrypt',
+    ]);
+  } catch (error: any) {
+    console.log('Could not import key: sad ' + error.message);
+    throw error;
   }
 };

@@ -62,7 +62,10 @@ export const login = async (req: Request, res: Response) => {
 
     const challenge = {
       content: pow,
-      ciphered: SecurityService.encryptWithSharedSecret(pow, sharedSecret),
+      ciphered: await SecurityService.encryptWithSharedSecret(
+        pow,
+        sharedSecret,
+      ),
       solution: powSolution,
       numberOfTries: 0,
     };

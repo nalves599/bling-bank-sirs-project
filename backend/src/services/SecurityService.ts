@@ -6,6 +6,7 @@ import {
   createKeyEncryptionKey,
   createProtectProp,
   createUnprotectProp,
+  stringToAESKey,
 } from './EncryptionService';
 
 enum SecretType {
@@ -23,7 +24,7 @@ let keyEncryptionKey: CryptoKey;
 let hmacKey: CryptoKey;
 
 export const generateSharedSecret = () => {
-  const friendlySharedSecret = generate(5).join('-');
+  const friendlySharedSecret = 'cao-gato-aviao'; // FIXME: Generate 3 random words
   const sharedSecret = friendlySharedSecret;
 
   return {
@@ -97,10 +98,19 @@ export const solvePOWChallenge = (challenge: string) => {
   return String(solution);
 };
 
-export const encryptWithSharedSecret = (data: string, sharedSecret: string) => {
-  // FIXME: Encrypt data with shared secret using blingbank-lib
-  const encryptedData = data;
-  return encryptedData;
+export const encryptWithSharedSecret = async (
+  data: string,
+  sharedSecret: string,
+) => {
+  const sharedKey = await stringToAESKey(sharedSecret);
+  const protectProp = createProtectProp(sharedKey);
+
+  const { messageEncrypted } = await crypto.protect(
+    Buffer.from(data, 'utf8'),
+    protectProp,
+  );
+
+  return Buffer.from(messageEncrypted).toString('base64');
 };
 
 export const generateSessionKey = async () => {
