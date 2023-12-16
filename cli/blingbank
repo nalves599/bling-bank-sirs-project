@@ -1,0 +1,9 @@
+#!/bin/bash
+
+NODE_MODULES="./node_modules"
+NODE_PATH=node
+
+NODE_SCRIPT=src/index.ts
+
+# Run using local ts-node
+$NODE_PATH $NODE_MODULES/ts-node/dist/bin.js $NODE_SCRIPT "$@"
