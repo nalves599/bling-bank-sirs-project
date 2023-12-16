@@ -136,4 +136,4 @@ export const getUser = async (req: Request, res: Response) => {
     console.error(error);
     res.status(400).json({ message: 'Could not get user' });
   }
-}
+};
