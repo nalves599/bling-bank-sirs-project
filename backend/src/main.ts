@@ -1,7 +1,7 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 
-import {PORT} from './config';
+import { PORT } from './config';
 import routes from './routes';
 
 import './database';

@@ -22,7 +22,7 @@ export const register = async (user: RegisterUser) => {
   });
 
   return registeredUser;
-}
+};
 
 export const getUserByEmail = async (email: string) => {
   const user = await db.user.findUnique({
@@ -32,7 +32,7 @@ export const getUserByEmail = async (email: string) => {
   });
 
   return user;
-}
+};
 
 export const getUserById = async (id: string) => {
   const user = await db.user.findUnique({
@@ -42,16 +42,20 @@ export const getUserById = async (id: string) => {
   });
 
   return user;
-}
+};
 
-export const comparePasswords = async (password: string, passwordHash: string) => {
+export const comparePasswords = async (
+  password: string,
+  passwordHash: string,
+) => {
   const passwordMatches = await bcrypt.compare(password, passwordHash);
 
   return passwordMatches;
-}
+};
 
 export const generateToken = (userID: string) => {
-  const token = jwt.sign({ userID, }, JWT_PRIVATE_KEY, { expiresIn: JWT_OPTIONS.expiresIn });
+  const token = jwt.sign({ userID }, JWT_PRIVATE_KEY, {
+    expiresIn: JWT_OPTIONS.expiresIn,
+  });
   return token;
-}
-
+};

@@ -20,4 +20,4 @@ export const sendSharedSecret = async (email: string, sharedSecret: string) => {
   });
 
   console.debug('Email sent to', email, 'with ID', info);
-}
+};

@@ -11,5 +11,4 @@ class User {
     this.passwordHash = props.passwordHash;
     this.name = props.name;
   }
-
 }
