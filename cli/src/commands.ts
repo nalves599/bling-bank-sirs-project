@@ -1,7 +1,6 @@
 import {
   ProtectProps,
   UnprotectProps,
-  protect,
   unprotect,
   check,
 } from "../../library/src/utils/crypto";
@@ -19,7 +18,8 @@ import {
   unprotectUsage,
   unknownCommand,
 } from "./messages";
-import { it } from "node:test";
+
+import { Account, Doc, Movement } from "./document";
 
 export class Commands {
   help(args: string[]): void {
@@ -52,13 +52,27 @@ export class Commands {
         signingKey: signKey,
       };
 
-      const jsonInput = JSON.parse(input.toString());
-      iterateJSON(jsonInput, '', protectProps);
+      const jsonData = JSON.parse(input.toString());
 
-      //console.log(JSON.stringify(jsonInput, null, 2));
+      // Extract data and create instances
+      const account = new Account(
+        jsonData.account.accountHolder,
+        jsonData.account.balance,
+        jsonData.account.currency,
+        jsonData.account.movements.map(
+          (movement: any) =>
+            new Movement(movement.date, movement.amount, movement.description),
+        ),
+      );
 
-      //const output = await protect(input, protectProps);
-      //Utils.writeFile(outputPath, output.messageEncrypted);
+      const doc = new Doc(account);
+
+      // Protect data
+      await doc.protect(protectProps);
+
+      const docJson = JSON.stringify(doc, null, 2);
+
+      Utils.writeFile(outputPath, Buffer.from(docJson));
     } catch (error: any) {
       console.log("Could not protect file " + inputPath + ": " + error.message);
     }
@@ -137,33 +151,5 @@ export class Commands {
 
   async unknown(): Promise<void> {
     console.log(unknownCommand);
-  }
-}
-
-async function iterateJSON(obj: any, parentKey = '', props: ProtectProps): Promise<void> {
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const value = obj[key];
-
-      if (Array.isArray(value)) {
-        //console.log(`${parentKey}.${key}: [${value.join(', ')}]`);
-        for (let i = 0; i < value.length; i++) {
-          if (typeof value[i] === 'object') {
-            iterateJSON(value[i], `${parentKey}.${key}[${i}]`, props);
-          }
-        }
-      } else if (typeof value === 'object' && value !== null) {
-        //console.log(`${parentKey}.${key}:`);
-        iterateJSON(value, `${parentKey}.${key}`, props);
-      } else {
-        if (typeof value === 'number') {
-          obj[key] = value.toString();
-        }
-        const valueToProtect = obj[key];
-        console.log(`${parentKey}.${key}: ${valueToProtect}`);
-        console.log(typeof valueToProtect)
-        obj[key] = await protect(valueToProtect, props);
-      }
-    }
   }
 }
