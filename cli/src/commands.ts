@@ -57,11 +57,11 @@ export class Commands {
       // Extract data and create instances
       const account = new Account(
         jsonData.account.accountHolder,
-        jsonData.account.balance,
+        jsonData.account.balance.toString(),
         jsonData.account.currency,
         jsonData.account.movements.map(
           (movement: any) =>
-            new Movement(movement.date, movement.amount, movement.description),
+            new Movement(movement.date, movement.amount.toString(), movement.description),
         ),
       );
 
@@ -105,8 +105,24 @@ export class Commands {
         nonceVerification: nonceVerification,
       };
 
-      const valid = await check(input, unprotectedProps);
-      console.log("File is protected: " + valid);
+      const jsonData = JSON.parse(input.toString());
+
+      // Extract data and create instances
+      const account = new Account(
+        jsonData.account.accountHolder,
+        jsonData.account.balance.toString(),
+        jsonData.account.currency,
+        jsonData.account.movements.map(
+          (movement: any) =>
+            new Movement(movement.date, movement.amount.toString(), movement.description),
+        ),
+      );
+
+      const doc = new Doc(account);
+
+      // Check data
+      const checkResult = await doc.check(unprotectedProps);
+      console.log("File is protected: " + checkResult);
     } catch (error: any) {
       console.log("File is not protected");
     }
@@ -120,8 +136,8 @@ export class Commands {
 
     const inputPath = args[1];
     const outputPath = args[2];
-    const aesKeyPath = args[3];
-    const verifyKeyPath = args[4];
+    const verifyKeyPath = args[3];
+    const aesKeyPath = args[4];
 
     try {
       const input = Utils.readFile(inputPath);
@@ -140,8 +156,27 @@ export class Commands {
         nonceVerification: nonceVerification,
       };
 
-      const output = await unprotect(input, unProtectProps);
-      Utils.writeFile(outputPath, output.payload);
+      const jsonData = JSON.parse(input.toString());
+
+      // Extract data and create instances
+      const account = new Account(
+        jsonData.account.accountHolder,
+        jsonData.account.balance.toString(),
+        jsonData.account.currency,
+        jsonData.account.movements.map(
+          (movement: any) =>
+            new Movement(movement.date, movement.amount.toString(), movement.description),
+        ),
+      );
+
+      const doc = new Doc(account);
+
+      // Unprotect data
+      await doc.unprotect(unProtectProps);
+
+      const docJson = JSON.stringify(doc, null, 2);
+
+      Utils.writeFile(outputPath, Buffer.from(docJson));
     } catch (error: any) {
       console.log(
         "Could not unprotect file " + inputPath + ": " + error.message,
