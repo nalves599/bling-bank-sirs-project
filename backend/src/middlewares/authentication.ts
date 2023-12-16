@@ -3,6 +3,12 @@ import jwt from 'jsonwebtoken';
 
 import { JWT_PUBLIC_KEY } from '../config';
 
+declare module 'express-serve-static-core' {
+  interface Request {
+    authData?: jwt.JwtPayload | null | string;
+  }
+}
+
 export const jwtAuth = async (
   req: Request,
   res: Response,

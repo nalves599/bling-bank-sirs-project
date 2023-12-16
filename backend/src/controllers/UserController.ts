@@ -120,3 +120,20 @@ export const generateToken = async (req: Request, res: Response) => {
     res.status(400).json({ message: 'Could not get token' });
   }
 };
+
+export const getUser = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  try {
+    const user = await UserService.getUserByEmail(email);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' }); // TODO: Make this generic
+    }
+
+    res.json({ user });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: 'Could not get user' });
+  }
+}
