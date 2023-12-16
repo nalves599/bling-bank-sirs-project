@@ -1,8 +1,6 @@
-import { generate as randomWords } from 'random-words';
-import nodeCrypto from 'node:crypto';
+import { generate, generate as randomWords } from 'random-words';
 import { crypto } from 'blingbank-lib';
 
-import { MASTER_PASSWORD } from '../config';
 import db from '../database';
 import {
   createKeyEncryptionKey,
@@ -20,15 +18,13 @@ const sharedSecrets = new Map<string, string>(); // <userID, sharedSecret>
 
 const sessionKeys = new Map<string, string>(); // <userID, sessionKey>
 
-const masterKey = nodeCrypto.createSecretKey(MASTER_PASSWORD, 'utf8'); // FIXME: Use blingbank-lib
-
+let masterKey: CryptoKey;
 let keyEncryptionKey: CryptoKey;
-
 let hmacKey: CryptoKey;
 
 export const generateSharedSecret = () => {
-  const friendlySharedSecret = 'cao-gato-aviao'; // FIXME: Generate 3 random words
-  const sharedSecret = friendlySharedSecret; // FIXME: Encrypt shared secret
+  const friendlySharedSecret = generate(5).join('-');
+  const sharedSecret = friendlySharedSecret;
 
   return {
     friendlySharedSecret,
@@ -40,11 +36,6 @@ export const saveSharedSecret = async (
   userID: string,
   sharedSecret: string,
 ) => {
-  if (!keyEncryptionKey) {
-    // TODO: Improve this
-    keyEncryptionKey = await createKeyEncryptionKey();
-    hmacKey = await crypto.createHMACKey();
-  }
   const protectProp = createProtectProp(keyEncryptionKey, hmacKey);
   const { messageEncrypted } = await crypto.protect(
     Buffer.from(sharedSecret, 'utf8'),
@@ -112,14 +103,19 @@ export const encryptWithSharedSecret = (data: string, sharedSecret: string) => {
   return encryptedData;
 };
 
-export const generateSessionKey = () => {
-  const sessionKey = crypto.createAESKey();
+export const generateSessionKey = async () => {
+  const sessionKey = await crypto.createAESKey();
 
   return sessionKey;
 };
 
 export const saveSessionKey = async (userID: string, sessionKey: string) => {
-  const encryptedSessionKey = sessionKey; // FIXME: Encrypt session key
+  const protectProp = createProtectProp(keyEncryptionKey, hmacKey);
+  const { messageEncrypted } = await crypto.protect(
+    Buffer.from(sessionKey, 'utf8'),
+    protectProp,
+  );
+  const encryptedSessionKey = Buffer.from(messageEncrypted).toString('base64');
 
   await db.secret.create({
     data: {
@@ -129,25 +125,45 @@ export const saveSessionKey = async (userID: string, sessionKey: string) => {
     },
   });
 
-  sessionKeys.set(userID, encryptedSessionKey); // FIXME: Encrypt session key
+  sessionKeys.set(userID, encryptedSessionKey);
 };
 
 export const getSessionKey = async (userID: string) => {
+  let encryptedSessionKey;
   if (sessionKeys.has(userID)) {
-    return sessionKeys.get(userID); // FIXME: Decrypt session key
+    encryptedSessionKey = sessionKeys.get(userID)!;
+  } else {
+    const entry = await db.secret.findFirst({
+      where: {
+        type: SecretType.SESSION_KEY,
+        key: userID,
+      },
+    });
+
+    if (!entry) {
+      throw new Error('Session secret not found');
+    }
+    encryptedSessionKey = entry.value;
   }
 
-  const encryptedSessionKey = await db.secret.findFirst({
-    where: {
-      type: SecretType.SESSION_KEY,
-      key: userID,
-    },
-  });
+  const unprotectProp = createUnprotectProp(
+    keyEncryptionKey,
+    undefined,
+    hmacKey,
+  );
+  const { payload } = await crypto.unprotect(
+    Buffer.from(encryptedSessionKey, 'base64'),
+    unprotectProp,
+  );
+  const sessionKey = Buffer.from(payload).toString('utf8');
 
-  if (!encryptedSessionKey) {
-    throw new Error('Session key not found');
-  }
-
-  const sessionKey = encryptedSessionKey.value; // FIXME: Decrypt session key
   return sessionKey;
 };
+
+async function startSecurity() {
+  masterKey = await crypto.createAESKey();
+  keyEncryptionKey = await createKeyEncryptionKey();
+  hmacKey = await crypto.createHMACKey();
+}
+
+startSecurity();
