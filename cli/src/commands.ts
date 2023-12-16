@@ -19,6 +19,7 @@ import {
   unprotectUsage,
   unknownCommand,
 } from "./messages";
+import { it } from "node:test";
 
 export class Commands {
   help(args: string[]): void {
@@ -51,8 +52,13 @@ export class Commands {
         signingKey: signKey,
       };
 
-      const output = await protect(input, protectProps);
-      Utils.writeFile(outputPath, output.messageEncrypted);
+      const jsonInput = JSON.parse(input.toString());
+      iterateJSON(jsonInput, '', protectProps);
+
+      //console.log(JSON.stringify(jsonInput, null, 2));
+
+      //const output = await protect(input, protectProps);
+      //Utils.writeFile(outputPath, output.messageEncrypted);
     } catch (error: any) {
       console.log("Could not protect file " + inputPath + ": " + error.message);
     }
@@ -131,5 +137,33 @@ export class Commands {
 
   async unknown(): Promise<void> {
     console.log(unknownCommand);
+  }
+}
+
+async function iterateJSON(obj: any, parentKey = '', props: ProtectProps): Promise<void> {
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      const value = obj[key];
+
+      if (Array.isArray(value)) {
+        //console.log(`${parentKey}.${key}: [${value.join(', ')}]`);
+        for (let i = 0; i < value.length; i++) {
+          if (typeof value[i] === 'object') {
+            iterateJSON(value[i], `${parentKey}.${key}[${i}]`, props);
+          }
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        //console.log(`${parentKey}.${key}:`);
+        iterateJSON(value, `${parentKey}.${key}`, props);
+      } else {
+        if (typeof value === 'number') {
+          obj[key] = value.toString();
+        }
+        const valueToProtect = obj[key];
+        console.log(`${parentKey}.${key}: ${valueToProtect}`);
+        console.log(typeof valueToProtect)
+        obj[key] = await protect(valueToProtect, props);
+      }
+    }
   }
 }
