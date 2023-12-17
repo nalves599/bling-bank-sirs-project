@@ -2,6 +2,7 @@
   "account": {
     "accountHolder": ["Alice"],
     "currency": "EUR",
+    "balance": 872.22,
     "movements": [
       {
         "date": "09/11/2023",

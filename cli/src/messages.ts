@@ -4,10 +4,10 @@ export const protectUsage =
   "Usage: ./blingbank protect <input-file> <output-file> <aes-key> <priv-key>";
 
 export const checkUsage =
-  "Usage: ./blingbank check <input-file> <receiver-public-key> <session-secret-key> [timeout]";
+  "Usage: ./blingbank check <input-file> <session-secret-key> <receiver-public-key> [timeout]";
 
 export const unprotectUsage =
-  "Usage: ./blingbank unprotect <input-file> <output-file> <receiver-public-key> <session-secret-key> [timeout]";
+  "Usage: ./blingbank unprotect <input-file> <output-file> <session-secret-key> <receiver-public-key> [timeout]";
 
 export const unknownCommand =
   "Unknown command. Type ./blingbank help to display all available commands and their description";

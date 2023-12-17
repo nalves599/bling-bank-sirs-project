@@ -1,9 +1,4 @@
-import {
-  ProtectProps,
-  UnprotectProps,
-  unprotect,
-  check,
-} from "../../library/src/utils/crypto";
+import { ProtectProps, UnprotectProps } from "../../library/src/utils/crypto";
 import {
   bytesToAesKey,
   bytesToSigningKey,
@@ -53,19 +48,7 @@ export class Commands {
       };
 
       const jsonData = JSON.parse(input.toString());
-
-      // Extract data and create instances
-      const account = new Account(
-        jsonData.account.accountHolder,
-        jsonData.account.balance.toString(),
-        jsonData.account.currency,
-        jsonData.account.movements.map(
-          (movement: any) =>
-            new Movement(movement.date, movement.amount.toString(), movement.description),
-        ),
-      );
-
-      const doc = new Doc(account);
+      const doc = this.createDoc(jsonData);
 
       // Protect data
       await doc.protect(protectProps);
@@ -106,19 +89,7 @@ export class Commands {
       };
 
       const jsonData = JSON.parse(input.toString());
-
-      // Extract data and create instances
-      const account = new Account(
-        jsonData.account.accountHolder,
-        jsonData.account.balance.toString(),
-        jsonData.account.currency,
-        jsonData.account.movements.map(
-          (movement: any) =>
-            new Movement(movement.date, movement.amount.toString(), movement.description),
-        ),
-      );
-
-      const doc = new Doc(account);
+      const doc = this.createDoc(jsonData);
 
       // Check data
       const checkResult = await doc.check(unprotectedProps);
@@ -136,8 +107,8 @@ export class Commands {
 
     const inputPath = args[1];
     const outputPath = args[2];
-    const verifyKeyPath = args[3];
-    const aesKeyPath = args[4];
+    const aesKeyPath = args[3];
+    const verifyKeyPath = args[4];
 
     try {
       const input = Utils.readFile(inputPath);
@@ -157,19 +128,7 @@ export class Commands {
       };
 
       const jsonData = JSON.parse(input.toString());
-
-      // Extract data and create instances
-      const account = new Account(
-        jsonData.account.accountHolder,
-        jsonData.account.balance.toString(),
-        jsonData.account.currency,
-        jsonData.account.movements.map(
-          (movement: any) =>
-            new Movement(movement.date, movement.amount.toString(), movement.description),
-        ),
-      );
-
-      const doc = new Doc(account);
+      const doc = this.createDoc(jsonData);
 
       // Unprotect data
       await doc.unprotect(unProtectProps);
@@ -186,5 +145,28 @@ export class Commands {
 
   async unknown(): Promise<void> {
     console.log(unknownCommand);
+  }
+
+  private createDoc(jsonData: any): Doc {
+    // Extract data and create instances
+    if (jsonData.account.balance instanceof Number)
+      jsonData.account.balance = jsonData.account.balance.toString();
+
+    for (let movement of jsonData.account.movements) {
+      if (movement.value instanceof Number)
+        movement.value = movement.value.toString();
+    }
+
+    const account = new Account(
+      jsonData.account.accountHolder,
+      jsonData.account.balance,
+      jsonData.account.currency,
+      jsonData.account.movements.map(
+        (movement: any) =>
+          new Movement(movement.date, movement.value, movement.description),
+      ),
+    );
+
+    return new Doc(account);
   }
 }

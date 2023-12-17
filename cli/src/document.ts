@@ -1,4 +1,10 @@
-import { ProtectProps, UnprotectProps, protect, unprotect, check } from "blingbank-lib/dist/utils/crypto";
+import {
+  ProtectProps,
+  UnprotectProps,
+  protect,
+  unprotect,
+  check,
+} from "blingbank-lib/dist/utils/crypto";
 
 import { TextEncoder } from "util";
 
@@ -92,40 +98,44 @@ export class Account {
       }),
     );
 
-    return accountHolderValid.every((valid) => valid) &&
+    return (
+      accountHolderValid.every((valid) => valid) &&
       balanceValid &&
       currencyValid &&
-      movementsValid.every((valid) => valid);
+      movementsValid.every((valid) => valid)
+    );
   }
 }
 
 export class Movement {
   date: string;
-  amount: string;
+  value: string;
   description: string;
 
-  constructor(date: string, amount: string, description: string) {
+  constructor(date: string, value: string, description: string) {
     this.date = date;
-    this.amount = amount;
+    this.value = value;
     this.description = description;
   }
 
   async protect(props: ProtectProps) {
     this.date = await protectValue(this.date, props);
-    this.amount = await protectValue(this.amount, props);
+    this.value = await protectValue(this.value, props);
     this.description = await protectValue(this.description, props);
   }
 
   async unprotect(props: UnprotectProps) {
     this.date = await unprotectValue(this.date, props);
-    this.amount = await unprotectValue(this.amount, props);
+    this.value = await unprotectValue(this.value, props);
     this.description = await unprotectValue(this.description, props);
   }
 
   async check(props: UnprotectProps) {
-    return await checkValue(this.date, props) &&
-      await checkValue(this.amount, props) &&
-      await checkValue(this.description, props);
+    return (
+      (await checkValue(this.date, props)) &&
+      (await checkValue(this.value, props)) &&
+      (await checkValue(this.description, props))
+    );
   }
 }
 
@@ -138,17 +148,11 @@ const protectValue = async (value: string, props: ProtectProps) => {
 };
 
 const unprotectValue = async (value: string, props: UnprotectProps) => {
-  const { payload } = await unprotect(
-    Buffer.from(value, "base64"),
-    props,
-  );
+  const { payload } = await unprotect(Buffer.from(value, "base64"), props);
   return new TextDecoder().decode(payload);
 };
 
 const checkValue = async (value: string, props: UnprotectProps) => {
-  const valid = await check(
-    Buffer.from(value, "base64"),
-    props,
-  );
+  const valid = await check(Buffer.from(value, "base64"), props);
   return valid;
-}
+};
