@@ -21,6 +21,7 @@ jobs:
           npm ci
           npm run test
           npm run build
+          npm pack
       - name: cli
         run: |
           cd cli
