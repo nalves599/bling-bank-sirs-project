@@ -19,11 +19,9 @@ It offers insights into the rationale behind these choices, the project's archit
 
 This document presents installation and demonstration instructions.
 
-*(adapt all of the following to your project, changing to the specific Linux distributions, programming languages, libraries, etc)*
-
 ## Installation
 
-To see the project in action, it is necessary to setup a virtual environment, with N networks and M machines.  
+To see the project in action, it is necessary to setup a virtual environment, with 3 TODO: networks and 4 machines.
 
 The following diagram shows the networks and machines:
 
@@ -31,12 +29,22 @@ The following diagram shows the networks and machines:
 
 ### Prerequisites
 
-All the virtual machines are based on: Linux 64-bit, Kali 2023.3  
+All the virtual machines are based on: Linux 64-bit, nixos-23.05 and were ran using QEMU.
 
-[Download](https://...link_to_download_installation_media) and [install](https://...link_to_installation_instructions) a virtual machine of Kali Linux 2023.3.  
-Clone the base machine to create the other machines.
+[Download NixOS](https://nixos.org/download)
+[Download QEMU](https://qemu.org/download)
 
-*(above, replace witch actual links)*
+NixOS was chosen due to its ease of use and its ability to be easily configured and replicated.
+With one simple configuration file, we can easily replicate the same environment in multiple machines.
+The different machines will only differ with the network configuration and which services are running.
+
+QEMU was chosen due to the fact that it is faster than most other virtual box solutions (since it has direct kernel integration), and for our purposes, it is more than enough (since we are not using any graphical interface)
+
+#### Docker
+
+Firstly the group wanted to use Docker to run the different services, in a way to avoid using virtual machines.
+However, this approach was not allowed (due to the easy configuration of Docker, which would not be a challenge for the project).
+In a real world scenario, Docker would be the best option, since it is easy to configure and replicate, and it is also very lightweight.
 
 ### Machine configurations
 
