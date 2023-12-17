@@ -95,9 +95,28 @@ TODO: ADD img of the structure
 
 #### 2.1.2. Implementation
 
-(_Detail the implementation process, including the programming language and cryptographic libraries used._)
+We decided to use typescript as the programming language for the library.
+Typescript allows us to use the library in both the frontend and the backend.
+Allowing for the client to use it in the browser without needing an external tool.
+The library is transparent to the user, the user might not even know that the library is being used.
 
-(_Include challenges faced and how they were overcome._)
+Some cryptographic libraries were used in order to implement the library, such as crypto (webcrypto).
+
+Even though typescript has types, the use of raw bytes is not easily done.
+A lot of fight and experimentation was needed in order to get the library to work with raw bytes.
+
+Tests were also implemented in order to ensure that the library was working as intended.
+The tests were implemented using jest.
+This was a very important step, since it allowed us to find bugs and fix them.
+
+We followed a very modular approach, in order to make the library as flexible as possible.
+The multiple functions allow the user that uses it to choose for example, if either a HMAC or a DS is used, use a custom nonce or choose the nonce verifcation function.
+This was done without compromising the security of the library.
+
+In the case of the protect/unprotect functions, the library does not care about the content that is being protected.
+The library receives bytes and returns bytes.
+
+If it exists, it can be protected!
 
 ### 2.2. Infrastructure
 
