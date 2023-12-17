@@ -91,15 +91,100 @@ If configured correctly, alongside the gateway, the backend should be able to co
 
 ## Demonstration
 
-Now that all the networks and machines are up and running, ...
+### CLI - Command Line Interface
+To easily demonstrate that the library is working as expected, a CLI was created. Here we can protect, check, and unprotect documents following the requirements of the project. To do so, we must first setup this environment following these steps:
+
+1. Install the library in the machine that will be used to run the CLI
+```sh
+$ cd library
+$ npm i
+$ npm run build
+$ npm pack
+```
+
+2. Install cli dependencies
+```sh
+$ cd ../cli
+$ npm i
+$ npm run build
+```
+
+Now that the environment is ready, we can start the demonstration. On the `cli` directory we can see that we have a sub-direcotry called `files`. In this directory we can find the keys necessary to perform the operations as well as the input file that will be used to test the library.
+
+The following commands should be run in the `cli` directory.
+
+#### Help
+To see the available commands and their usage, we can run the following command:
+```sh
+$ ./blingbank help
+```
+
+#### Protect
+To protect a file, we can run the following command:
+```sh
+$ ./blingbank protect files/input.json files/protected.json files/aes.key files/priv.key
+```
+As we can see after running the `help` command, the `protect` command takes 4 arguments:
+- `input.json` - The file that will be protected
+- `protected.json` - The file that will be created with the protected data
+- `aes.key` - The file that contains the secret key that will be used to encrypt the data
+- `priv.key` - The file that contains the private key that will be used to sign the data
+
+After performing this command, we can see that the `protected.json` file was created and it contains the protected data.
+We can see that only the multiple values of the json file are protected, and not the file as a whole.
+
+#### Check
+To check the integrity of the protected data, we can run the following command:
+```sh
+$ ./blingbank check files/protected.json files/aes.key files/pub.key
+```
+As we can see after running the `help` command, the `check` command takes 3 arguments:
+- `protected.json` - The file that we want to check
+- `aes.key` - The file that contains the secret key that will be used to decrypt the data
+- `pub.key` - The file that contains the public key that will be used to verify the signature of the data
+
+After performing this command, a message will be displayed informing if the data is valid or not. In this case, the message will be true since the data is valid. If we change the file to be checked to `files/input.json` and run the command again, the message will be false since the data is not protected.
+
+The check is done to verify the integrity and freshness of the data so we might see that the message is false even if we know that the file is "protected". This happens because the data is not fresh, meaning that the timestamp of the data is not valid as the default threshold is set to 3 seconds. This means that if we take more than 3 seconds between performing the `protect` command and the `check` command, the output of the `check` command will be: `File is protected: false`. To fix this, we can run the `check` command with one additional argument at the end, the timeout:
+```sh
+$ ./blingbank check files/protected.json files/aes.key files/pub.key 100000
+```
+This command will check if the data is valid and if the timestamp is not older than 100_000 ms (or 100 s). By doing this, we can see that the message is true since the data is valid and fresh. This is done to prevent replay attacks.
+
+#### Unprotect
+To unprotect a file, we can run the following command:
+```sh
+$ ./blingbank unprotect files/protected.json files/output.json files/aes.key files/pub.key
+```
+
+As we can see after running the `help` command, the `unprotect` command takes 4 arguments:
+- `protected.json` - The file that we want to unprotect
+- `output.json` - The file that will be created with the unprotected data
+- `aes.key` - The file that contains the secret key that will be used to decrypt the data
+- `pub.key` - The file that contains the public key that will be used to verify the signature of the data
+
+After performing this command, we can see that the `output.json` file was created and it contains the unprotected data. Since we are using the same keys as before and the input file is the output of the `protect` command, the data will be the same as the input file. We can check this by running the following command:
+```sh
+$ diff files/input.json files/output.json
+```
+This command will not output anything since the files are the same.
+
+As it happens with the `check` command, sometimes we might get an error saying that it wasn't possible to unprotect the data, if we take more than 3 seconds between performing the `protect` command and the `unprotect` command. This happens because the data is not fresh, meaning that the timestamp of the data is not valid. To fix this, we can run the `unprotect` command with one additional argument at the end, the timeout:
+```sh
+$ ./blingbank unprotect files/protected.json files/output.json files/aes.key files/pub.key 100000
+```
+This command will unprotect the data if it is valid and if the timestamp is not older than 100_000 ms (or 100 s). This way, we are able to unprotect the data and see its contents.
+
+### Web Application
+
+Assuming that the machines are properly configured after following the installation instructions, we can now demonstrate the web application.
+
 
 *(give a tour of the best features of the application; add screenshots when relevant)*
 
 ```sh
 $ demo command
 ```
-
-*(replace with actual commands)*
 
 *(IMPORTANT: show evidence of the security mechanisms in action; show message payloads, print relevant messages, perform simulated attacks to show the defenses in action, etc.)*
 
