@@ -1,16 +1,45 @@
-# CXX GrooveGalaxy / BombAppetit / BlingBank / MediTrack Project Report
+# A39 BlingBank Project Report
 
 ## 1. Introduction
 
-(_Provide a brief overview of your project, including the business scenario and the main components: secure documents, infrastructure, and security challenge._)
+BlingBank provides an online banking platform, accessible via a web application.
+The main functionalities are: account management, expense monitoring, and payments. The account management allows an efficient oversight of account balance. Expense monitoring shows the movements corresponding to expenses, in categories. Finally, payments allow a simple way to make bill payments.
 
-(_Include a structural diagram, in UML or other standard notation._)
+### 1.1. Secure Documents
+Our secure documents must ensure authenticity and confidentiality of the account data. Therefore, these properties are achieved by a custom library which will be explained in more detail in the following sections.
+
+### 1.2. Infrastructure
+BlingBank's infrastructure is composed of three servers: a web server, a database server, and a gateway.
+
+### 1.3. Security Challenge
+The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed.
+With all these requirements, the new document format for payment orders has the following structure:
+```json
+{
+    "account": "account-id",
+    "amount": "amount",
+    "currency": "currency",
+    "date": "date",
+    "description": "description",
+    "requiredApprovals": "required-approvals",
+    "givenApprovals": "given-approvals",
+    "accepted": "accepted"
+}
+```
+
+### 1.4 Project Structure
+Our BlingBank project has the following structure that will be explained in more detail in the following sections.
+
+[![Project Structure](img/uml.png)]
 
 ## 2. Project Development
 
 ### 2.1. Secure Document Format
 
 #### 2.1.1. Design
+
+BlingBank's cryptographic custom library needs to protect, check, and unprotect documents. The protection of a document is done in such way that it ensure authenticity, confidentiality, and integrity. To achieve this we created a custom algorithm which follows the following steps:
+
 
 (_Outline the design of your custom cryptographic library and the rationale behind your design choices, focusing on how it addresses the specific needs of your chosen business scenario._)
 
