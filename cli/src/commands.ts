@@ -56,6 +56,7 @@ export class Commands {
       const docJson = JSON.stringify(doc, null, 2);
 
       Utils.writeFile(outputPath, Buffer.from(docJson));
+      console.log("File protected successfully");
     } catch (error: any) {
       console.log("Could not protect file " + inputPath + ": " + error.message);
     }
@@ -136,6 +137,7 @@ export class Commands {
       const docJson = JSON.stringify(doc, null, 2);
 
       Utils.writeFile(outputPath, Buffer.from(docJson));
+      console.log("File unprotected successfully");
     } catch (error: any) {
       console.log(
         "Could not unprotect file " + inputPath + ": " + error.message,
