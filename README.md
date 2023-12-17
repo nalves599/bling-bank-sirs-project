@@ -119,6 +119,8 @@ This concludes the demonstration.
 - [MongoDB](https://www.mongodb.com/)
 - [Shamir Secret Sharing TS](https://www.npmjs.com/package/shamirs-secret-sharing-ts)
 
+For additional tools and libraries, check the dependecies installed in the various `package.json` files.
+
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) for details.
