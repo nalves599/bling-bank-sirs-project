@@ -18,12 +18,13 @@ jobs:
       - name: Library
         run: |
           cd library
+          npm cache clean --force
           npm ci
           npm run test
           npm run build
-          npm pack
       - name: cli
         run: |
           cd cli
+          npm cache clean --force
           npm ci
           npm run build
