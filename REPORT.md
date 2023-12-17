@@ -9,7 +9,7 @@ The main functionalities are: account management, expense monitoring, and paymen
 Our secure documents must ensure authenticity and confidentiality of the account data. Therefore, these properties are achieved by a custom library which will be explained in more detail in the following sections.
 
 ### 1.2. Infrastructure
-BlingBank's infrastructure is composed of three servers: a web server, a database server, and a gateway.
+BlingBank's infrastructure is composed of four servers: a gateway, a web server, a backend server and a database server.
 
 ### 1.3. Security Challenge
 The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed.
@@ -38,12 +38,60 @@ Our BlingBank project has the following structure that will be explained in more
 
 #### 2.1.1. Design
 
-BlingBank's cryptographic custom library needs to protect, check, and unprotect documents. The protection of a document is done in such way that it ensure authenticity, confidentiality, and integrity. To achieve this we created a custom algorithm which follows the following steps:
+BlingBank's cryptographic custom library needs to protect, check, and unprotect documents. The protection of a document is done in such way that it ensure confidentiality, integrity and authenticity. In order to achieve this the following structure was created.
+
+##### Confidentiality
+
+It was used AES(Advanced Encryption Standard) with a 256-bit key in CBC(Cipher Block Chaining) mode.
+In order to use CBC mode, an IV(Initialization Vector) is needed.
+
+##### Integrity
+
+The Library can accept either an HMAC(Hash-based Message Authentication Code) or a DS(digital signature).
+
+The HMAC uses SHA-256 as the hash function.
+In order to use HMAC, a key is needed.
+
+The DS uses ECDSA(Elliptic Curve Digital Signature Algorithm) with the p521 curve.
+In order to use a DS, a private key is needed.
+
+##### Authenticity
+
+Authenticity is achieved by using a DS.
+By using a DS, the document can be signed with a private key and then verified with the corresponding public key.
+This way, the document can be verified by anyone with the public key, allowing for non-repudiation.
+
+###### Replay Attacks
+
+By itself, the Library does not protect against replay attacks.
+This is done by design. The Library is meant to be stateless, so it does not keep track of the documents that were already processed.
+It is up to the user of the Library to keep track of the documents that were already processed.
+
+##### Document Structure
+
+With all the properties mentioned above, we can now define how the library will protect the documents.
+
+Starting by the "outside" layer, we can get two parts: the iv and the protected data.
+
+Since the iv is not sensitive data, it can be sent in plain text.
+And it can be easily extracted from the protected data, since it is the first 16 bytes.
+
+The protected data is encrypted with the iv and with a aes key.
+
+Before encrypting, the data is divided into multiple parts.
+The first part is the content length.
+The second part is the content itself.
+The third part is the nonce length.
+The fourth part is the nonce itself.
+The fifth part is the HMAC or DS length.
+The sixth part is the HMAC or DS itself.
+
+The HMAC or DS is calculated over the content and the nonce.
+
+TODO: ADD JSON comparison
 
 
-(_Outline the design of your custom cryptographic library and the rationale behind your design choices, focusing on how it addresses the specific needs of your chosen business scenario._)
-
-(_Include a complete example of your data format, with the designed protections._)
+TODO: ADD img of the structure
 
 #### 2.1.2. Implementation
 
