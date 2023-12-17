@@ -48,51 +48,46 @@ In a real world scenario, Docker would be the best option, since it is easy to c
 
 ### Machine configurations
 
-For each machine, there is an initialization script with the machine name, with prefix `init-` and suffix `.sh`, that installs all the necessary packages and makes all required configurations in the a clean machine.
+In order to install the multiple machines, a guide was provided [here](https://github.com/tecnico-sec/a39-diogo-nuno-tomas/tree/master/infra).
 
-Inside each machine, use Git to obtain a copy of all the scripts and code.
+#### Machine 1 (Gateway)
 
-```sh
-$ git clone https://github.com/tecnico-sec/cxx...
-```
+This machine runs the gateway service, which is responsible for routing the messages between the different networks.
 
-*(above, replace with link to actual repository)*
+The expected results are a properly configured machine, with the gateway service running.
+Allowing the other machines to communicate with each other.
 
-Next we have custom instructions for each machine.
+##### Common Problems
 
-#### Machine 1
+It seems that the gateway may not work as intended, if the docker service in the host machine is running.
+Disabling it, seems to fix the problem.
 
-This machine runs ...
+The first installation of the machine may take a while, since it needs to download all the dependencies.
 
-*(describe what kind of software runs on this machine, e.g. a database server (PostgreSQL 16.1))*
+#### Machine 2 (Web Server)
 
-To verify:
+This machine runs the web server service, which is responsible for serving the web application.
 
-```sh
-$ setup command
-```
+The expected results are a properly configured machine, with the web server service running.
+If configured correctly, alongside the gateway, the web application should be accessible from the host machine.
 
-*(replace with actual commands)*
+##### Common Problems
 
-To test:
+The first installation of the machine may take a while, since it needs to download all the dependencies.
 
-```sh
-$ test command
-```
+#### Machine 3 (Backend/API)
 
-*(replace with actual commands)*
+This machine runs the backend service, which is responsible for serving the API.
 
-The expected results are ...
+The expected results are a properly configured machine, with the backend service running.
+If configured correctly, alongside the gateway, the API should be accessible from the host machine.
 
-*(explain what is supposed to happen if all goes well)*
+#### Machine 4 (Database)
 
-If you receive the following message ... then ...
+This machine runs the database service, which is responsible for storing the data.
 
-*(explain how to fix some known problem)*
-
-#### Machine ...
-
-*(similar content structure as Machine 1)*
+The expected results are a properly configured machine, with the database service running.
+If configured correctly, alongside the gateway, the backend should be able to connect to the database.
 
 ## Demonstration
 
@@ -114,19 +109,19 @@ This concludes the demonstration.
 
 ### Links to Used Tools and Libraries
 
-- [Java 11.0.16.1](https://openjdk.java.net/)
-- [Maven 3.9.5](https://maven.apache.org/)
-- ...
-
-### Versioning
-
-We use [SemVer](http://semver.org/) for versioning.  
+- [NixOS](https://nixos.org/)
+- [QEMU](https://qemu.org/)
+- [Node.js](https://nodejs.org/en/)
+- [Typescript](https://www.typescriptlang.org/)
+- [Vue.js](https://vuejs.org/)
+- [Vuetify](https://vuetifyjs.com/en/)
+- [Express](https://expressjs.com/)
+- [MongoDB](https://www.mongodb.com/)
+- [Shamir Secret Sharing TS](https://www.npmjs.com/package/shamirs-secret-sharing-ts)
 
 ### License
 
 This project is licensed under the MIT License - see the [LICENSE.txt](LICENSE.txt) for details.
-
-*(switch to another license, or no license, as you see fit)*
 
 ----
 END OF README
