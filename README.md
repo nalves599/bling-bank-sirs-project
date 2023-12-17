@@ -1,24 +1,14 @@
-# CXX GrooveGalaxy / BombAppetit / BlingBank / MediTrack Project Read Me
-
-<!-- this is an instruction line; after you follow the instruction, delete the corresponding line. Do the same for all instruction lines! -->
-
-*(replace CXX above with group identifier, for example, A07 ou T22)*
-
-*(keep only your scenario name and delete the other names)*
+# A39 BlingBank Project Read Me
 
 ## Team
 
 | Number | Name              | User                             | E-mail                              |
 | -------|-------------------|----------------------------------| ------------------------------------|
-| 11111  | Alice Network     | <https://github.com/AliceUser>   | <mailto:alice@tecnico.ulisboa.pt>   |
-| 22222  | Bob Computer      | <https://github.com/BobUser>     | <mailto:bob@tecnico.ulisboa.pt>     |
-| 33333  | Charlie Security  | <https://github.com/CharlieUser> | <mailto:charlie@tecnico.ulisboa.pt> |
+| 99202  | Diogo Melita     | <https://github.com/d-melita>   | <mailto:diogo.melita@tecnico.ulisboa.pt>   |
+| 99291  | Nuno Alves      | <https://github.com/nalves599>     | <mailto:nuno.f.alves@tecnico.ulisboa.pt>     |
+| 99341  | Tomás Esteves  | <https://github.com/Pesteves2002> | <mailto:tomasesteves2002@tecnico.ulisboa.pt> |
 
-*(fill table above with team member information)*  
-
-![Alice](img/alice.png) ![Bob](img/bob.png) ![Charlie](img/charlie.png)
-
-*(add face photos with 150px height; faces should have similar size and framing)*
+![Diogo Melita](img/diogo.png) ![Nuno Alves](img/nuno.png) ![Tomás Esteves](img/tomas.png)
 
 ## Contents
 
