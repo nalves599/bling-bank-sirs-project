@@ -165,30 +165,37 @@ This command will not output anything since the files are the same.
 
 #### Automatization
 
-All of these commands can be run automatically using the script `demonstration.sh` under the `cli/sripts` directory. To do so, we must first change the permissions of the file to be executable:
-```sh
-$ chmod +x demonstration.sh
-```
-After that, we can run the script:
+All of these commands can be run automatically using the script `demonstration.sh` under the `cli/sripts` directory.
 ```sh
 $ ./demonstration.sh
 ```
 This script will run all the commands described above and will output the results of each command.
 
 #### Security Mechanisms
+
 To demonstrate the security mechanisms, we will perform simulated attacks to the data.
+
+##### Confidentiality
+
+If an attacker manages to get the data from the `protected.json` file, he will not be able to read it since it is encrypted.
+
+##### Integrity
 Trying adding 401 to the middle value of the `protected.json` file and running the `check` command again. The message will be false since the data was tampered with.
 
 If we even try to unprotect the file, an error will be thrown saying `Could not unprotect file files/protected.json: The operation failed for an operation-specific reason` which is due to the file being tampered with.
 
-These instructions above can be ran automatically using the script `attack.sh` under the `cli/sripts` directory. To do so, we must first change the permissions of the file to be executable:
+These instructions above can be ran automatically using the script `attack.sh` under the `cli/sripts` directory.
 ```sh
-$ chmod +x attack.sh
+$ ./integrity_attack.sh
 ```
 
-After that, we can run the script:
+##### Authenticity
+
+If a malicious user tries to replace the `protected.json` file with a file that he created, the `check` command will output false since the signature of the file is not valid.
+
+These interaction can be seen in the `authenticity_attack.sh` script.
 ```sh
-$ ./attack.sh
+$ ./authenticity_attack.sh
 ```
 
 ### Web Application - TODO
