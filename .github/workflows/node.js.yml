@@ -1,0 +1,31 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  setup-node:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.10.0'
+      - name: Library
+        run: |
+          cd library
+          npm cache clean --force
+          npm ci
+          npm run test
+          npm run build
+          npm pack
+      - name: cli
+        run: |
+          cd cli
+          npm cache clean --force
+          npm install --force
+          npm run build
