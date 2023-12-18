@@ -1,21 +1,21 @@
 #!/bin/bash
 
-echo "Change to root directory"
-# Change to root directory
+echo "Change to project root directory"
+# Change to project root directory
 cd ../..
 
 echo "Step 1: Install the library"
 # Step 1: Install the library
 cd library
-npm i
-npm run build
-npm pack
+npm i &> /dev/null
+npm run build &> /dev/null
+npm pack &> /dev/null
 
 echo "Step 2: Install CLI dependencies"
 # Step 2: Install CLI dependencies
 cd ../cli
-npm i
-npm run build
+npm i &> /dev/null
+npm run build &> /dev/null
 
 echo "Step 3: Help command"
 # Step 3: Help command
