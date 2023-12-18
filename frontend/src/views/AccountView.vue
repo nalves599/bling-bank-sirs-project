@@ -1,7 +1,18 @@
 <template>
   <div class="accounts">
-    <h1>This is a accounts page</h1>
-    <v-data-table :items="accounts" :headers="headers"> </v-data-table>
+    <h1>Accounts of user {{ username }}</h1>
+    <v-data-table :items="accounts" :headers="headers">
+      <template #item.holders="{ item }">
+        {{ item.holders.sort().join(', ') }}
+      </template>
+    </v-data-table>
+
+    <div class="create-account-container">
+      <router-link to="/create-account" class="create-account-button">Create Account</router-link>
+    </div>
+
+    <LogoutButton />
+    <BottomBar />
   </div>
 </template>
 
@@ -9,7 +20,10 @@
 import { ref } from 'vue'
 import { getAccountsFromHolder } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
-import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+import BottomBar from '@/components/BottomBar.vue'
+import LogoutButton from '@/components/LogoutButton.vue'
 
 const accounts = ref<AccountDto[]>([])
 
@@ -37,11 +51,35 @@ const headers = [
   }
 ]
 
-const id = useRoute().params.id[0]
+const authStore = useAuthStore()
+const { username } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(id)
+  const response = await getAccountsFromHolder(username.value)
+  accounts.value = response.map((item) => ({
+    ...item,
+    holders: item.holders.sort() // Sort holders alphabetically
+  }))
 }
 
 fetchAccountsFromHolder()
 </script>
+<style scoped>
+.create-account-container {
+  margin-top: 20px; /* Add some margin to separate the button from the table */
+}
+
+.create-account-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 15px;
+  border-radius: 5px;
+  margin-right: 30px; /* Margin between buttons */
+}
+
+.create-account-button:hover {
+  background-color: #45a049;
+}
+</style>
