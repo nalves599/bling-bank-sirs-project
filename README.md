@@ -176,7 +176,8 @@ $ ./demonstration.sh
 This script will run all the commands described above and will output the results of each command.
 
 #### Security Mechanisms
-To demonstrate the security mechanisms, we will perform simulated attacks to the data. To do so, we will use the `protected.json` file that was created in the `protect` command. For instance, if we add a char at the beginning of the protected value of the field "balance" and run the `check` command, a message will be displayed informing that the file is not protected.
+To demonstrate the security mechanisms, we will perform simulated attacks to the data.
+Trying adding 401 to the middle value of the `protected.json` file and running the `check` command again. The message will be false since the data was tampered with.
 
 If we even try to unprotect the file, an error will be thrown saying `Could not unprotect file files/protected.json: The operation failed for an operation-specific reason` which is due to the file being tampered with.
 
@@ -189,8 +190,6 @@ After that, we can run the script:
 ```sh
 $ ./attack.sh
 ```
-
-Note: This script assumes that the demonstration script was already ran, so it uses the `protected.json` file that was created in the `protect` command. Additionally, it is imporant to have the `jq` command installed in the machine, since it is used to edit the json file.
 
 ### Web Application - TODO
 
