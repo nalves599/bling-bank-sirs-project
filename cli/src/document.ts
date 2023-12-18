@@ -36,12 +36,12 @@ export class Account {
 
   constructor(
     accountHolder: string[],
-    balance: string,
+    balance: number,
     currency: string,
     movements: Movement[],
   ) {
     this.accountHolder = accountHolder;
-    this.balance = balance;
+    this.balance = balance.toString();
     this.currency = currency;
     this.movements = movements;
   }
@@ -112,9 +112,9 @@ export class Movement {
   value: string;
   description: string;
 
-  constructor(date: string, value: string, description: string) {
+  constructor(date: string, value: number, description: string) {
     this.date = date;
-    this.value = value;
+    this.value = value.toString();
     this.description = description;
   }
 
