@@ -1,10 +1,4 @@
-import {
-  ProtectProps,
-  UnprotectProps,
-  protect,
-  unprotect,
-  check,
-} from "../../library/src/utils/crypto";
+import { ProtectProps, UnprotectProps } from "../../library/src/utils/crypto";
 import {
   bytesToAesKey,
   bytesToSigningKey,
@@ -19,6 +13,8 @@ import {
   unprotectUsage,
   unknownCommand,
 } from "./messages";
+
+import { Account, Doc, Movement } from "./document";
 
 export class Commands {
   help(args: string[]): void {
@@ -51,15 +47,23 @@ export class Commands {
         signingKey: signKey,
       };
 
-      const output = await protect(input, protectProps);
-      Utils.writeFile(outputPath, output.messageEncrypted);
+      const jsonData = JSON.parse(input.toString());
+      const doc = this.createDoc(jsonData);
+
+      // Protect data
+      await doc.protect(protectProps);
+
+      const docJson = JSON.stringify(doc, null, 2);
+
+      Utils.writeFile(outputPath, Buffer.from(docJson));
+      console.log("File protected successfully");
     } catch (error: any) {
       console.log("Could not protect file " + inputPath + ": " + error.message);
     }
   }
 
   async check(args: string[]): Promise<void> {
-    if (args.length != 4 && args.length != 5) {
+    if (args.length != 4) {
       console.log(checkUsage);
       return;
     }
@@ -74,26 +78,28 @@ export class Commands {
       const verifyKey = await bytesToVerificationKey(
         Utils.readFile(verifyKeyPath),
       );
-      const threshold = args.length == 5 ? parseInt(args[4]) : undefined;
-      const nonceVerification = Utils.getVerificationNonce(threshold);
 
       const unprotectedProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
-        nonceVerification: nonceVerification,
+        nonceVerification: undefined,
       };
 
-      const valid = await check(input, unprotectedProps);
-      console.log("File is protected: " + valid);
+      const jsonData = JSON.parse(input.toString());
+      const doc = this.createDoc(jsonData);
+
+      // Check data
+      const checkResult = await doc.check(unprotectedProps);
+      console.log("File is protected: " + checkResult);
     } catch (error: any) {
       console.log("File is not protected");
     }
   }
 
   async unprotect(args: string[]): Promise<void> {
-    if (args.length != 5 && args.length != 6) {
+    if (args.length != 5) {
       console.log(unprotectUsage);
       return;
     }
@@ -109,19 +115,25 @@ export class Commands {
       const verifyKey = await bytesToVerificationKey(
         Utils.readFile(verifyKeyPath),
       );
-      const threshold = args.length == 6 ? parseInt(args[5]) : undefined;
-      const nonceVerification = Utils.getVerificationNonce(threshold);
 
       const unProtectProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
-        nonceVerification: nonceVerification,
+        nonceVerification: undefined,
       };
 
-      const output = await unprotect(input, unProtectProps);
-      Utils.writeFile(outputPath, output.payload);
+      const jsonData = JSON.parse(input.toString());
+      const doc = this.createDoc(jsonData);
+
+      // Unprotect data
+      await doc.unprotect(unProtectProps);
+
+      const docJson = JSON.stringify(doc, null, 2);
+
+      Utils.writeFile(outputPath, Buffer.from(docJson));
+      console.log("File unprotected successfully");
     } catch (error: any) {
       console.log(
         "Could not unprotect file " + inputPath + ": " + error.message,
@@ -131,5 +143,28 @@ export class Commands {
 
   async unknown(): Promise<void> {
     console.log(unknownCommand);
+  }
+
+  private createDoc(jsonData: any): Doc {
+    // Extract data and create instances
+    if (jsonData.account.balance instanceof Number)
+      jsonData.account.balance = jsonData.account.balance.toString();
+
+    for (let movement of jsonData.account.movements) {
+      if (movement.value instanceof Number)
+        movement.value = movement.value.toString();
+    }
+
+    const account = new Account(
+      jsonData.account.accountHolder,
+      jsonData.account.balance,
+      jsonData.account.currency,
+      jsonData.account.movements.map(
+        (movement: any) =>
+          new Movement(movement.date, movement.value, movement.description),
+      ),
+    );
+
+    return new Doc(account);
   }
 }
