@@ -163,7 +163,36 @@ $ diff files/input.json files/output.json
 ```
 This command will not output anything since the files are the same.
 
-### Web Application
+#### Automatization
+
+All of these commands can be run automatically using the script `demonstration.sh` under the `cli/sripts` directory. To do so, we must first change the permissions of the file to be executable:
+```sh
+$ chmod +x demonstration.sh
+```
+After that, we can run the script:
+```sh
+$ ./demonstration.sh
+```
+This script will run all the commands described above and will output the results of each command.
+
+#### Security Mechanisms
+To demonstrate the security mechanisms, we will perform simulated attacks to the data. To do so, we will use the `protected.json` file that was created in the `protect` command. For instance, if we add a char at the beginning of the protected value of the field "balance" and run the `check` command, a message will be displayed informing that the file is not protected.
+
+If we even try to unprotect the file, an error will be thrown saying `Could not unprotect file files/protected.json: The operation failed for an operation-specific reason` which is due to the file being tampered with.
+
+These instructions above can be ran automatically using the script `attack.sh` under the `cli/sripts` directory. To do so, we must first change the permissions of the file to be executable:
+```sh
+$ chmod +x attack.sh
+```
+
+After that, we can run the script:
+```sh
+$ ./attack.sh
+```
+
+Note: This script assumes that the demonstration script was already ran, so it uses the `protected.json` file that was created in the `protect` command. Additionally, it is imporant to have the `jq` command installed in the machine, since it is used to edit the json file.
+
+### Web Application - TODO
 
 Assuming that the machines are properly configured after following the installation instructions, we can now demonstrate the web application.
 
