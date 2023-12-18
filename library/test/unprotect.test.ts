@@ -7,7 +7,7 @@ import {
   protect,
   createHMACKey,
   createECDSAKey,
-} from "../src/utils/crypto";
+} from "../src/crypto";
 import { TextEncoder, TextDecoder } from "util";
 
 describe("unprotect module", () => {

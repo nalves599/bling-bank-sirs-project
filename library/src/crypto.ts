@@ -40,6 +40,13 @@ export const createHMACKey = async () => {
   return key;
 };
 
+// Hash a message with SHA-256
+export const hash = async (message: string | ArrayBuffer) => {
+  const messageBuffer = typeof message === "string" ? UTF8Encoder.encode(message) : message;
+  const hashBuffer = await crypto.digest("SHA-256", messageBuffer);
+  return hashBuffer;
+};
+
 // Sign a message with a private key
 export const signMessage = async (
   message: ArrayBuffer,
@@ -270,3 +277,13 @@ export function toBytesInt64(num: bigint) {
   view.setBigInt64(0, num, false); // byteOffset = 0; litteEndian = false
   return arr;
 }
+
+export const generatePOWChallenge = () => {
+  const challenge = (Math.random() * 1000).toFixed(0); // TODO: Improve challenge
+  return String(challenge);
+};
+
+export const solvePOWChallenge = (challenge: string) => {
+  const solution = parseInt(challenge) * 39; // TODO: Improve challenge
+  return String(solution);
+};

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { toBytesInt64, fromBytesInt64 } from "../src/utils/crypto";
+import { toBytesInt64, fromBytesInt64 } from "../src/crypto";
 
 describe("convert module", () => {
   test("Test simple int", () => {
