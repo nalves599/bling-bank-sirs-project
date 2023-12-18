@@ -132,7 +132,9 @@ export class Commands {
 
       const docJson = JSON.stringify(doc, null, 2);
 
-      Utils.writeFile(outputPath, Buffer.from(docJson));
+      const docJsonNumber = this.changeToNumber(docJson);
+
+      Utils.writeFile(outputPath, Buffer.from(docJsonNumber));
       console.log("File unprotected successfully");
     } catch (error: any) {
       console.log(
@@ -166,5 +168,17 @@ export class Commands {
     );
 
     return new Doc(account);
+  }
+
+  private changeToNumber(jsonData: any): any {
+    const jsonObject = JSON.parse(jsonData);
+
+    jsonObject.account.balance = Number(jsonObject.account.balance);
+
+    for (let movement of jsonObject.account.movements) {
+      movement.value = Number(movement.value);
+    }
+
+    return JSON.stringify(jsonObject, null, 2);
   }
 }
