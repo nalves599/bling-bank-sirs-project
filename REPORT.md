@@ -111,22 +111,22 @@ since JSON does not support raw bytes.
       "accountHolder": [
         "Alice"
       ],
-      "balance": "872.22",
+      "balance": 872.22,
       "currency": "EUR",
       "movements": [
         {
           "date": "09/11/2023",
-          "value": "1000",
+          "value": 1000,
           "description": "Salary"
         },
         {
           "date": "15/11/2023",
-          "value": "-77.78",
+          "value": -77.78,
           "description": "Electricity bill"
         },
         {
           "date": "22/11/2023",
-          "value": "-50",
+          "value": -50,
           "description": "ATM Withdrawal"
         }
       ]
@@ -201,6 +201,19 @@ If it exists, it can be protected!
 
 #### 2.2.2. Server Communication Security
 
+At the start, the server has a Master Key that it stores. This solution was implemented in order to avoid the complexity of having to distribute keys. This master key is used to encrypt the account keys hold by the server in the database. This solution is used to simulate and account manager on the bank side. In this case, as this account manager is the server it self, it is necessary for it to have access to the account keys. The optimal solution would be to have a separate server that would hold the account keys and would be responsible for the encryption and decryption of the account keys. This solution would be more secure as it would be more difficult to compromise the account keys. However, this solution would also be more complex to implemenhet and would require more resources.
+
+At the moment of registration, a user accesses the registration page where he inputs his email and password. The server will receive this data and will generate a passphrase composed of 5 random words and send it to the user email. Once again, this solution is not optimal as the email can be compromised. However, in the real world, in order to open an account, the person would need to go in person to the bank where he would physically get the security codes. In this case, the email is used as a substitute for the physical presence of the user and it is assumed that this environment is secure and that the email is not compromised. After this, the server stores on the database the user e-mail and the hash of the password in order to guarantee that the password is not compromised in case of a DB leak.
+
+At the moment of login, the user inputs his email and password. The data sent to the server is the email and the hash of that password that will be compared to the registries on the database. If the login is successful, the server will create a session key that will be encrypted with the master key and stored on the database. This session key will used to encrypt data sent to the server and decrypt data received from the server. Additionally, the server creates a JWT token and sends it with the session key encrypted with (???). The JWT token will be used in later communications to authenticate the user.
+
+After the moment of login, it is now possible to access all functionalities of BlingBank, where we can create accounts and access their info, view the movements of an account, create and authorize payment orders and view the payment orders of an account.
+
+Starting with the creation of an account, the user will be able to select the account holders of that account with the constraint that he needs to be one of them. This is not an optimal solution as this allows any user with bad intentions to create an account with other users that don't want to do so. However, this is an online bank and due to the time frame we assumed that the users registered and authenticated are not well intenteded as in the real-world, in order to open an account with multiple holders, all of them would need to go to the bank in person. With this in mind, we proceed to the next step where the server receives the information of the user that is composed by the data to create the account encrypted with the session key and the JWT token. If the token and the data are valid, the server will create N+1 Shamir Keys, being N the number of account holders. One of those Shamir keys belongs to the server, like it was an account manager, and so the server will store this key encrypted with the master key on the database. The other keys belonging to the account holders are sent to their respective emails. The problems described on the register phase are also valid here and the same assumptions were made.
+
+We chose to used the Shamir Keys method as it allows for more security. With N+1 keys, it is necessary to have at least N keys to access the account data. This means that if the server is compromised and the key of that account is stolen or a thief stoles an holder key, the attacker will not be able to access the account data.
+
+TODO: how do we access an account movements and pending payments. How do we create and authorize payments.
 (_Discuss how server communications were secured, including the secure channel solutions implemented and any challenges encountered._)
 
 (_Explain what keys exist at the start and how are they distributed?_)
