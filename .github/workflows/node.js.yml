@@ -26,5 +26,5 @@ jobs:
         run: |
           cd cli
           npm cache clean --force
-          npm ci --force
+          npm install --force
           npm run build
