@@ -42,14 +42,14 @@ BlingBank's cryptographic custom library needs to protect, check, and unprotect 
 
 ##### Confidentiality
 
-It was used AES(Advanced Encryption Standard) with a 256-bit key in CBC(Cipher Block Chaining) mode.
-In order to use CBC mode, an IV(Initialization Vector) is needed.
-AES-256 is considered to be secure by the NIST(National Institute of Standards and Technology), therefore it was chosen.
-CBC mode is more secure than ECB(Electronic Code Book) mode, therefore it was chosen.
+It was used AES (Advanced Encryption Standard) with a 256-bit key in CBC (Cipher Block Chaining) mode.
+In order to use CBC mode, an IV (Initialization Vector) is needed.
+AES-256 is considered to be secure by the NIST (National Institute of Standards and Technology), therefore it was chosen.
+CBC mode is more secure than ECB (Electronic Code Book) mode, therefore it was chosen.
 
 ##### Integrity
 
-The Library can accept either an HMAC(Hash-based Message Authentication Code) or a DS(Digital Signature).
+The Library can accept either an HMAC (Hash-based Message Authentication Code) or a DS(Digital Signature).
 
 The HMAC uses SHA-256 as the hash function.
 In order to use HMAC, a key is needed.
@@ -101,37 +101,37 @@ Note: The protected data is encoded to base64 in order to be sent as a string,
 since JSON does not support raw bytes.
 
 <details>
-<summary> Comparasion of unprotected and protected file </summary>
+<summary>Comparasion of unprotected and protected file</summary>
 
 <details>
 <summary> Unprotected file </summary>
 
 ```json
 {
-  "account": {
-    "accountHolder": [
-      "Alice"
-    ],
-    "balance": "872.22",
-    "currency": "EUR",
-    "movements": [
-      {
-        "date": "09/11/2023",
-        "value": "1000",
-        "description": "Salary"
-      },
-      {
-        "date": "15/11/2023",
-        "value": "-77.78",
-        "description": "Electricity bill"
-      },
-      {
-        "date": "22/11/2023",
-        "value": "-50",
-        "description": "ATM Withdrawal"
-      }
-    ]
-  }
+    "account": {
+      "accountHolder": [
+        "Alice"
+      ],
+      "balance": "872.22",
+      "currency": "EUR",
+      "movements": [
+        {
+          "date": "09/11/2023",
+          "value": "1000",
+          "description": "Salary"
+        },
+        {
+          "date": "15/11/2023",
+          "value": "-77.78",
+          "description": "Electricity bill"
+        },
+        {
+          "date": "22/11/2023",
+          "value": "-50",
+          "description": "ATM Withdrawal"
+        }
+      ]
+    }
 }
 ```
 </details>
@@ -143,25 +143,25 @@ since JSON does not support raw bytes.
 {
   "account": {
     "accountHolder": [
-      "5mXdLOKu3TJvN7LB8pUqiYGG3LruRA+iH0WuOXbk7feDVNSc7aa/rHo6fy4eN7XnBKB4HKAzF/rNVE9hjmfaeqBq8LNTWliwlr97ZYxgRIeKK1U2AMm/07XpqP3KcfZlruquNR/KstDcDusKC8DJNCkjRF4VBGOAHlfO/D3OCIbGpmX5yiTiPnuCMCPHa6B2zGUQ8iz3xfIgl2aJWNIbH1565hvsFiCmsnpGArH9nBYzCiAolGbqy0ZK562xawZN"
+      "JphVj5rENm+JTNODC2A+qKqRI2oOMtesmLVOSM0lyOn7u8TgX8DzJes2eqB+XKwwDE/0KLGUQKf3SmQxcD4KbG1wSWDYy6t3Wa+cuZOeyzaXK877/YKQjM2mCA5UICFb0mjmaUJif3i6lW8NTtBvyQJJIk97ytfBCDQ4QDq5SOCTXl1k7/qOhLgtbP6CRDCX+86PME0be4J0WKYGxEh7UiSEto4EpJPZNl+vgKWM8z/vvVsly4OMuzgKFe+D9TRA"
     ],
-    "balance": "IgvgQIiiAfuXecS+aHOJLtqluaQ5Z9nL7thUL4MDwlVqIUCIENNCSEEcz3MkcRbnKAiF+MXvh+/yw5upooB/I++hm9LW6i6pWC5puv5+9adTm7sv9jsi/jkZTc24l3bxoroX5FI9i9NX+KqVBV6HZP7H9Me07FXl5oNOGXzn7utpDzmDX3rX5IBdY8/hDRYzlWAFWJxI6R39bE+25U+7Z5KEf0vaVCVgWmcaHBZFVFjqLeMB5GPm750ZRslaXCkP",
-    "currency": "unHvXb5MgKITnjlKKMO2jZMVLQUwivoSjwNorq9Bf+ksP+f8zDwtUpxudIsaxZcHe7mIkKwJbXDdotTPkgLVWklbV5fUkGQU6yrpD5V3y1xK4NbvncHtZT8/lRiYjaWzFGIoRZ5wPQ3dHLGlVVnUuWmR8KpLK7ns/pFTZLaLwwreHFs6iPCBxngoYXkv81ZFA77IncRHz7knI48FHnIl//LTwngaIJYeXZWKPWNGrypGTc/Cb/h/QnJtYsBR0RGe",
+    "balance": "A7RCdYBUpmP8WfgHy7isAAB9ekIyX2VR5bs+MyhhCFoXQL9w07oLyk62dFR1EVqy2xT5Z6QhzeOuPTAJCHT9UySRYTqb5eMnPJAnOkB43z2oZsNaG4PbWKlIRwgmx/DQn0FbgTve3OYRogZwqmB/pZ7V1NG4Q5D77mM8bJ7R8f7AtQG41pQzA3yca3wUnnr+nSKPL4IkHFtgo/Juw2i/i45/2GPzne6IPvaD6ttjI5WKcJZj9tACe9Dc0s5Rq01R",
+    "currency": "7v6VZfTPexleY7tQdpwX9qwe9qY4mPJLNsJ/OQZzFNncmwDUwuDkgHRuEp+rDFpFbuI/2s6TiVB3NoXutS7o+DLqb0/ob+kXj+QiGIRR9xd3R2uK/R7XCljGg8ff2ieULUWOgZfsrCIcIJuHOqVJnBpZB6LVuw6J9hjZ4b6vE0J20ccgQpuDngBcThG3sipY35fz2A9+4iYd8u2juwiaSYELl0uolQ2MXHiZVX5EmZ8yrBxhNb1Y1z7fGcoqnzJE",
     "movements": [
       {
-        "date": "bH5plULBkVTNl/6ZutVCQGhhVGoi2bhw0QCueaT4pXgjKmYN/jEDl9pUuxOwAZ/bDBu0TZI/m1sZX/LA/KavUdyp7+Ff5U9GTXHEDrrKQvx1UYQGOok3wuFSxsIHjrC+wU1yPsWRjBXrm9IatdABFY7gHN+pGzzrncjV9X1g77DEoSIPrVA1xId5NPiYRllmSTmEyS3qZdPnx9VJnQqGI6GvCaQwToUvDb5Zt2ANWe84yu7/gpAvSQqTBqNw60ra",
-        "value": "7VwhR0gipCnbjC/2aGA8rFjOXqyK3r84eBjlsYQZeD6URrQ03VP6L5UCjm5ceS9siLGInyS5YTcl5Km5WMExQ1Ci4x8/ogE1W8BxFpC2ZLq95W3WNL1VRPV+4+GYi40Oly7wsIyUn7aXJm38JT7SbIylZnSgxxwXCbGcJ514glvnHLFt9p5nedq0MfHElLC6T3Yq65kv5U1h8XzZwDaneWJH39nebYL5iyuG+K69oK5PFU4RCcSHhNpg/9LOywc5",
-        "description": "fKN+Thxu9GyWvnq/GM/DoQW0LMgYYenT9LN9TvFehA2d6D13fDm7akVgWZWmQbdms+KpWWXT19YJysjIifE10C3aMJrX15UVEaxQA0i3BrNrPVxXsYHDlTNSeDmSaAYNcvXhNEkGKm//AIQuvbvnihFuToha6qEswsecWra5GtkBczyr6Vd6fxBVQW2jEVdWVbZx21MW+MWKySg2Y+AfnnEjem4hokJrmpw3Jij8gA90OCif67jaQoR/jSZgG3KR"
+        "date": "q9GufmJMsGCKWsTzxIstiYY0IY6w8eaI2Jdhjzj8182L1R1BuBwg5jbrnq1j1/L5ajQR7dmPUrm3zFVQE+o42UjChKwwB13mkZyfDcvjUuGJhlZFV2Its42znu0a/RoxlSAwEUvLTIJB+77LFZwoMCmsv7gzNXOWSLQ9ebxva/pDa6SHbVaLS5/HdIb3Fg3kTnXJ8Tfe2EjkpabNvWcfywvAQ0Xoa1NMoyaU2h+oRf/dYNk1/9aEf0WCXyzwhegn",
+        "value": "zkYnI2CUmJorG0UKv42T10UyZ3zojAUklPJEZc/VDJXkIODyc6rNL/PQq41c7vLj3TyZW5EhZVy+FD135ZhrvMs2WW/OIwW3o7tAU9eSIb9RB3YqFrEqeS+d9ghdumVxlkvb0XiM7IGjmRGnsYWRCvgdgryQqzSeNdDllEceLwGSeQxHPnunrOb5SpT3I7HceCNEu3yjG4SD65WKfIfgJWaA+nNivKzAmC+j6u4kG16u+10P1KVDIMoiIvOpc/E2",
+        "description": "ZMpRkOUTPkB3o26pFgUWtMc3ENjAIX3by1eh2Y8tMgo0N10eDilTVPtWOrNRYXYX7H/0iDze0icX9qe/g0CMKpMM6PFMX446sLndQNeaCZJcp0nC6fFhPO7J1eXmdFVoCsWVggZpngdNgxkfI8xlog90PTsbMN3434ozkq5QfXkhgIt+vfDBWV3t3oZopebYlzHnyZhmHBFJStpeCLafaufwOqWCwCaP0CLFt7iBMax/wmpe33adLgM5y9NSs37w"
       },
       {
-        "date": "kbokuHgWTi6lDeB2oNtyRlEEePx6Sl2gknkWRzoZXSXjFUdb1f/rRt4xCMnu1cmn1xfWqKYrPiocTvX08z0WoSHyw9Sz5p82F25sUq2W6ucN4oix3CQk7SkjIS7N9NqME1yo94WCFOP3uIpcI5u3zCSfA9G+tlTjdgO/8SFvDIVj+d4KF2GANVhPQqvTiYINSvPzMx3oUolND6/ytT2k6waZWFxnkRSV5TtQ1n8y0pBbicRYI0ysw97fz+KcFr+K",
-        "value": "5bMHX6qteu5k702oJE0IhChkGyn3VSIA82v3iptfQirybJfYZcLadG6RrPDABwxRIFEinGuwO4hrXXHjMUSlDM0OAmvG7WJuhtVPW1grVsTdBapyE0rTh7W0O7ay6RGp3yS1o14xGlTJ7pTYAa80OI4B/IzRbkq1aD3AV9ZgoISdkWAmug+GL+pgE5odiSTn9jqEn4Wv77HMwi0XMo+Ozc02XGOw5YJdDa83XWtaCKiGEHshDhHUpDdWACRwqSMW",
-        "description": "U2yI272LM5/9hQ7OrYrpjEHQIm8NZQ+WzghsvtQnNtMG81i2XSNvxqhXaPe52VN9x/pdB+q+BQGfDnba4y2u9FBy953IUYwJu6jIdniPg+kTsnNLsRN1j0W4Q/kYTfRKXwJYmsLkCxRzWrC2ieRHcIQbEPo6/NmoVHs78vzahibn9Ie4fogE33YsA+AGFfSO/gi4G8ic+dnNIZM1j/EN/osQHyD8AerLkrDHhmlTDcQCPkD7pndjyldYE48B6m9D"
+        "date": "rs2CFcoRggnxZOLHzMpTRVz85/zlBDianMF1qRT7BsioDFOuGJ86uN2jfxd7yEcdoNvpqOtAFzhxtFwFGCaqiY1wGI9p16CDyk4jFHt8ONz4amKh2aZ5Gv0jbuimoV7kzuVSP0YUZX3nDaUcE1XZdatfFNVLeUIeb5Rgr3zJeGLUltvZe07aukwF5Nbjpe7y5thXYE+i3n9D2HNtaqiw/HORtYKdtzHlj4jrdvN9+nh96YoZkN+MEL1jwyYemRKM",
+        "value": "3Vd5EFNvm1y6dkDeoF8xS/YMLk1/Fd+IGzJZw0a+lAgtTewJUpNbj3MiPoWFA5UXYzQUcsM0HQbmeibihVNJqrUHRfnCfPsSJoY1wWHOTvp1OXwEW8mJFhpHi3Csp0CQKeVun3peaHng39Oa/TXQVqXEM5GhSucQEuV443ch/t3oQDq6gstmTCztyaxw1y0vz2x/efQ4rLKplQ90D6MWhI3DL5ZqrT4xuEpRAWTrSWJaTGdo+Gv9FzXqwU+liro7",
+        "description": "gX6O0uD8E5BkhQi5mfvHuPGLVM6/YChf6JiZXCnAxfgeuY+MTMU2/dD2LgHSfPJjDeqgXIGRitmtsguC7loP900aNil4lJ34GuhLjqYx2/CMbEw5R80dL2/wwgLFEQ5nBR3iE7EKPrnSr0mL7YFS3leHnCDbhYvRoN6aGqZfNsrfCAkcj3t+AG3sXk1Qxs8EgyilYd9JAL9SZFKImnzQGxzOUCIwGKtuE6BeMGdHxTa65c+0dvNJf09GMABoFe4h"
       },
       {
-        "date": "GupZ9imRkY3PxMYNk3EBDeTBJd6/khACbMtp1n+QbfNHxp+RQTJLwfr/E8oGB5L4VlKz5xaooDOZkgIfZWU76u1WzmQp9BbmGPJawj4xVYHWF8eLau0DjzrAl+8XfWw3SPmbC1wrAh0UlOqc8HNAQZ6tz2rPr4mgmyx9JJDbUqY0VTE15Hgaz2pAfwEY+X3hZkOEp+OHW5r48U8/JeLKu/H1OAO0S40eCfd7CRQ4WaFWtZoDV4yg5nlLs6tTPjqd",
-        "value": "JqcBNLwBFv4Bq0KYcug2uwkLEuRjD2dFbE5mr9TFf7wpgeYYsZrRLrkd3j3WbBPV8jo08v9fuBHle7GJfpbnJepoIoR8NiP4AqtO6dINBKbqBoMASIydGR5JwUF83HXPN+YGvsEob09L8XCwDcafH7TLy/PVfxMShF14AuwuFKsG4fgpi34+0b3RbsdZPApzwaWnkte6b+K3M0fVosWGtO1eLRQxno6fVHVXFpEvCdy0G2TS4P4QozcsSa5TE3CV",
-        "description": "moKGvpUQPdzbEXTy5Dn05J13G1AHNnhr+oxeL5oBKrUIgQIvSVk84rrOe7fXzaucgesW4sxXTM8aA+D74SBMISD1+u8Fqg8CgCBGpzQ7iMVf0eLcsbT34uOCLzvSXNBn0r9EzSy6JdgRhO9u++cfLqcT6UjjZZQQF9jEsmwVHuQRpFmRaP5/nHUPWLXgQ3kZKa6Dya276Ub1cAuCPu/SbquhNs1i9YK+kjM7zI9S5FcgtSPNu1e7bBnBxAGERVRp"
+        "date": "33n6FfXwsJb+GbXBOhOSgcLeKjk53iG2UcfDv1VU2hax2lPlxN/j4azyBi/WS7uzJJ7mmrmpY8TRBfMTIc4lmBp/jouzlFRDXekHxJTCXV034Q/kQkrioo4wbxgJ+b+OP72SHfHJN0G+jMwxhjo7d4pKOQnrb+hbcjLKcbOaIqDODygpanqlYBrnfdRhb3A/ofvWj7P8MKO/8t46/zDJzI31I0896tL+R9KJNtmWT+2zA89sOzeaVIgMhmTlX78t",
+        "value": "elcr3qc1nKkhwXDaSY+lE3599QLt89JG7UXH4er1hh6azueAUiJ5tK7TVqnN1yPb22O4PMoX8Yfo/5En9qWNCsW06pDFZYnr+YthAMZY6lzrSGY21IRDCOaEHLtNenQk/zDQ1rrXjd5E3sXoJUCKQ4qUQJxUx1CKOedSMWoyVcxrPZ1Sy8rbcBY/osbQFWVSPGRmeM4/CJBDEMPVaSzBVURFWvgd9/JsJXkvvokMDI37T5fCJ5Hk4baYHTRtxeMz",
+        "description": "xjdcFehm+zQ+uA5evM4h0/Wd1zwVvr9X5LQljVWmQHGR6Zz/UtF4rYAb/6XKKTtEuAuZtRCSfp+C6gQPQXIhMveYRsKAb7IhDos9ZVihRPoXOFlTA51NQcb+oTZ9SiRxSXLADLbMI3oaT3BD4TpSNohwMvwvwyCI7Dn7G/2kROl98pf3S30gUelj1WbtYncG24QnF18gAr680xag0ka2npp0Qd9qRlVwZI6NLiSWO2zlP2Ra+u+a+L2ht8yvBtGE"
       }
     ]
   }
