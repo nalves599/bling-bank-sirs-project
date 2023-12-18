@@ -49,13 +49,13 @@ CBC mode is more secure than ECB (Electronic Code Book) mode, therefore it was c
 
 ##### Integrity
 
-The Library can accept either an HMAC (Hash-based Message Authentication Code) or a DS(Digital Signature).
+The Library can accept either an HMAC (Hash-based Message Authentication Code) or a DS (Digital Signature).
 
 The HMAC uses SHA-256 as the hash function.
 In order to use HMAC, a key is needed.
 The length of the key is equal to the length of the hash function (256 bits), which is considered to be secure.
 
-The DS uses ECDSA(Elliptic Curve Digital Signature Algorithm) with the p521 curve.
+The DS uses ECDSA (Elliptic Curve Digital Signature Algorithm) with the p521 curve.
 p521 is considered to be secure by the NIST, therefore it was chosen.
 In order to use a DS, a private key is needed.
 
@@ -80,20 +80,19 @@ With all the properties mentioned above, we can now define how the library will 
 
 TODO: ADD img of the structure
 
-Starting by the "outside" layer, we can get two parts: the iv and the protected data.
+Starting by the "outside" layer, we can get two parts: the IV and the protected data.
 
-Since the iv is not sensitive data, it can be sent in plain text.
-And it can be easily extracted from the protected data, since it has always the same length (16 bytes).
+Since the IV is not sensitive data, it can be sent in plain text and it can be easily extracted from the protected data, since it has always the same length (16 bytes).
 
-The protected data is encrypted with the aes key and using the iv.
+The protected data is encrypted with the AES key and using the IV.
 
-The data is divided into multiple parts.
-The first part is the content length.
-The second part is the content itself.
-The third part is the nonce length.
-The fourth part is the nonce itself.
-The fifth part is the HMAC or the DS length.
-The sixth part is the HMAC or the DS itself.
+The data is divided into seven parts:
+- The first part is the content length.
+- The second part is the content itself.
+- The third part is the nonce length.
+- The fourth part is the nonce itself.
+- The fifth part is the HMAC or the DS length.
+- The sixth part is the HMAC or the DS itself.
 
 The HMAC or DS is calculated over the content and the nonce.
 
@@ -173,8 +172,7 @@ since JSON does not support raw bytes.
 #### 2.1.2. Implementation
 
 We decided to use typescript as the programming language for the library.
-Typescript allows us to use the library in both the frontend and the backend.
-Allowing for the client to use it in the browser without needing an external tool.
+Typescript allows us to use the library in both the frontend and the backend, allowing the client to use it in the browser without needing an external tool.
 The library is transparent to the user, the user might not even know that the library is being used.
 
 Some cryptographic libraries were used in order to implement the library, such as crypto (webcrypto).
@@ -182,16 +180,14 @@ Some cryptographic libraries were used in order to implement the library, such a
 Even though typescript has types, the use of raw bytes is not easily done.
 A lot of fight and experimentation was needed in order to get the library to work with raw bytes.
 
-Tests were also implemented in order to ensure that the library was working as intended.
-The tests were implemented using jest.
+Tests were also implemented, using jest, in order to ensure that the library was working as intended.
 This was a very important step, since it allowed us to find bugs and fix them.
 
 We followed a very modular approach, in order to make the library as flexible as possible.
 The multiple functions allow the user that uses it to choose for example, if either a HMAC or a DS is used, use a custom nonce or choose the nonce verifcation function.
 This was done without compromising the security of the library.
 
-In the case of the protect/unprotect functions, the library does not care about the content that is being protected.
-The library receives bytes and returns bytes.
+In the case of the protect/unprotect functions, the library does not care about the content that is being protected: the library receives bytes and returns bytes.
 
 If it exists, it can be protected!
 
