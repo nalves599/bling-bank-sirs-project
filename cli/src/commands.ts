@@ -63,7 +63,7 @@ export class Commands {
   }
 
   async check(args: string[]): Promise<void> {
-    if (args.length != 4 && args.length != 5) {
+    if (args.length != 4) {
       console.log(checkUsage);
       return;
     }
@@ -78,15 +78,13 @@ export class Commands {
       const verifyKey = await bytesToVerificationKey(
         Utils.readFile(verifyKeyPath),
       );
-      const threshold = args.length == 5 ? parseInt(args[4]) : undefined;
-      const nonceVerification = Utils.getVerificationNonce(threshold);
 
       const unprotectedProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
-        nonceVerification: nonceVerification,
+        nonceVerification: undefined,
       };
 
       const jsonData = JSON.parse(input.toString());
@@ -101,7 +99,7 @@ export class Commands {
   }
 
   async unprotect(args: string[]): Promise<void> {
-    if (args.length != 5 && args.length != 6) {
+    if (args.length != 5) {
       console.log(unprotectUsage);
       return;
     }
@@ -117,15 +115,13 @@ export class Commands {
       const verifyKey = await bytesToVerificationKey(
         Utils.readFile(verifyKeyPath),
       );
-      const threshold = args.length == 6 ? parseInt(args[5]) : undefined;
-      const nonceVerification = Utils.getVerificationNonce(threshold);
 
       const unProtectProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
         hmacKey: undefined,
         verifyingKey: verifyKey,
-        nonceVerification: nonceVerification,
+        nonceVerification: undefined,
       };
 
       const jsonData = JSON.parse(input.toString());
