@@ -134,7 +134,7 @@ After performing this command, we can see that the `protected.json` file was cre
 We can see that only the multiple values of the json file are protected, and not the file as a whole.
 
 #### Check
-To check the integrity of the protected data, we can run the following command:
+To check if a file's data is protected or not, we can run the following command:
 ```sh
 $ ./blingbank check files/protected.json files/aes.key files/pub.key
 ```
@@ -143,13 +143,7 @@ As we can see after running the `help` command, the `check` command takes 3 argu
 - `aes.key` - The file that contains the secret key that will be used to decrypt the data
 - `pub.key` - The file that contains the public key that will be used to verify the signature of the data
 
-After performing this command, a message will be displayed informing if the data is valid or not. In this case, the message will be true since the data is valid. If we change the file to be checked to `files/input.json` and run the command again, the message will be false since the data is not protected.
-
-The check is done to verify the integrity and freshness of the data so we might see that the message is false even if we know that the file is "protected". This happens because the data is not fresh, meaning that the timestamp of the data is not valid as the default threshold is set to 3 seconds. This means that if we take more than 3 seconds between performing the `protect` command and the `check` command, the output of the `check` command will be: `File is protected: false`. To fix this, we can run the `check` command with one additional argument at the end, the timeout:
-```sh
-$ ./blingbank check files/protected.json files/aes.key files/pub.key 100000
-```
-This command will check if the data is valid and if the timestamp is not older than 100_000 ms (or 100 s). By doing this, we can see that the message is true since the data is valid and fresh. This is done to prevent replay attacks.
+After performing this command, a message will be displayed informing if the data is protected or not. In this case, the message will be true since the input is the output of the `protect` command. If we change the file to be checked to `files/input.json` and run the command again, the message will be false since the data is not protected.
 
 #### Unprotect
 To unprotect a file, we can run the following command:
@@ -168,12 +162,6 @@ After performing this command, we can see that the `output.json` file was create
 $ diff files/input.json files/output.json
 ```
 This command will not output anything since the files are the same.
-
-As it happens with the `check` command, sometimes we might get an error saying that it wasn't possible to unprotect the data, if we take more than 3 seconds between performing the `protect` command and the `unprotect` command. This happens because the data is not fresh, meaning that the timestamp of the data is not valid. To fix this, we can run the `unprotect` command with one additional argument at the end, the timeout:
-```sh
-$ ./blingbank unprotect files/protected.json files/output.json files/aes.key files/pub.key 100000
-```
-This command will unprotect the data if it is valid and if the timestamp is not older than 100_000 ms (or 100 s). This way, we are able to unprotect the data and see its contents.
 
 ### Web Application
 
