@@ -14,6 +14,8 @@ BlingBank's infrastructure is composed of four servers: a gateway, a web server,
 ### 1.3. Security Challenge
 The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed.
 With all these requirements, the new document format for payment orders has the following structure:
+
+TODO: Is this the document?
 ```json
 {
     "account": "account-id",
@@ -61,16 +63,20 @@ In order to use a DS, a private key is needed.
 
 ##### Authenticity
 
-Authenticity is achieved by using a DS.
+Authenticity is achieved by using the also the HMAC or the DS.
+With the HMAC, the document can be verified by the receiver, ensuring authenticity.
+
+###### Non-Repudiation
+
 By using a DS, the document can be signed with a private key and then verified with the corresponding public key.
-This way, the document can be verified by anyone with the public key, ensuring non-repudiation.
+This way, the document can be verified by anyone that has public key, ensuring non-repudiation.
 
 ###### Replay Attacks
 
 By itself, the Library does not protect against replay attacks.
 This is done by design. The Library is meant to be stateless, so it does not keep track of the documents that were already processed.
 It is up to the user of the Library to keep track of the documents that were already processed.
-This issue was discussed with the professor and it was agreed that this was not a issue as long as the verification is done by a third party using the library.
+This issue was discussed with the professor and it was agreed that this was not a issue as long as the verification is done by the third party using the library.
 It was discussed that the CLI tool does not need to protect against replay attacks.
 In the case of the backend, this implementation is done by the backend itself.
 
@@ -195,9 +201,31 @@ If it exists, it can be protected!
 
 #### 2.2.1. Network and Machine Setup
 
+##### Virtual Machines
+
+NixOS was chosen due to its ease of use and its ability to be easily configured and replicated.
+With one simple configuration file, we can easily replicate the same environment in multiple machines.
+The different machines will only differ with the network configuration and which services are running.
+
+QEMU was chosen due to the fact that it is faster than most other virtual box solutions (since it has direct kernel integration), and for our purposes, it is more than enough (since we are not using any graphical interface)
+
+##### Docker
+
+Firstly the group wanted to use Docker to run the different services, in a way to avoid using virtual machines.
+However, this approach was not allowed (due to the easy configuration of Docker, which would not be a challenge for the project).
+In a real world scenario, Docker would be the best option, since it is easy to configure and replicate, and it is also very lightweight.
+
 (_Provide a brief description of the built infrastructure._)
 
 (_Justify the choice of technologies for each server._)
+
+##### Technologies Used
+
+As said previously, the library, the CLI, the backend and the frontend were all developed in Typescript.
+This was done in order to have a single language for the whole project, allowing us to easily share code between the different parts of the project.
+At the first weeks of the project, the development was being made in Java, which was easier to imlement the cryptographic library. The problem with Java was that it was not possible to use the library in the frontend. It seemed odd for a bank website to not be able to show the accounts information at the browser. A possible approach was downloading the protected file and use another tool to unprotect it. This seemed like a bad approach, since it would be a bad user experience. By having Typescript, all the project spoke the same language, allowing for the user to see in a secure way the information about his accounts.
+
+The database was implemented using MongoDB, which is a NoSQL database. This was done in order to have a more flexible database, allowing us to easily change the structure of the database without having to change the code.
 
 #### 2.2.2. Server Communication Security
 
