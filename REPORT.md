@@ -229,31 +229,105 @@ The database was implemented using MongoDB, which is a NoSQL database. This was 
 
 #### 2.2.2. Server Communication Security
 
-At the start, the server has a Master Key that it stores. This solution was implemented in order to avoid the complexity of having to distribute keys. This master key is used to encrypt the account keys hold by the server in the database. This solution is used to simulate an account manager on the bank side. In this case, as this account manager is the server itself, it needs to have access to the account keys. The optimal solution would be to have a separate server that would hold the account keys and would be responsible for the encryption and decryption of the account keys. This solution would be more secure as it would be more difficult to compromise the account keys. However, this solution would also be more complex to implemenhet and would require more resources.
+In order to provide security in the application, multiple solutions were implemented.
 
-At the moment of registration, a user accesses the registration page where he inputs his email and username. The server will receive this data and will generate a shared-secret and sends it to the user email. This shared secret is stored in the database encrypted with the Master Key. 
+##### Master Key
 
-Once again, this solution is not optimal as the email can be compromised. However, in the real world, in order to open an account, the client would need to go in person to the bank where he would physically get the security codes. In this case, the email is used as a substitute for the physical presence of the user and it is assumed that this environment is secure and that the email is not compromised. After this, the server stores on the database the user e-mail and the hash of the password in order to guarantee that the password is not compromised in case of a DB leak. Additionally, in the real world there is no concept of registration without an being the holder of an account at a bank. In our BlingBank system, it is possible for a user to register and never open an account. This solution was implemented as it would be necessary for the account holders to have security codes to access their accounts which is done on registration. Since every user is allowed to have multiple accounts at BlingBank, this solution helps us to facilitate the navigation of the user on the system, allowing him to easily access his accounts info.
+The backend server has a Master Key which is stored in a file, and it is loaded as an environment variable, when the server starts.
+This Master Key is used to store sensitive keys in the database. Some exemples of these keys will be explained in the following sections.
 
-At the moment of login, the user inputs his email. Upon receiving this request, the server will generate a challenge based on the user-server shared-secret and returns it to the user encrypted with the shared-secret. The client will then answer the challenge and will return the answer encrypted with the shared-secret. If the answer is correct and accepted by the server, this will generate a Session Key and a JWT Token and will return this two elements to the client but the Session Key will first be encrypted by the shared-secret. Finally, after the client receives the session key and the JWT token, it will send its public key to the server encrypted with the session key and the server will store the client's public key encrypted with the shared-secret on the database. If there is an existing entry on this login table to this user, it will first be deleted before a new one is added.
+##### Registration
 
-We opted for this complex round of communication in order to ensure that the user who is authenticating is who he says he is and to be able to safely change all keys necessary for future possible operations.
+When a new user registers, a POST request is sent with the user email and the user name.
+The server will then generate a shared-secret, which will be sent to the user email.
+This shared secret will also be stored in the db, encrypted with the Master Key.
 
-After the moment of login, it is now possible to access all functionalities of BlingBank, where we can create accounts and access their info, view the movements of an account, create and authorize payment orders and view the payment orders of an account.
+This first step is simulating the sharing of a secret between the user and the server, which will be used in the next steps.
+This was not needed to do, since it says in the project description that this key is assumed to be shared, but we decided to do it anyway, since it allowed us to have a more extensive and realistic implementation.
 
-Starting with the creation of an account, the user will be able to select the account holders of that account with the constraint that he needs to be one of them. This is not an optimal solution as this allows any user with bad intentions to create an account with other users that don't want to do so. However, this is an online bank and due to the time frame we assumed that the users registered and authenticated are not well intenteded as in the real-world, in order to open an account with multiple holders, all of them would need to go to the bank in person. With this in mind, we proceed to the next step where the client will send this data to the server encrypted with the session key along side with his valid JWT Token. Upon receiving this request, the server will generate N+1 Shamir Keys, being N the number of account holders. The other extra key is the server's key for that account as the server will work as an account manager. This key will then be stored on the database encrypted with the Master Key. The other N shamir keys will be send by email to the respective users encrypted with the shared-secret of each user.
+We are assuming that the email is secure, and that the user has access to it.
+This approach in a real world scenario could be replaced by the user going to the bank and getting the security codes in person. There is no truly secure way to exchange the shared-secret to the user, even if the exchange is done in person, another person could be faking the user or steal the shared-secret.
 
-We chose to used the Shamir Keys method as it allows for more security. With N+1 keys, it is necessary to have at least 2 keys to access the account data. This means that the server will not be able to access the accounts' info alone and therefore we prevent the confidentiality of the data in the case the server is compromised.
+Another way this exchange could be done was using the Diffie-Hellman (DH) key exchange protocol.
+It would be really interesting to implement this protocol, but it was not possible due to time constraints.
 
-To access an account's movements or payments, the authenticated user will first need to select the account he wants to access. For this, a simple get with the user ID and the JWT Token is made to the server which will return all accounts which the user is a holder of. After this, the user will select the account he wants to access and will send the account ID along side with his shamir key encrypted with the session key plus the JWT Token (the message sent is: accountID+E(UserShamirKey, SessionKey) + JWT Token). When the server receives this request, it will get its shamir key for this account from the database and will retrieve the account info from the database using these 2 shamir keys. The server will then return the account info encrypted with the session key to the client which will decrypt it and display it to the user.
+This secret is stored encrypted in the database, so that if the database is compromised, the shared-secret is not compromised.
+If the database is compromised, all the systems that use the database are compromised, so the shared-secret is not the only problem. (TODO)
+
+##### Login
+
+When a user logs in, a POST request is sent with the user email.
+The server will then generate a challenge, which will be protected with the shared-secret.
+The user will then decrypt the challenge, calculate the answer and the encrypt it with the shared-secret and send it to the server.
+If the answer is incorrect, it means that the user is not who he says he is, and the login will fail.
+If the answer is correct, the server will generate a Session Key and a JWT Token.
+The Session Key will be encrypted with the shared-secret and the server will send the JWT Token and the encrypted Session Key to the user.
+Upon receiving the response, the user will decrypt the Session Key and store it in a cookie along with the JWT Token.
+The user will then send the public key to the server, encrypted with the Session Key.
+The server will then store the public key in the database, encrypted with the Shared Secret.
+
+This distribution of keys tries to follow what was taught in class about the Perfect Forward Secrecy (PFS).
+If a session key is compromised, the attacker can only access the information of that session.
+Here we assume that the Key Encrypting Key (KEK) is the shared-secret (created in the registration phase).
+Authenticity can be achieved by the user verifying the freshness (through the nonce/challenge) and the integrity (through the HMAC) of the message. TODO:
+
+The challenge is used to ensure that the user is who he says he is. The challenge itself is based on the shared-secret, since it is assumed that the user has access to it.
+It would also be possible for the user to challenge the server but this was not implemented due to time constraints.
+
+This solution was implemented as it would be necessary for the account holders to have security codes to access their accounts which is done on registration. Since every user is allowed to have multiple accounts at BlingBank, this solution helps us to facilitate the navigation of the user on the system, allowing him to easily access his accounts info.
+
+The user sends his public key to the server, encrypted with the Session Key, so that the server can store it in the database. And will potentially be used in the future to verify the digital signatures of the payment orders.
+
+##### Create Account
+
+In order to make any request about accounts, the user needs to be authenticated.
+
+When a user creates an account, a POST request is sent with the account holders, the account balance and the account currency, all encrypted with the Session Key along with the JWT Token.
+
+Upon receiving this request, the server will generate an account key that will be used to encrypt the account movements and the account balance.
+Then it will generate N + 1 Keys based on the account key, where N is the number of account holders, using the Shamir Secret Sharing algorithm.
+The extra key is the server's key which will be stored in the database, encrypted with the Master Key. (TODO)
+
+The other N keys will be sent by email to the respective users, encrypted with the shared-secret of each user and deleted from the backend's memory.
+
+When said the user needs to be authenticated, it means that the user needs to have a valid JWT Token.
+
+In order to ease the implementation, the user can create an account with every user that is registered in the system.
+This obviously is not a good solution, but allows us to easily create accounts.
+
+We used the Shamir Secret Sharing algorithm, since it allows us to have more security. 
+It allows for the information of accounts to not be compromised if the server is compromised.
+The algorithm generates M keys, and by giving a threshold of N keys, it is possible to recover the secret, where N <= M.
+By setting the threshold to 2, it is necessary to have at least 2 keys to access the account data.
+So by itself, the server cannot access the account information, since it only has one key, it always needs to have at least one user to access the account information.
+
+As with the registration, the email is assumed to be secure and that the user has access to it.
+In a real world scenario, this would be done in person, where the user would go to the bank and get its shamir key.
+
+##### Get Account Information
+
+To get the account information, a GET request is sent with the the account ID, the user's Shamir Key encrypted with the Session Key and the JWT Token.
+
+Upon receiving this request, the server will get its Shamir Key for this account from the database and will generate the account key.
+Then it will retrieve the account info from the database using the account key.
+The server will then return the account info encrypted with the Session Key to the client which will decrypt it and display it to the user.
+
+The server has verifications that do not allow an authenticated user to access an account that he does not have access to.
+
+##### Communication Channels
+
+The communication between all the servers is done using TLS (Transport Layer Security).
+
+But even if the TLS is compromised, the attacker cannot access the information, since the most critical information is protected using the cryptographic library.
+
+### 2.3. Security Challenge
+
 
 To create a payment order, the same procedure as the creation of an account is followed. - TODO COMPLEMENT
 
 Finnaly, to sign a payment, i.e. to approve a payment order, the client will transfer an hash of the payment and then use the CLI to sign it. After this is done, it will send the signed hash to the server encrypted with the session key. The server will then verify the signature and if it is valid, it will update the payment order on the database with the new signature. When a payment has all necessary signatures, it will be executed and the server will update the account movements and the account balance.
 
-(_Explain what keys exist at the start and how are they distributed?_)
-
-### 2.3. Security Challenge
+(TODO)
 
 #### 2.3.1. Challenge Overview
 
