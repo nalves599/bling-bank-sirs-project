@@ -215,9 +215,28 @@ Firstly the group wanted to use Docker to run the different services, in a way t
 However, this approach was not allowed (due to the easy configuration of Docker, which would not be a challenge for the project).
 In a real world scenario, Docker would be the best option, since it is easy to configure and replicate, and it is also very lightweight.
 
-(_Provide a brief description of the built infrastructure._)
+##### Infrastructure
 
-(_Justify the choice of technologies for each server._)
+The infrastructure is composed of four servers: a gateway, a web server, a backend server and a database server.
+
+There are 3 networks: the gateway network, the public network (DMZ) and the private network.
+
+The gateway has the ip address of 10.69.0.0/24
+
+The gateway network works also as a NAT (Network Address Translation) and a firewall.
+
+// TODO
+The firewall is configured to only allow the public network to send tcp requests to the private network through ...
+
+All other traffic to the private network is dropped.
+
+`iptables -A FORWARD -m conntrack --ctstate UNTRACKED -d 10.69.1.0/24 -j DROP`
+
+The public network has the ip address of 10.69.2.0/24 //TODO:
+
+The private network has the ip address of 10.69.1.0/24
+
+In the private network resides the database server.
 
 ##### Technologies Used
 
@@ -366,17 +385,26 @@ The new secure document format for payment orders has the following structure:
 
 (_Explain how your team redesigned and extended the solution to meet the security challenge, including key distribution and other security measures._)
 
-(_Identify communication entities and the messages they exchange with a UML sequence or collaboration diagram._)  
+(_Identify communication entities and the messages they exchange with a UML sequence or collaboration diagram._)
 
 ## 3. Conclusion
 
-(_State the main achievements of your work._)
+With this project, we were able to deepen our understanding of cryptographic libraries and how to use them in a real world scenario.
+It was also a great opportunity to learn a little bit abouth virtual machines using QEMU and NixOS.
+We also learned that we can't take security for granted and how difficult it is to implement a secure system.
+Not only due to the sheer amount of ways used to attack a system, but also due to the fact that it is very easy to make a mistake and compromise the whole system.
+Setting up the infrastructure was also a great learning experience, since it allowed us to learn how to configure a network and how to setup a firewall.
 
-(_Describe which requirements were satisfied, partially satisfied, or not satisfied; with a brief justification for each one._)
+We were very sastified in being able to implement in our project the shamir secret sharing algorithm, which was not taught in class, but we were able to learn it by ourselves. And how it allowed us to have a more robust system.
+Implementing the session keys and the JWT tokens was also a great learning experience, since it allowed us to learn how to implement a secure login system.
 
-(_Identify possible enhancements in the future._)
+We were also very happy with the fact that we were able to implement the library in a way that it can be used in the frontend and in the backend, allowing us to have a single language for the whole project. One of the main reasons to do this was to allow the user to see his information in a browser without even noticing that his data was being transformed in the background.
 
-(_Offer a concluding statement, emphasizing the value of the project experience._)
+We wish we had a little more time to refine the project, but we are very happy with the result.
+
+For the future, the system would benefit from some kind of sotisficated signature scheme, using a yubikey or a smartcard, in order to have a more secure way to sign the payment orders. It would be also nice to implement the Diffie-Hellman (DH) key exchange protocol, in order to have a more secure way to exchange the shared-secret.
+
+Overall the project was a great learning experience and we are very happy with the result.
 
 ## 4. Bibliography
 
