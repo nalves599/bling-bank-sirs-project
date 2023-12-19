@@ -47,7 +47,7 @@ BlingBank's cryptographic custom library needs to protect, check, and unprotect 
 It was used AES (Advanced Encryption Standard) with a 256-bit key in CBC (Cipher Block Chaining) mode.
 In order to use CBC mode, an IV (Initialization Vector) is needed.
 AES-256 is considered to be secure by the NIST (National Institute of Standards and Technology), therefore it was chosen.
-CBC mode is more secure than ECB (Electronic Code Book) mode, therefore it was chosen.
+CBC mode is more secure than ECB (Electronic Code Book) mode, due to the fact that if there are two blocks with the same content, they will not be encrypted to the same value.
 
 ##### Integrity
 
@@ -55,7 +55,7 @@ The Library can accept either an HMAC (Hash-based Message Authentication Code) o
 
 The HMAC uses SHA-256 as the hash function.
 In order to use HMAC, a key is needed.
-The length of the key is equal to the length of the hash function (256 bits), which is considered to be secure.
+The length of the key is equal to the length of the hash function (256 bits), which is considered to be secure by the NIST.
 
 The DS uses ECDSA (Elliptic Curve Digital Signature Algorithm) with the p521 curve.
 p521 is considered to be secure by the NIST, therefore it was chosen.
@@ -79,6 +79,14 @@ It is up to the user of the Library to keep track of the documents that were alr
 This issue was discussed with the professor and it was agreed that this was not a issue as long as the verification is done by the third party using the library.
 It was discussed that the CLI tool does not need to protect against replay attacks.
 In the case of the backend, this implementation is done by the backend itself.
+
+###### Freshness
+
+The Library also has the ability to check the freshness of the document.
+While protecting, it can generate a nonce based on the current time or accept a custom nonce.
+While unprotecting/checking, a custom nonce verification function can be used.
+Allowing for modularity and flexibility.
+It was also discussed with the professor if the CLI should verify the freshness of the document. It was not required, but in the backend it was implemented.
 
 ##### Document Structure
 
@@ -217,7 +225,7 @@ In a real world scenario, Docker would be the best option, since it is easy to c
 
 ##### Infrastructure
 
-The infrastructure is composed of four servers: a gateway, a web server, a backend server and a database server.
+The infrastructure is composed of three servers: a gateway, a web/backend server and a database server.
 
 There are 3 networks: the gateway network, the public network (DMZ) and the private network.
 
@@ -225,14 +233,17 @@ The gateway has the ip address of 10.69.0.0/24
 
 The gateway network works also as a NAT (Network Address Translation) and a firewall.
 
-// TODO
-The firewall is configured to only allow the public network to send tcp requests to the private network through ...
+The firewall is configured to only allow the public network to send tcp requests to the private network through port 3306
+
+`iptables -A FORWARD -p tcp -i eth2 -s 10.69.2.2 -d 10.69.1.2 --dport 3306 -j ACCEPT`
 
 All other traffic to the private network is dropped.
 
 `iptables -A FORWARD -m conntrack --ctstate UNTRACKED -d 10.69.1.0/24 -j DROP`
 
-The public network has the ip address of 10.69.2.0/24 //TODO:
+The public network has the ip address of 10.69.2.0/24
+
+In the public newtork web/backend server.
 
 The private network has the ip address of 10.69.1.0/24
 
@@ -341,33 +352,47 @@ But even if the TLS is compromised, the attacker cannot access the information, 
 
 ### 2.3. Security Challenge
 
-To create a payment order, the same procedure as the creation of an account is followed.
-
-Finnaly, to sign a payment, i.e. to approve a payment order, the client will transfer an hash of the payment and then use the CLI to sign it. After this is done, it will send the signed hash to the server encrypted with the session key. The server will then verify the signature and if it is valid, it will update the payment order on the database with the new signature. When a payment has all necessary signatures, it will be executed and the server will update the account movements and the account balance.
-
-(TODO)
-
 #### 2.3.1. Challenge Overview
 
-The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed. To achieve this, and particular the non-repudiation of each transaction, we need to add new keys to the system, namely the users' asymmetric keys. This keys are required to sign the payment orders and to verify the signatures. 
+To create a payment order, the same procedure as the creation of an account is followed.
 
-(_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
+In order to a payment order to be executed, it needs to be approved by all the account holders.
+This is done by the user signing the payment order with his private key and sending it to the server.
+
+This allows for confidentiality, authenticity and non-repudiation of each transaction.
+
+In order to achieve this, it was needed to add a new phase to the login, where the user sends his public key to the server and the server stores it in the database.
+
+The server can then use the public key to verify the digital signature of the payment order.
+
+Design some kind of signature scheme, using a yubikey or a smartcard, in order to have a more secure way to sign the payment orders.
 
 #### 2.3.2. Attacker Model
 
-The authenticated users are considered fully trusted as they have the ability to create accounts with multiple holders and can select who this holders are. The server is considered partially trusted as it has access to the account keys and can decrypt the account info. However, it is not able to access the accounts' info alone as it needs the users' keys. The attacker is considered untrusted as he does not have access to the users' keys and therefore cannot access the accounts' info.
+We assume the web and backend server to be correct.
+Neither the user nor the backend server trust each other.
+All communications are assumed to be insecure, needing to be protected when necessary.
+The certificates are assumed to be valid and the attacker does not have access to the private keys.
 
-(_Define who is fully trusted, partially trusted, or untrusted._)
+By intercepting the register email response the attacker can get the shared-secret.
+Which with the password, the attacker can login as the user.
 
-(_Define how powerful the attacker is, with capabilities and limitations, i.e., what can he do and what he cannot do_)
+By stealing the device where the user is logged in, the attacker can get the Session Key and the JWT Token and use it to access the user's account information from another device.
 
-TODO - explain how the attacker can compromise the system - maybe related to the infrastructure?
+If the user has access to the memory of the backend computer, he may access the Master Key and the shared-secret of all the users. He can't access the accounts information, since it is protected by the Shamir Secret Sharing algorithm.
+
+The account data can be compromised if the attacker has one of the Shamir Keys of the user and the master key.
 
 #### 2.3.3. Solution Design and Implementation
 
-For the server to able to have the user's public key, it was necessary to update the login phase to include a phase where the user sends his public key to the server and for the latter to store this information.
+Firstly the user needs to send his public key to the server, encrypted with the Session Key.
 
-Regarding the structure of BlingBank, not much change. The accounts were extendended to hold a list of payments and the notion of payment was created. Since when a payment is approved, it is executed and therefore transforms into a movement, the new secure document format for payment orders was created in way that it could be easily transformed into a movement. This way, the server can easily transform a payment into a movement and update the account movements and balance.
+Then when a user wants to sign a payment order, he signs the payment order with his private key and a nonce with a timestamp.
+
+The server will then verify the freshness of the nonce and the digital signature of the payment order.
+The freshness is verified by checking if the timestamp is more recent than the last timestamp used by the user and if it's in a certain time window (like a TOTP).
+
+When a payment has all the required signatures, the server will execute the payment and add to the account movements.
 
 The new secure document format for payment orders has the following structure:
 ```json
@@ -382,8 +407,6 @@ The new secure document format for payment orders has the following structure:
     "accepted": "accepted"
 }
 ```
-
-(_Explain how your team redesigned and extended the solution to meet the security challenge, including key distribution and other security measures._)
 
 (_Identify communication entities and the messages they exchange with a UML sequence or collaboration diagram._)
 
@@ -408,9 +431,9 @@ Overall the project was a great learning experience and we are very happy with t
 
 ## 4. Bibliography
 
-(_Present bibliographic references, with clickable links. Always include at least the authors, title, "where published", and year._)
-
-https://www.nist.gov/
+[NIST Official Website](https://www.nist.gov/)
+[Shamir Secret Sharing](https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing)
+[Diffie-Hellman Key Exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
 
 ----
 END OF REPORT

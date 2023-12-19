@@ -21,9 +21,9 @@ This document presents installation and demonstration instructions.
 
 ## Installation
 
-To see the project in action, it is necessary to setup a virtual environment, with 3 TODO: networks and 4 machines.
+To see the project in action, it is necessary to setup a virtual environment, with 3 networks and 3 machines.
 
-n order to install the multiple machines, a guide was provided [here](https://github.com/tecnico-sec/a39-diogo-nuno-tomas/tree/master/infra).
+In order to install the multiple machines, a guide was provided [here](https://github.com/tecnico-sec/a39-diogo-nuno-tomas/tree/master/infra).
 
 The following diagram shows the networks and machines:
 
@@ -45,21 +45,14 @@ This machine runs the gateway service, which is responsible for routing the mess
 The expected results are a properly configured machine, with the gateway service running.
 Allowing the other machines to communicate with each other.
 
-#### Machine 2 (Web Server)
+#### Machine 2 (Web Server and Backend)
 
-This machine runs the web server service, which is responsible for serving the web application.
+This machine runs the web server service and the backend, which is responsible for serving the web application.
 
 The expected results are a properly configured machine, with the web server service running.
 If configured correctly, alongside the gateway, the web application should be accessible from the host machine.
 
-#### Machine 3 (Backend/API)
-
-This machine runs the backend service, which is responsible for serving the API.
-
-The expected results are a properly configured machine, with the backend service running.
-If configured correctly, alongside the gateway, the API should be accessible from the host machine.
-
-#### Machine 4 (Database)
+#### Machine 3 (Database)
 
 This machine runs the database service, which is responsible for storing the data.
 
@@ -68,7 +61,25 @@ If configured correctly, alongside the gateway, the backend should be able to co
 
 #### Common Problems
 
-It seems that the gateway may not work as intended, if the docker service in the host machine is running.
+It may be necessary to add the current user to the `nix-users` group.
+
+```sh
+$ sudo usermod -a -G nix-users $USER
+```
+
+It is also necessary to have the `nix-daemon` service running.
+
+```sh
+$ sudo systemctl start nix-daemon
+```
+
+The nix config file (`~/.config/nix/nix.conf`) should have the following lines:
+
+```conf
+experimental-features = nix-command flakes
+```
+
+It seems that the gateway may not work as intended, if the `docker` service in the host machine is running.
 Disabling it, seems to fix the problem.
 
 The first installation of the machine may take a while, since it needs to download all the dependencies.
