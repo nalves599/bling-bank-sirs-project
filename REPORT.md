@@ -302,7 +302,7 @@ By setting the threshold to 2, it is necessary to have at least 2 keys to access
 So, by itself, the server cannot access the account information, since it only has one key, it always needs to have at least one user to access the account information.
 
 As with the registration, the email is assumed to be secure and that the user has access to it.
-In a real world scenario, this would be done in person, where the user would go to the bank and get hSis shamir key.
+In a real world scenario, this would be done in person, where the user would go to the bank and get his shamir key.
 
 ##### Get Account Information
 
@@ -322,8 +322,7 @@ But even if the TLS is compromised, the attacker cannot access the information, 
 
 ### 2.3. Security Challenge
 
-
-To create a payment order, the same procedure as the creation of an account is followed. - TODO COMPLEMENT
+To create a payment order, the same procedure as the creation of an account is followed.
 
 Finnaly, to sign a payment, i.e. to approve a payment order, the client will transfer an hash of the payment and then use the CLI to sign it. After this is done, it will send the signed hash to the server encrypted with the session key. The server will then verify the signature and if it is valid, it will update the payment order on the database with the new signature. When a payment has all necessary signatures, it will be executed and the server will update the account movements and the account balance.
 
