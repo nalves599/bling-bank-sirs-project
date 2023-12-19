@@ -223,14 +223,29 @@ To create a payment order, the same procedure as the creation of an account is f
 
 Finnaly, to sign a payment, i.e. to approve a payment order, the client will transfer an hash of the payment and then use the CLI to sign it. After this is done, it will send the signed hash to the server encrypted with the session key. The server will then verify the signature and if it is valid, it will update the payment order on the database with the new signature. When a payment has all necessary signatures, it will be executed and the server will update the account movements and the account balance.
 
-TODO: how do we access an account movements and pending payments. How do we create and authorize payments.
-(_Discuss how server communications were secured, including the secure channel solutions implemented and any challenges encountered._)
-
 (_Explain what keys exist at the start and how are they distributed?_)
 
 ### 2.3. Security Challenge
 
 #### 2.3.1. Challenge Overview
+
+The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed. To achieve this, and particular the non-repudiation of each transaction, we need to add new keys to the system, namely the users' asymmetric keys. This keys are required to sign the payment orders and to verify the signatures. For the server to able to have the user's public key, it was necessary to update the login phase to include a phase where the user sends his public key to the server and for the latter to store this information.
+
+Regarding the structure of BlingBank, not much change. The accounts were extendended to hold a list of payments and the notion of payment was created. Since when a payment is approved, it is executed and therefore transforms into a movement, the new secure document format for payment orders was created in way that it could be easily transformed into a movement. This way, the server can easily transform a payment into a movement and update the account movements and balance.
+
+The new secure document format for payment orders has the following structure:
+```json
+{
+    "account": "account-id",
+    "amount": "amount",
+    "currency": "currency",
+    "date": "date",
+    "description": "description",
+    "requiredApprovals": "required-approvals",
+    "givenApprovals": "given-approvals",
+    "accepted": "accepted"
+}
+```
 
 (_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
 
