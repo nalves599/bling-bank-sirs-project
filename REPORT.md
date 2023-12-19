@@ -257,7 +257,23 @@ Finnaly, to sign a payment, i.e. to approve a payment order, the client will tra
 
 #### 2.3.1. Challenge Overview
 
-The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed. To achieve this, and particular the non-repudiation of each transaction, we need to add new keys to the system, namely the users' asymmetric keys. This keys are required to sign the payment orders and to verify the signatures. For the server to able to have the user's public key, it was necessary to update the login phase to include a phase where the user sends his public key to the server and for the latter to store this information.
+The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed. To achieve this, and particular the non-repudiation of each transaction, we need to add new keys to the system, namely the users' asymmetric keys. This keys are required to sign the payment orders and to verify the signatures. 
+
+(_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
+
+#### 2.3.2. Attacker Model
+
+The authenticated users are considered fully trusted as they have the ability to create accounts with multiple holders and can select who this holders are. The server is considered partially trusted as it has access to the account keys and can decrypt the account info. However, it is not able to access the accounts' info alone as it needs the users' keys. The attacker is considered untrusted as he does not have access to the users' keys and therefore cannot access the accounts' info.
+
+(_Define who is fully trusted, partially trusted, or untrusted._)
+
+(_Define how powerful the attacker is, with capabilities and limitations, i.e., what can he do and what he cannot do_)
+
+TODO - explain how the attacker can compromise the system - maybe related to the infrastructure?
+
+#### 2.3.3. Solution Design and Implementation
+
+For the server to able to have the user's public key, it was necessary to update the login phase to include a phase where the user sends his public key to the server and for the latter to store this information.
 
 Regarding the structure of BlingBank, not much change. The accounts were extendended to hold a list of payments and the notion of payment was created. Since when a payment is approved, it is executed and therefore transforms into a movement, the new secure document format for payment orders was created in way that it could be easily transformed into a movement. This way, the server can easily transform a payment into a movement and update the account movements and balance.
 
@@ -274,16 +290,6 @@ The new secure document format for payment orders has the following structure:
     "accepted": "accepted"
 }
 ```
-
-(_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
-
-#### 2.3.2. Attacker Model
-
-(_Define who is fully trusted, partially trusted, or untrusted._)
-
-(_Define how powerful the attacker is, with capabilities and limitations, i.e., what can he do and what he cannot do_)
-
-#### 2.3.3. Solution Design and Implementation
 
 (_Explain how your team redesigned and extended the solution to meet the security challenge, including key distribution and other security measures._)
 
