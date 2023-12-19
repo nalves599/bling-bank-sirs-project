@@ -44,7 +44,7 @@ export async function bytesToSigningKey(data: Buffer): Promise<CryptoKey> {
   }
 }
 
-export async function bytesToVerificationKey(data: Buffer): Promise<CryptoKey> {
+export async function bytesToECDSAKey(data: Buffer): Promise<CryptoKey> {
   try {
     return await crypto.importKey(
       "raw",
