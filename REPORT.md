@@ -245,13 +245,13 @@ This shared secret will also be stored in the db, encrypted with the Master Key.
 This first step is simulating the sharing of a secret between the user and the server, which will be used in the next steps.
 This was not needed to do, since it says in the project description that this key is assumed to be shared, but we decided to do it anyway, since it allowed us to have a more extensive and realistic implementation.
 
-We are assuming that the email is secure, and that the user has access to it.
-This approach in a real world scenario could be replaced by the user going to the bank and getting the security codes in person. There is no truly secure way to exchange the shared-secret to the user, even if the exchange is done in person, another person could be faking the user or steal the shared-secret.
+We are assuming that the email is secure and that the user has access to it.
+This approach in a real world scenario could be replaced by the user going to the bank and getting the security codes in person. There is no truly secure way to exchange the shared-secret to the user, even if the exchange is done in person, another person could steal the shared-secret.
 
 Another way this exchange could be done was using the Diffie-Hellman (DH) key exchange protocol.
 It would be really interesting to implement this protocol, but it was not possible due to time constraints.
 
-This secret is stored encrypted in the database, so that if the database is compromised, the shared-secret is not compromised.
+This secret is stored encrypted in the database so, if the database is compromised, the shared-secret is not compromised.
 If the database is compromised, all the systems that use the database are compromised, so the shared-secret is not the only problem. (TODO)
 
 ##### Login
@@ -259,7 +259,7 @@ If the database is compromised, all the systems that use the database are compro
 When a user logs in, a POST request is sent with the user email.
 The server will then generate a challenge, which will be protected with the shared-secret.
 The user will then decrypt the challenge, calculate the answer and the encrypt it with the shared-secret and send it to the server.
-If the answer is incorrect, it means that the user is not who he says he is, and the login will fail.
+If the answer is incorrect, it means that the user is not who he says he is and the login will fail.
 If the answer is correct, the server will generate a Session Key and a JWT Token.
 The Session Key will be encrypted with the shared-secret and the server will send the JWT Token and the encrypted Session Key to the user.
 Upon receiving the response, the user will decrypt the Session Key and store it in a cookie along with the JWT Token.
@@ -299,10 +299,10 @@ We used the Shamir Secret Sharing algorithm, since it allows us to have more sec
 It allows for the information of accounts to not be compromised if the server is compromised.
 The algorithm generates M keys, and by giving a threshold of N keys, it is possible to recover the secret, where N <= M.
 By setting the threshold to 2, it is necessary to have at least 2 keys to access the account data.
-So by itself, the server cannot access the account information, since it only has one key, it always needs to have at least one user to access the account information.
+So, by itself, the server cannot access the account information, since it only has one key, it always needs to have at least one user to access the account information.
 
 As with the registration, the email is assumed to be secure and that the user has access to it.
-In a real world scenario, this would be done in person, where the user would go to the bank and get its shamir key.
+In a real world scenario, this would be done in person, where the user would go to the bank and get hSis shamir key.
 
 ##### Get Account Information
 
