@@ -2,10 +2,10 @@
 
 ## Team
 
-| Number | Name              | User                             | E-mail                              |
-| -------|-------------------|----------------------------------| ------------------------------------|
-| 99202  | Diogo Melita     | <https://github.com/d-melita>   | <mailto:diogo.melita@tecnico.ulisboa.pt>   |
-| 99291  | Nuno Alves      | <https://github.com/nalves599>     | <mailto:nuno.f.alves@tecnico.ulisboa.pt>     |
+| Number | Name              | User                             | E-mail                                     |
+| -------|-------------------|----------------------------------| -------------------------------------------|
+| 99202  | Diogo Melita     | <https://github.com/d-melita>   | <mailto:diogo.melita@tecnico.ulisboa.pt>     |
+| 99291  | Nuno Alves      | <https://github.com/nalves599>     | <mailto:nuno.f.alves@tecnico.ulisboa.pt>   |
 | 99341  | Tomás Esteves  | <https://github.com/Pesteves2002> | <mailto:tomasesteves2002@tecnico.ulisboa.pt> |
 
 ![Diogo Melita](img/diogo.png) ![Nuno Alves](img/nuno.png) ![Tomás Esteves](img/tomas.png)
@@ -128,6 +128,13 @@ As we can see after running the `help` command, the `protect` command takes 4 ar
 After performing this command, we can see that the `protected.json` file was created and it contains the protected data.
 We can see that only the multiple values of the json file are protected, and not the file as a whole.
 
+It is also possible to run this command using an hmac key instead of a private key. This allows the user to protect a document in a more secure way once the flag allows the user to have not only the Digital Signature but HMAC as well as this key signs and verifies the integrity of the data. To do so, we can run the following command:
+```sh
+$ ./blingbank protect files/input.json files/protected.json files/aes.key files/hmac.key --hmac
+```
+
+In this case, the `hmac.key` file will be used to sign the data instead of the `priv.key` file. The `--hmac` flag is used to indicate that we want to use the hmac key instead of the private key.
+
 #### Check
 To check if a file's data is protected or not, we can run the following command:
 ```sh
@@ -139,6 +146,13 @@ As we can see after running the `help` command, the `check` command takes 3 argu
 - `pub.key` - The file that contains the public key that will be used to verify the signature of the data
 
 After performing this command, a message will be displayed informing if the data is protected or not. In this case, the message will be true since the input is the output of the `protect` command. If we change the file to be checked to `files/input.json` and run the command again, the message will be false since the data is not protected.
+
+Like the protect command, we can also run this command using an hmac key instead of a public key. To do so, we can run the following command:
+```sh
+$ ./blingbank check files/protected.json files/aes.key files/hmac.key --hmac
+```
+
+In this case, the `hmac.key` file will be used to verify the signature and integrity of the data instead of the `pub.key` file. The `--hmac` flag is used to indicate that we want to use the hmac key instead of the public key. We should use this flag if we used the `--hmac` flag in the protect command.
 
 #### Unprotect
 To unprotect a file, we can run the following command:
@@ -157,6 +171,13 @@ After performing this command, we can see that the `output.json` file was create
 $ diff files/input.json files/output.json
 ```
 This command will not output anything since the files are the same.
+
+Like the protect and check commands, we can also run this command using an hmac key instead of a public key. To do so, we can run the following command:
+```sh
+$ ./blingbank unprotect files/protected.json files/output.json files/aes.key files/hmac.key --hmac
+```
+
+In this case, the `hmac.key` file will be used to verify the signature and integrity of the data instead of the `pub.key` file. The `--hmac` flag is used to indicate that we want to use the hmac key instead of the public key. We should use this flag if we used the `--hmac` flag in the protect command.
 
 #### Automatization
 
