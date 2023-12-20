@@ -1,15 +1,27 @@
 let webcrypto: Crypto;
 let UTF8Encoder: TextEncoder;
+let UTF8Decoder: TextDecoder;
 if (require("is-node")) {
   //console.log("Using Node.js WebCrypto");
   webcrypto = require("crypto").webcrypto;
   UTF8Encoder = new (require("util").TextEncoder)();
+  UTF8Decoder = new (require("util").TextDecoder)("utf-8");
 } else {
   //console.log("Using WebCrypto API");
   webcrypto = window.crypto;
   UTF8Encoder = new TextEncoder();
+  UTF8Decoder = new TextDecoder("utf-8");
 }
 const crypto = webcrypto.subtle;
+
+export const encoder = UTF8Encoder;
+export const decoder = UTF8Decoder;
+
+export const generateKey = async (length?: number) => {
+  const key = new Uint8Array(length || 32);
+  webcrypto.getRandomValues(key);
+  return key;
+};
 
 export const createAESKey = async (length?: 256) => {
   const key = await crypto.generateKey(
@@ -18,6 +30,19 @@ export const createAESKey = async (length?: 256) => {
     ["encrypt", "decrypt"],
   );
   return key;
+};
+
+// Import AES key from raw bytes
+export const importAESKey = async (key: string | ArrayBuffer) => {
+  const keyBuffer = typeof key === "string" ? hexToBuffer(key) : key;
+  const importedKey = await crypto.importKey(
+    "raw",
+    keyBuffer,
+    { name: "AES-CBC" },
+    true,
+    ["encrypt", "decrypt"],
+  );
+  return importedKey;
 };
 
 // Create ECDSA key pair to sign and verify
@@ -30,6 +55,19 @@ export const createECDSAKey = async (namedCurve?: "P-521") => {
   return { publicKey, privateKey };
 };
 
+// Import ECDSA key from raw bytes
+export const importECDSAKey = async (key: string | ArrayBuffer) => {
+  const keyBuffer = typeof key === "string" ? hexToBuffer(key) : key;
+  const importedKey = await crypto.importKey(
+    "raw",
+    keyBuffer,
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["sign", "verify"],
+  );
+  return importedKey;
+};
+
 // Create HMAC key to sign and verify
 export const createHMACKey = async () => {
   const key = await crypto.generateKey(
@@ -40,9 +78,23 @@ export const createHMACKey = async () => {
   return key;
 };
 
+// Import HMAC key
+export const importHMACKey = async (key: string | ArrayBuffer) => {
+  const keyBuffer = typeof key === "string" ? hexToBuffer(key) : key;
+  const importedKey = await crypto.importKey(
+    "raw",
+    keyBuffer,
+    { name: "HMAC", hash: "SHA-256" },
+    true,
+    ["sign", "verify"],
+  );
+  return importedKey;
+};
+
 // Hash a message with SHA-256
-export const hash = async (message: string | ArrayBuffer) => {
-  const messageBuffer = typeof message === "string" ? UTF8Encoder.encode(message) : message;
+export const sha256 = async (message: string | ArrayBuffer) => {
+  const messageBuffer =
+    typeof message === "string" ? UTF8Encoder.encode(message) : message;
   const hashBuffer = await crypto.digest("SHA-256", messageBuffer);
   return hashBuffer;
 };
@@ -92,7 +144,15 @@ export const verifyHMAC = async (
 };
 
 // Encrypt a message with a key
-export const encryptMessage = async (message: ArrayBuffer, key: CryptoKey) => {
+export const encryptMessage = async (
+  message: string | ArrayBuffer,
+  key: ArrayBuffer | CryptoKey | string,
+) => {
+  message = typeof message === "string" ? UTF8Encoder.encode(message) : message;
+  key = typeof key === "string" ? hexToBuffer(key) : key;
+  if (key instanceof ArrayBuffer || key instanceof Uint8Array) {
+    key = await importAESKey(key);
+  }
   const iv = webcrypto.getRandomValues(new Uint8Array(16));
   const ciphertext = await crypto.encrypt(
     { name: "AES-CBC", iv },
@@ -105,9 +165,13 @@ export const encryptMessage = async (message: ArrayBuffer, key: CryptoKey) => {
 // Decrypt a message with a key
 export const decryptMessage = async (
   ciphertext: ArrayBuffer,
-  key: CryptoKey,
+  key: string | ArrayBuffer | CryptoKey,
   iv: ArrayBuffer,
 ) => {
+  key = typeof key === "string" ? hexToBuffer(key) : key;
+  if (key instanceof ArrayBuffer || key instanceof Uint8Array) {
+    key = await importAESKey(key);
+  }
   const plaintext = await crypto.decrypt(
     { name: "AES-CBC", iv },
     key,
@@ -118,7 +182,7 @@ export const decryptMessage = async (
 
 // Generate nonce
 export const generateNonce = async () => {
-  const timestamp = new Date().getTime().toString();
+  const timestamp = Date.now().toString();
   const nonce = UTF8Encoder.encode(timestamp);
   return nonce;
 };
@@ -138,19 +202,25 @@ function concatBuffers(...buffers: ArrayBuffer[]) {
 }
 
 export type ProtectProps = {
-  aesKey: CryptoKey;
-  hmacKey?: CryptoKey;
+  aesKey: string | ArrayBuffer | CryptoKey;
+  hmacKey?: ArrayBuffer | CryptoKey;
   signingKey?: CryptoKey;
   nonce?: ArrayBuffer;
+  hex?: boolean;
 };
 
 // Protect data
 // Structure of the protected data:
 // [payloadLength: 4 bytes][payload: payloadLength bytes][nonceLength: 4 bytes][nonce: nonceLength bytes][signatureLength: 4 bytes][signature: signatureLength bytes]
-export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
-  let { aesKey, hmacKey, signingKey, nonce } = props;
+export const protect = async (
+  data: string | ArrayBuffer,
+  props: ProtectProps,
+) => {
+  let { aesKey, hmacKey, signingKey, nonce, hex } = props;
   let signature: ArrayBuffer | null = null;
   let hmac: ArrayBuffer | null = null;
+
+  data = typeof data === "string" ? UTF8Encoder.encode(data) : data;
 
   const payloadLength = toBytesInt32(data.byteLength);
 
@@ -171,6 +241,9 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
       signature,
     );
   } else if (hmacKey) {
+    if (hmacKey instanceof ArrayBuffer || hmacKey instanceof Uint8Array) {
+      hmacKey = await importHMACKey(hmacKey);
+    }
     hmac = await generateHMAC(message, hmacKey);
     const hmacLength = toBytesInt32(hmac.byteLength);
     data = concatBuffers(
@@ -187,21 +260,33 @@ export const protect = async (data: ArrayBuffer, props: ProtectProps) => {
 
   const { iv, encrypted } = await encryptMessage(data, aesKey);
   const messageEncrypted = concatBuffers(iv, encrypted);
+  const messageEncryptedHex = bufferToHex(messageEncrypted);
 
-  return { iv, messageEncrypted, signature, hmac, nonce };
+  return {
+    iv,
+    messageEncrypted: hex ? messageEncryptedHex : messageEncrypted,
+    signature,
+    hmac,
+    nonce,
+  };
 };
 
 export type UnprotectProps = {
   iv?: ArrayBuffer;
-  aesKey: CryptoKey;
-  hmacKey?: CryptoKey;
+  aesKey: string | ArrayBuffer | CryptoKey;
+  hmacKey?: ArrayBuffer | CryptoKey;
   verifyingKey?: CryptoKey;
   nonceVerification?: (nonce: ArrayBuffer) => boolean;
 };
 
 // Unprotect data
-export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
+export const unprotect = async (
+  data: string | ArrayBuffer,
+  props: UnprotectProps,
+) => {
   let { iv, aesKey, hmacKey, verifyingKey, nonceVerification } = props;
+
+  data = typeof data === "string" ? hexToBuffer(data) : data;
 
   if (!iv) {
     iv = data.slice(0, 16);
@@ -231,6 +316,9 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
     const hmac = message.slice(4, 4 + hmacLength);
     const verify = concatBuffers(payload, nonce);
 
+    if (hmacKey instanceof ArrayBuffer || hmacKey instanceof Uint8Array) {
+      hmacKey = await importHMACKey(hmacKey);
+    }
     if (!(await verifyHMAC(verify, hmac, hmacKey))) {
       throw new Error("Invalid HMAC");
     }
@@ -245,6 +333,33 @@ export const unprotect = async (data: ArrayBuffer, props: UnprotectProps) => {
   };
 };
 
+export const paramProtect = async (
+  data: string | ArrayBuffer,
+  key: ArrayBuffer,
+) => {
+  data = typeof data === "string" ? UTF8Encoder.encode(data) : data;
+  const { messageEncrypted } = await protect(data, {
+    aesKey: key,
+    hmacKey: key,
+    hex: true,
+  });
+  return messageEncrypted;
+};
+
+export const paramUnprotect = async (
+  data: string | ArrayBuffer,
+  key: ArrayBuffer,
+  nonceVerification?: (nonce: ArrayBuffer) => boolean,
+) => {
+  data = typeof data === "string" ? hexToBuffer(data) : data;
+  const { payload } = await unprotect(data, {
+    aesKey: key,
+    hmacKey: key,
+    nonceVerification,
+  });
+  return payload;
+};
+
 export const check = async (data: ArrayBuffer, props: UnprotectProps) => {
   try {
     await unprotect(data, props);
@@ -252,6 +367,17 @@ export const check = async (data: ArrayBuffer, props: UnprotectProps) => {
   } catch (e) {
     return false;
   }
+};
+
+export const hexToBuffer = (hex: string) => {
+  return new Uint8Array(hex.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)))
+    .buffer;
+};
+
+export const bufferToHex = (buffer: ArrayBuffer) => {
+  return Array.prototype.map
+    .call(new Uint8Array(buffer), (x) => ("00" + x.toString(16)).slice(-2))
+    .join("");
 };
 
 export function toBytesInt32(num: number) {
@@ -279,11 +405,37 @@ export function toBytesInt64(num: bigint) {
 }
 
 export const generatePOWChallenge = () => {
-  const challenge = (Math.random() * 1000).toFixed(0); // TODO: Improve challenge
+  const challenge = (Math.random() * 1000 + 100).toFixed(0); // TODO: Improve challenge
   return String(challenge);
 };
 
 export const solvePOWChallenge = (challenge: string) => {
   const solution = parseInt(challenge) * 39; // TODO: Improve challenge
   return String(solution);
+};
+
+export const nonceCheck = (
+  lastNonce: ArrayBuffer | undefined,
+  nonceInterval?: number,
+) => {
+  return (nonce: ArrayBuffer) => {
+    const currentDate = new Date();
+    const nonceDate = new Date(fromBytesInt32(nonce));
+
+    if (
+      Math.abs(currentDate.getTime() - nonceDate.getTime()) >
+      (nonceInterval || 1000 * 60)
+    ) {
+      return false;
+    }
+
+    if (lastNonce) {
+      const lastNonceDate = new Date(fromBytesInt32(lastNonce));
+      if (nonceDate.getTime() <= lastNonceDate.getTime()) {
+        return false;
+      }
+    }
+
+    return true;
+  };
 };

@@ -1,169 +1,142 @@
-import { crypto } from 'blingbank-lib';
+import { v4 as uuid } from "uuid";
+import { crypto } from "blingbank-lib";
 
-import db from '../database';
-import { createProtectProp, createUnprotectProp } from './PropCreator';
-import {
-  stringToAESKey,
-  AESKeytoBuffer,
-  bufferToAESKey,
-  bufferToString,
-  stringToBuffer,
-} from './KeyConverter';
-import {
-  createHMACKey,
-  createKeyEncryptionKey,
-  createMasterKey,
-} from './KeyGenerator';
+import db from "../database";
+import { MASTER_KEY } from "../config";
 
 enum SecretType {
-  SHARED_SECRET = 'SHARED_SECRET',
-  MASTER_PASSWORD = 'MASTER_PASSWORD',
-  SESSION_KEY = 'SESSION_KEY',
+  SHARED_SECRET = "SHARED_SECRET",
+  SESSION_KEY = "SESSION_KEY",
+  SHAMIR_SECRET = "SHAMIR_SECRET",
 }
 
-const sharedSecrets = new Map<string, string>(); // <userID, sharedSecret>
-
-const sessionKeys = new Map<string, string>(); // <userID, sessionKey>
-
-let masterKey: CryptoKey;
-let keyEncryptionKey: CryptoKey;
-let hmacKey: CryptoKey;
+const sharedSecrets = new Map<string, ArrayBuffer>(); // <userId, sharedSecret>
+const sessionKeys = new Map<string, ArrayBuffer>(); // <sessionId, sessionKey>
+const shamirSecrets = new Map<string, string>(); // <accountId, base64(shamirSecret)>
+const lastNonces = new Map<string, ArrayBuffer>(); // <sessionId, lastNonce>
 
 export const saveSharedSecret = async (
-  userID: string,
-  sharedSecret: string,
+  userId: string,
+  sharedSecret: ArrayBuffer,
 ) => {
-  const protectProp = createProtectProp(keyEncryptionKey, hmacKey);
-  const { messageEncrypted } = await crypto.protect(
-    await stringToBuffer(sharedSecret),
-    protectProp,
-  );
-  const encryptedSharedSecret = await bufferToString(
-    Buffer.from(messageEncrypted),
-  );
+  const { messageEncrypted } = await crypto.protect(sharedSecret, {
+    aesKey: MASTER_KEY,
+  });
 
   await db.secret.create({
     data: {
       type: SecretType.SHARED_SECRET,
-      key: userID,
-      value: encryptedSharedSecret,
+      key: userId,
+      value: crypto.bufferToHex(messageEncrypted as ArrayBuffer),
     },
   });
 
-  sharedSecrets.set(userID, encryptedSharedSecret);
+  sharedSecrets.set(userId, messageEncrypted as ArrayBuffer);
 };
 
-export const getSharedSecret = async (userID: string) => {
-  let encryptedSharedSecret;
-  if (sharedSecrets.has(userID)) {
-    encryptedSharedSecret = sharedSecrets.get(userID)!;
-  } else {
-    const entry = await db.secret.findFirst({
-      where: {
-        type: SecretType.SHARED_SECRET,
-        key: userID,
-      },
-    });
-
-    if (!entry) {
-      throw new Error('Shared secret not found');
-    }
-    encryptedSharedSecret = entry.value;
+export const getSharedSecret = async (userId: string) => {
+  if (sharedSecrets.has(userId)) {
+    return sharedSecrets.get(userId);
   }
 
-  const unprotectProp = createUnprotectProp(
-    keyEncryptionKey,
-    undefined,
-    hmacKey,
+  const entry = await db.secret.findFirst({
+    where: {
+      type: SecretType.SHARED_SECRET,
+      key: userId,
+    },
+  });
+
+  if (!entry) {
+    throw new Error("Shared secret not found");
+  }
+
+  const encryptedSharedSecret = crypto.hexToBuffer(entry.value);
+  const { payload: sharedSecret } = await crypto.unprotect(
+    encryptedSharedSecret,
+    {
+      aesKey: MASTER_KEY,
+    },
   );
-  const { payload } = await crypto.unprotect(
-    Buffer.from(encryptedSharedSecret, 'base64'),
-    unprotectProp,
-  );
 
-  return await bufferToString(Buffer.from(payload));
+  return sharedSecret;
 };
 
-export const generatePOWChallenge = () => {
-  const challenge = (Math.random() * 1000).toFixed(0); // TODO: Improve challenge
-  return String(challenge);
+export const createSessionKey = async () => {
+  const sessionId = uuid();
+  const sessionKey = await crypto.generateKey();
+
+  sessionKeys.set(sessionId, sessionKey);
+
+  return { sessionId, sessionKey };
 };
 
-export const solvePOWChallenge = (challenge: string) => {
-  const solution = parseInt(challenge) * 39; // TODO: Improve challenge
-  return String(solution);
+export const getSessionKey = (sessionId: string) => {
+  if (sessionKeys.has(sessionId)) {
+    return sessionKeys.get(sessionId);
+  }
+
+  throw new Error("Session key not found");
 };
 
-export const encryptWithSharedSecret = async (
-  data: string,
-  sharedSecret: string,
+export const saveShamirSecret = async (
+  accountId: string,
+  secret: ArrayBuffer,
 ) => {
-  const sharedKey = await stringToAESKey(sharedSecret);
-  const protectProp = createProtectProp(sharedKey);
+  const shamirSecret = Buffer.from(secret).toString("base64");
+  const { messageEncrypted } = await crypto.protect(shamirSecret, {
+    aesKey: MASTER_KEY,
+  });
 
-  const { messageEncrypted } = await crypto.protect(
-    await stringToBuffer(data),
-    protectProp,
-  );
-
-  return await bufferToString(Buffer.from(messageEncrypted));
-};
-
-export const saveSessionKey = async (userID: string, sessionKey: CryptoKey) => {
-  const protectProp = createProtectProp(keyEncryptionKey, hmacKey);
-  const { messageEncrypted } = await crypto.protect(
-    await AESKeytoBuffer(sessionKey),
-    protectProp,
-  );
-  const encryptedSessionKey = await bufferToString(
-    Buffer.from(messageEncrypted),
-  );
   await db.secret.create({
     data: {
-      type: SecretType.SESSION_KEY,
-      key: userID,
-      value: encryptedSessionKey,
+      type: SecretType.SHAMIR_SECRET,
+      key: accountId,
+      value: crypto.bufferToHex(messageEncrypted as ArrayBuffer),
+    },
+  });
+};
+
+export const getShamirSecret = async (accountId: string) => {
+  if (shamirSecrets.has(accountId)) {
+    return shamirSecrets.get(accountId);
+  }
+
+  const entry = await db.secret.findFirst({
+    where: {
+      type: SecretType.SHAMIR_SECRET,
+      key: accountId,
     },
   });
 
-  sessionKeys.set(userID, encryptedSessionKey);
-};
-
-export const getSessionKey = async (userID: string) => {
-  let encryptedSessionKey;
-  if (sessionKeys.has(userID)) {
-    encryptedSessionKey = sessionKeys.get(userID)!;
-  } else {
-    const entry = await db.secret.findFirst({
-      where: {
-        type: SecretType.SESSION_KEY,
-        key: userID,
-      },
-    });
-
-    if (!entry) {
-      throw new Error('Session secret not found');
-    }
-    encryptedSessionKey = entry.value;
+  if (!entry) {
+    throw new Error("Shamir secret not found");
   }
 
-  const unprotectProp = createUnprotectProp(
-    keyEncryptionKey,
-    undefined,
-    hmacKey,
-  );
-  const { payload } = await crypto.unprotect(
-    await stringToBuffer(encryptedSessionKey),
-    unprotectProp,
+  const encryptedShamirSecret = crypto.hexToBuffer(entry.value);
+  const { payload: shamirSecret } = await crypto.unprotect(
+    encryptedShamirSecret,
+    {
+      aesKey: MASTER_KEY,
+    },
   );
 
-  return await bufferToAESKey(Buffer.from(payload));
+  return crypto.decoder.decode(shamirSecret);
 };
 
-async function startSecurity() {
-  masterKey = await createMasterKey();
-  keyEncryptionKey = await createKeyEncryptionKey();
-  hmacKey = await createHMACKey();
-}
+export const decryptWithSessionKey = async (
+  encrypted: string,
+  sessionId: string,
+) => {
+  const sessionKey = getSessionKey(sessionId);
+  if (!sessionKey) {
+    throw new Error("Session key not found");
+  }
 
-startSecurity();
+  const lastNonce = lastNonces.get(sessionId);
+  const decrypted = await crypto.paramUnprotect(
+    encrypted,
+    sessionKey,
+    crypto.nonceCheck(lastNonce),
+  );
+  return crypto.decoder.decode(decrypted);
+};

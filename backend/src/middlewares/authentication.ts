@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-import { JWT_PUBLIC_KEY } from '../config';
+import { JWT_PUBLIC_KEY } from "../config";
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    authData?: jwt.JwtPayload | null | string;
-  }
-}
+export type AuthData = {
+  userId: string;
+  initialNonce: string;
+  sessionId: string;
+};
 
 export const jwtAuth = async (
   req: Request,
@@ -16,20 +16,20 @@ export const jwtAuth = async (
 ) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ message: 'Token is missing' });
+    return res.status(401).json({ message: "Token is missing" });
   }
 
-  const [schema, token] = authHeader.split(' ');
-  if (!token || schema !== 'Bearer') {
-    return res.status(401).json({ message: 'Invalid token format' });
+  const [schema, token] = authHeader.split(" ");
+  if (!token || schema !== "Bearer") {
+    return res.status(401).json({ message: "Invalid token format" });
   }
 
   try {
-    jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ['RS256'] });
+    jwt.verify(token, JWT_PUBLIC_KEY, { algorithms: ["RS256"] });
   } catch {
-    return res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).json({ message: "Invalid token" });
   }
 
-  req.authData = jwt.decode(token);
+  req.authData = jwt.decode(token) as AuthData;
   return next();
 };

@@ -1,88 +1,88 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Secret {
-  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
+  type      String
+  key       String
+  value     String
 
-  type String
-  key String
-  value String
+  @@unique([type, key])
 }
 
-type SignKey {
-  createdAt   DateTime @default(now())
-  deletedAt   DateTime?
-  hash        String
-  content     String
+model SignKey {
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  deletedAt  DateTime?
+  hash       String      @unique
+  content    String
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  signatures Signature[]
 }
 
 model User {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-
-  email           String   @unique
-  passwordHash    String
-  name            String
-
-  signKeys    SignKey[]
-  accountsIDs String[] @default([])
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  email        String    @unique
+  passwordHash String
+  name         String
+  signKeys     SignKey[]
+  accounts     Account[] @relation("AccountToUser")
 }
 
-type Signature {
-  date        String // Encrypted
-  content     String // Encrypted
-  signKeyHash String
+model Signature {
+  id        String  @id @default(cuid())
+  date      String
+  content   String
+  paymentId String
+  signKeyId String
+  payment   Payment @relation(fields: [paymentId], references: [id])
+  signKey   SignKey @relation(fields: [signKeyId], references: [id])
 }
 
 model Payment {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  account     Account @relation(fields: [accountID], references: [id])
-  accountID   String
-  hash        String // Encrypted
-  value       String // Encrypted
-  description String // Encrypted
-  totp        String // Encrypted
-
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  accountId   String
+  hash        String
+  value       String
+  description String
+  totp        String
+  movement    Movement?
+  account     Account     @relation(fields: [accountId], references: [id])
   signatures  Signature[]
 }
 
-type Movement {
-  id          String
+model Movement {
+  id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
-
-  date        String // Encrypted
-  value       String // Encrypted
-  description String // Encrypted
-
-  paymentID   String?
+  date        String
+  value       String
+  description String
+  accountId   String
+  paymentId   String?  @unique
+  account     Account  @relation(fields: [accountId], references: [id])
+  payment     Payment? @relation(fields: [paymentId], references: [id])
 }
 
 model Account {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  name               String
-  accountHolders     String[]
-  balance            String // Encrypted
-  currency           String // Encrypted
-  movements          Movement[]
-  payments           Payment[]
+  id             String     @id @default(cuid())
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  name           String
+  balance        String
+  currency       String
+  movements      Movement[]
+  payments       Payment[]
+  accountHolders User[]     @relation("AccountToUser")
 }
-
-

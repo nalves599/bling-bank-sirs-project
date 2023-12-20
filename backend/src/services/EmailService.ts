@@ -1,5 +1,5 @@
-import { EMAIL_FROM } from '../config';
-import mail from '../email';
+import { EMAIL_FROM } from "../config";
+import mail from "../email";
 
 export const sendSharedSecret = async (email: string, sharedSecret: string) => {
   const emailTemplate = `
@@ -15,9 +15,38 @@ export const sendSharedSecret = async (email: string, sharedSecret: string) => {
   const info = await mail.sendMail({
     from: EMAIL_FROM,
     to: email,
-    subject: 'BlingBank - Thank you for registering',
+    subject: "BlingBank - Thank you for registering",
     html: emailTemplate,
   });
 
-  console.debug('Email sent to', email, 'with ID', info);
+  console.debug("Email sent to", email, "with shared secret", sharedSecret);
+};
+
+export const sendShamirSecret = async (
+  email: string,
+  accountId: string,
+  accountName: string,
+  secret: string,
+) => {
+  const emailTemplate = `
+    <h1>Bling Bank</h1>
+    <h3>Here is your secret for account ${accountName}</h3>
+    <p>Secret: <strong>${secret}</strong></p>
+  `;
+
+  const info = await mail.sendMail({
+    from: EMAIL_FROM,
+    to: email,
+    subject: `BlingBank - Account ${accountId} secret`,
+    html: emailTemplate,
+  });
+
+  console.debug(
+    "Email sent to",
+    email,
+    "with shamir secret",
+    secret,
+    "for account",
+    accountId,
+  );
 };
