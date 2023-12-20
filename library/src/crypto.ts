@@ -336,12 +336,14 @@ export const unprotect = async (
 export const paramProtect = async (
   data: string | ArrayBuffer,
   key: ArrayBuffer,
+  nonce?: ArrayBuffer | undefined,
 ) => {
   data = typeof data === "string" ? UTF8Encoder.encode(data) : data;
   const { messageEncrypted } = await protect(data, {
     aesKey: key,
     hmacKey: key,
     hex: true,
+    nonce,
   });
   return messageEncrypted;
 };

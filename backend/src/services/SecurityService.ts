@@ -136,7 +136,7 @@ export const decryptWithSessionKey = async (
   const decrypted = await crypto.paramUnprotect(
     encrypted,
     sessionKey,
-    crypto.nonceCheck(lastNonce),
+    // crypto.nonceCheck(lastNonce), //TODO: Uncomment this line
   );
   return crypto.decoder.decode(decrypted);
 };

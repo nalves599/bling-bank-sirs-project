@@ -14,6 +14,7 @@ export const addKey = async (req: Request, res: Response) => {
     );
 
     console.log("Add key", { signKey, userId, decrypted });
+    res.json()
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: "Could not add key" });
