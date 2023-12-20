@@ -22,7 +22,7 @@
     </div>
   </div>
 </template>
-  
+
 <script lang="ts">
 export default {
   data() {
@@ -35,23 +35,23 @@ export default {
         currency: 'USD',
         requiredApprovals: 2,
         givenApprovals: 1,
-        status: 'Pending',
-      },
-    };
+        status: 'Pending'
+      }
+    }
   },
   methods: {
     signPayment() {
       // Add logic to handle signing payment
-      console.log('Payment signed!');
+      console.log('Payment signed!')
       // You may want to update the status here after signing the payment
-      this.paymentDetails.status = 'Signed'; // Adjust this line based on your logic
+      this.paymentDetails.status = 'Signed' // Adjust this line based on your logic
     },
     goBack() {
       // Navigate back to the previous page
-      this.$router.go(-1);
-    },
-  },
-};
+      this.$router.go(-1)
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -106,7 +106,8 @@ export default {
   margin-top: 20px;
 }
 
-button, .back-button {
+button,
+.back-button {
   padding: 10px;
   margin-right: 10px;
   background-color: #4caf50;
@@ -118,7 +119,8 @@ button, .back-button {
   display: inline-block;
 }
 
-button:hover, .back-button:hover {
+button:hover,
+.back-button:hover {
   background-color: #45a049;
 }
 </style>

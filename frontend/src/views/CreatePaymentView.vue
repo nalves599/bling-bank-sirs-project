@@ -18,13 +18,8 @@
         <label for="accountDropdown">Source Account:</label>
         <select v-model="selectedAccountId" id="accountDropdown" @change="fetchAccountsFromHolder">
           <option value="" disabled>Select an account</option>
-          <option
-            v-for="account in sortedAccounts"
-            :key="account.accountId"
-            :value="parseInt(account.accountId)"
-          >
-            {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-            {{ account.holders.sort().join(', ') }}
+          <option v-for="account in accounts" :key="account.id" :value="account.id">
+            {{ account.id }} - {{ account.name }}
           </option>
         </select>
       </div>
@@ -55,36 +50,19 @@ const description = ref('')
 const selectedAccountId = ref<number | null>(null)
 
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
+const selectedAccount = ref<AccountDto | null>(null)
 
 const accounts = ref<AccountDto[]>([])
 
-onMounted(() => {
-  fetchAccountsFromHolder()
-})
-
-const fetchAccountsFromHolder = async () => {
-  accounts.value = await getAccountsFromHolder(username.value)
+async function fetchAccountsFromHolder() {
+  console.log(email.value)
+  const response = await getAccountsFromHolder(email.value)
+  accounts.value = response.map((item) => ({
+    ...item,
+    name: item.name // Sort holders alphabetically
+  }))
 }
-
-const sortedAccounts = computed(() => {
-  return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.id)
-    const idB = parseInt(b.id)
-    return idA - idB
-  })
-})
-
-const selectedAccount = ref<AccountDto | null>(null)
-
-watch(
-  () => selectedAccountId.value,
-  (newVal) => {
-    if (newVal !== null) {
-      selectedAccount.value = accounts.value.find((account) => account.id === newVal) || null
-    }
-  }
-)
 
 const formatDate = () => {
   const formattedDate = new Date(date.value).toISOString().split('T')[0]
@@ -99,8 +77,10 @@ const paymentCreate = () => {
     accountId: selectedAccountId.value || 0
   }
   createPayment(paymentDto)
-  router.push(`/payments/${username.value}`)
+  router.push(`/payments/${email.value}`)
 }
+
+fetchAccountsFromHolder()
 </script>
 
 <style scoped>

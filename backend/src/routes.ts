@@ -27,6 +27,11 @@ authenticatedRoutes.get("/accounts/holder/:holderId", AccountController.getAccou
 
 // Movement routes
 authenticatedRoutes.get("/movements/account/:accountId", AccountController.getAccountMovements);
+
+// Payments routes
+authenticatedRoutes.get("/payments/:accountId", AccountController.getAccountPayments);
+authenticatedRoutes.post("/payments/create", AccountController.createPayment);
+
 // Keys
 
 export default routes;

@@ -107,3 +107,23 @@ export const getAccountMovements = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Could not get movements" });
   }
 };
+
+export const getAccountPayments = async (req: Request, res: Response) => {
+  const { accountId } = req.params;
+
+  try {
+    const payments = await AccountService.getAccountPayments(accountId);
+
+    res.json(payments);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Could not get payments" });
+  }
+};
+
+export const createPayment = async (req: Request, res: Response) => {
+  const { accountId, amount, description } = req.body;
+
+  //TODO: Create payment
+}
+

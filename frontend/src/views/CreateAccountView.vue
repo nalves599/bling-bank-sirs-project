@@ -50,7 +50,7 @@ onMounted(async () => {
 })
 
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
 
 async function createAcc() {
   try {
@@ -62,7 +62,7 @@ async function createAcc() {
 
     await createAccount(accountDto)
 
-    router.push(`/accounts/${username.value}`)
+    router.push(`/accounts/${email.value}`)
   } catch (e) {
     // Set the error message if there's an issue
     error.value = 'Failed to create the account. You must include your user as one of the holders.'

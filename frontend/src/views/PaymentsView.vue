@@ -21,26 +21,25 @@
     >
       <option value="" disabled>Select an account</option>
       <option
-        v-for="account in sortedAccounts"
-        :key="account.accountId"
-        :value="account.accountId"
+        v-for="account in accounts"
+        :key="account.id"
+        :value="account.id"
         style="background-color: #f8f8f8"
       >
-        {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-        {{ account.holders.sort().join(', ') }}
+        {{ account.id }} - {{ account.currency }}
       </option>
     </select>
 
     <!-- Display payments of selected account -->
     <div class="create-payment-container">
-      <router-link :to="'/create-payment/' + username" class="create-payment-button"
+      <router-link :to="'/create-payment/' + email" class="create-payment-button"
         >Create Payment</router-link
       >
     </div>
 
     <div class="payment-table-container">
       <div v-if="selectedAccount" class="account-details">
-        <h2>Payments of Account {{ selectedAccount.accountId }}</h2>
+        <h2>Payments of Account {{ selectedAccount.name }}</h2>
         <v-data-table :headers="headers" :items="payments">
           <template v-slot:item="{ item }">
             <tr>
@@ -83,22 +82,14 @@ const accounts = ref<AccountDto[]>([])
 const payments = ref<PaymentDto[]>([])
 const selectedAccountId = ref<string | null>(null)
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(username.value)
+  accounts.value = await getAccountsFromHolder(email.value)
 }
 
 onMounted(() => {
   fetchAccountsFromHolder()
-})
-
-const sortedAccounts = computed(() => {
-  return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.id)
-    const idB = parseInt(b.id)
-    return idA - idB
-  })
 })
 
 // Watcher to ensure selected option stays in the dropdown

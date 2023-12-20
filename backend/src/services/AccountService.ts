@@ -103,3 +103,13 @@ export const getAccountMovements = async (accountId: string) => {
 
   return movements;
 };
+
+export const getAccountPayments = async (accountId: string) => {
+  const payments = await db.payment.findMany({
+    where: {
+      accountId: accountId,
+    },
+  });
+
+  return payments;
+};
