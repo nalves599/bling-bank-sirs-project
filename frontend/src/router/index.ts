@@ -56,6 +56,11 @@ const router = createRouter({
       path: '/create-account',
       name: 'create-account',
       component: () => import('../views/CreateAccountView.vue')
+    },
+    {
+      path: '/sign-payment/:name',
+      name: 'sign-payment',
+      component: () => import('../views/SignPaymentView.vue')
     }
   ]
 })
