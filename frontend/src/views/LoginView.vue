@@ -6,7 +6,7 @@
       <v-card-title></v-card-title>
       <v-card-text>
         <v-form v-model="form" @submit.prevent="onSubmit">
-          <v-text-field v-model="holderName" label="Holder Name" required></v-text-field>
+          <v-text-field v-model="holderEmail" label="Holder Email" required></v-text-field>
           <v-text-field
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
@@ -18,6 +18,7 @@
           >
           </v-text-field>
           <div v-if="error" class="error-message">{{ error }}</div>
+          <v-text-field v-model="sharedSecret" label="Shared Secret" required></v-text-field>
           <v-btn type="submit" color="green" class="mr-4">Login</v-btn>
           <v-btn color="blue" @click="togglePasswordVisibility">View Password</v-btn>
         </v-form>
@@ -32,9 +33,10 @@ import { login } from '@/services/api'
 import { LoginRequestDto } from '@/models/LoginRequestDto'
 import router from '@/router'
 
-const holderName = ref('')
+const holderEmail = ref('')
 const password = ref('')
 const showPassword = ref(false)
+const sharedSecret = ref('')
 const form = ref(null)
 const error = ref('')
 
@@ -49,13 +51,13 @@ function setError(message: string) {
 async function onSubmit() {
   try {
     const loginRequestDto: LoginRequestDto = {
-      holderName: holderName.value,
+      email: holderEmail.value,
       password: password.value
     }
 
-    await login(loginRequestDto)
+    await login(loginRequestDto, sharedSecret.value)
 
-    router.push(`/homepage/${holderName.value}`)
+    router.push(`/homepage/${holderEmail.value}`)
   } catch (error) {
     console.log(error)
     setError('Invalid credentials')

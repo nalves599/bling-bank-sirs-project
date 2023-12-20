@@ -4,10 +4,12 @@ import { HolderDto } from '@/models/HolderDto'
 import { AccountDto } from '@/models/AccountDto'
 import type { LoginRequestDto } from '@/models/LoginRequestDto'
 import { useAuthStore } from '@/stores/auth'
-import { LoginResponseDto } from '@/models/LoginResponseDto'
 import { MovementDto } from '@/models/MovementDto'
 import { PaymentDto } from '@/models/PaymentDto'
 import type { RegisterRequestDto } from '@/models/RegisterRequestDto'
+import { ChallengeResolvedDto } from '@/models/ChallengeResolvedDto'
+import { crypto as lib } from 'blingbank-lib'
+import { ChallengeDto } from '@/models/ChallengeDto'
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -39,13 +41,31 @@ export async function register(loginRequest: RegisterRequestDto) {
   }
 }
 
-export async function login(loginRequest: LoginRequestDto) {
+export async function login(loginRequest: LoginRequestDto, sharedSecret: string) {
   try {
     const { setToken } = useAuthStore()
     setToken('')
-    const response = await http.post('/auth/authenticate', loginRequest)
-    const responseData = new LoginResponseDto(response.data)
-    setToken(responseData.token)
+    const response = await http.post('/login', loginRequest)
+
+    const cipheredChallenge = new ChallengeDto(response.data).challenge
+
+    const secretHash = new Uint8Array(await lib.sha256(sharedSecret))
+
+    const challengeHash = await lib.paramUnprotect(cipheredChallenge, secretHash)
+
+    const challenge = lib.decoder.decode(challengeHash)
+
+    const solution = lib.solvePOWChallenge(challenge)
+
+    const protectedSolution = await lib.paramProtect(solution, secretHash)
+
+    const challengeResponse = new ChallengeResolvedDto({
+      email: loginRequest.email,
+      solution: protectedSolution
+    })
+
+    const responseToken = await http.post('/login/token', challengeResponse)
+    console.log(responseToken.data)
   } catch (error) {
     console.error(error)
     throw new Error('Login failed') // Throw an error on login failure
