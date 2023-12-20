@@ -32,7 +32,7 @@ TODO: Is this the document?
 ### 1.4 Project Structure
 Our BlingBank project has the following structure that will be explained in more detail in the following sections.
 
-[![Project Structure](img/uml.png)]
+![Project Structure](img/report/uml.jpg)
 
 ## 2. Project Development
 
@@ -92,8 +92,6 @@ It was also discussed with the professor if the CLI should verify the freshness 
 
 With all the properties mentioned above, we can now define how the library will protect the documents.
 
-TODO: ADD img of the structure
-
 Starting by the "outside" layer, we can get two parts: the IV and the protected data.
 
 Since the IV is not sensitive data, it can be sent in plain text and it can be easily extracted from the protected data, since it has always the same length (16 bytes).
@@ -109,6 +107,8 @@ The data is divided into seven parts:
 - The sixth part is the HMAC or the DS itself.
 
 The HMAC or DS is calculated over the content and the nonce.
+
+![Protected Document Structure](img/report/protected.jpg)
 
 Note: The protected data is encoded to base64 in order to be sent as a string,
 since JSON does not support raw bytes.
@@ -249,6 +249,8 @@ The private network has the ip address of 10.69.1.0/24
 
 In the private network resides the database server.
 
+![Infrastructure](img/report/infrastructure.jpg)
+
 ##### Technologies Used
 
 As said previously, the library, the CLI, the backend and the frontend were all developed in Typescript.
@@ -282,7 +284,9 @@ Another way this exchange could be done was using the Diffie-Hellman (DH) key ex
 It would be really interesting to implement this protocol, but it was not possible due to time constraints.
 
 This secret is stored encrypted in the database so, if the database is compromised, the shared-secret is not compromised.
-If the database is compromised, all the systems that use the database are compromised, so the shared-secret is not the only problem. (TODO)
+If the database is compromised, all the systems that use the database are compromised, so the shared-secret is not the only problem.
+
+![Register](img/report/register.jpg)
 
 ##### Login
 
@@ -307,6 +311,8 @@ It would also be possible for the user to challenge the server but this was not 
 This solution was implemented as it would be necessary for the account holders to have security codes to access their accounts which is done on registration. Since every user is allowed to have multiple accounts at BlingBank, this solution helps us to facilitate the navigation of the user on the system, allowing him to easily access his accounts info.
 
 The user sends his public key to the server, encrypted with the Session Key, so that the server can store it in the database. And will potentially be used in the future to verify the digital signatures of the payment orders.
+
+![Login](img/report/login.jpg)
 
 ##### Create Account
 
@@ -334,6 +340,8 @@ So, by itself, the server cannot access the account information, since it only h
 As with the registration, the email is assumed to be secure and that the user has access to it.
 In a real world scenario, this would be done in person, where the user would go to the bank and get his shamir key.
 
+![Create Account](img/report/create-account.jpg)
+
 ##### Get Account Information
 
 To get the account information, a GET request is sent with the the account ID, the user's Shamir Key encrypted with the Session Key and the JWT Token.
@@ -343,6 +351,8 @@ Then it will retrieve the account info from the database using the account key.
 The server will then return the account info encrypted with the Session Key to the client which will decrypt it and display it to the user.
 
 The server has verifications that do not allow an authenticated user to access an account that he does not have access to.
+
+![Get Account Information](img/report/get-account-info.jpg)
 
 ##### Communication Channels
 
@@ -356,16 +366,14 @@ But even if the TLS is compromised, the attacker cannot access the information, 
 
 To create a payment order, the same procedure as the creation of an account is followed.
 
-In order to a payment order to be executed, it needs to be approved by all the account holders.
+In order to a payment order to be executed, it first needs to be approved by all the account holders.
 This is done by the user signing the payment order with his private key and sending it to the server.
 
 This allows for confidentiality, authenticity and non-repudiation of each transaction.
 
-In order to achieve this, it was needed to add a new phase to the login, where the user sends his public key to the server and the server stores it in the database.
+In order to achieve this, it was needed to add a new phase to the login, where the user sends his public key to the server and the server stores it in the database. The server can then use the public key to verify the digital signature of the payment order.
 
-The server can then use the public key to verify the digital signature of the payment order.
-
-Design some kind of signature scheme, using a yubikey or a smartcard, in order to have a more secure way to sign the payment orders.
+In order to have a more secure way to sign the payment orders designing some kind of signature scheme, using a yubikey or a smartcard, would be a good solution. We had the itch to implement this, but due to time constraints, we were not able to do it.
 
 #### 2.3.2. Attacker Model
 
@@ -379,7 +387,7 @@ Which with the password, the attacker can login as the user.
 
 By stealing the device where the user is logged in, the attacker can get the Session Key and the JWT Token and use it to access the user's account information from another device.
 
-If the user has access to the memory of the backend computer, he may access the Master Key and the shared-secret of all the users. He can't access the accounts information, since it is protected by the Shamir Secret Sharing algorithm.
+If the user has access to the memory of the backend computer, he may access the Master Key and the shared-secret of all the users. He can't access the accounts information, since they are protected by the Shamir Secret Sharing algorithm.
 
 The account data can be compromised if the attacker has one of the Shamir Keys of the user and the master key.
 
@@ -388,6 +396,8 @@ The account data can be compromised if the attacker has one of the Shamir Keys o
 Firstly the user needs to send his public key to the server, encrypted with the Session Key.
 
 Then when a user wants to sign a payment order, he signs the payment order with his private key and a nonce with a timestamp.
+
+![Sign Payment Order](img/report/sign-payment.jpg)
 
 The server will then verify the freshness of the nonce and the digital signature of the payment order.
 The freshness is verified by checking if the timestamp is more recent than the last timestamp used by the user and if it's in a certain time window (like a TOTP).
@@ -408,17 +418,15 @@ The new secure document format for payment orders has the following structure:
 }
 ```
 
-(_Identify communication entities and the messages they exchange with a UML sequence or collaboration diagram._)
-
 ## 3. Conclusion
 
 With this project, we were able to deepen our understanding of cryptographic libraries and how to use them in a real world scenario.
-It was also a great opportunity to learn a little bit abouth virtual machines using QEMU and NixOS.
+It was also a great opportunity to learn a little bit about virtual machines using QEMU and NixOS.
 We also learned that we can't take security for granted and how difficult it is to implement a secure system.
 Not only due to the sheer amount of ways used to attack a system, but also due to the fact that it is very easy to make a mistake and compromise the whole system.
 Setting up the infrastructure was also a great learning experience, since it allowed us to learn how to configure a network and how to setup a firewall.
 
-We were very sastified in being able to implement in our project the shamir secret sharing algorithm, which was not taught in class, but we were able to learn it by ourselves. And how it allowed us to have a more robust system.
+We were very sastified in being able to implement in our project the shamir secret sharing algorithm, which was not taught in class, but we were able to learn it by ourselves and how it allowed us to have a more robust system.
 Implementing the session keys and the JWT tokens was also a great learning experience, since it allowed us to learn how to implement a secure login system.
 
 We were also very happy with the fact that we were able to implement the library in a way that it can be used in the frontend and in the backend, allowing us to have a single language for the whole project. One of the main reasons to do this was to allow the user to see his information in a browser without even noticing that his data was being transformed in the background.
