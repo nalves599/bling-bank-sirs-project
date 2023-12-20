@@ -5,7 +5,7 @@ import {
   check,
   createAESKey,
   protect,
-} from "../src/utils/crypto";
+} from "../src/crypto";
 import { TextEncoder, TextDecoder } from "util";
 
 describe("check module", () => {

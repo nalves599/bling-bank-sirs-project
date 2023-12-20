@@ -6,7 +6,7 @@ import {
   createHMACKey,
   protect,
   toBytesInt64,
-} from "../src/utils/crypto";
+} from "../src/crypto";
 import { TextEncoder } from "util";
 
 describe("protect module", () => {

@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Secret {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  type      String
+  key       String
+  value     String
+
+  @@unique([type, key])
+}
+
+model SignKey {
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  deletedAt  DateTime?
+  hash       String      @unique
+  content    String
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  signatures Signature[]
+}
+
+model User {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  email        String    @unique
+  passwordHash String
+  name         String
+  signKeys     SignKey[]
+  accounts     Account[] @relation("AccountToUser")
+}
+
+model Signature {
+  id        String  @id @default(cuid())
+  date      String
+  content   String
+  paymentId String
+  signKeyId String
+  payment   Payment @relation(fields: [paymentId], references: [id])
+  signKey   SignKey @relation(fields: [signKeyId], references: [id])
+}
+
+model Payment {
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  accountId   String
+  hash        String
+  value       String
+  description String
+  totp        String
+  movement    Movement?
+  account     Account     @relation(fields: [accountId], references: [id])
+  signatures  Signature[]
+}
+
+model Movement {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  date        String
+  value       String
+  description String
+  accountId   String
+  paymentId   String?  @unique
+  account     Account  @relation(fields: [accountId], references: [id])
+  payment     Payment? @relation(fields: [paymentId], references: [id])
+}
+
+model Account {
+  id             String     @id @default(cuid())
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  name           String
+  balance        String
+  currency       String
+  movements      Movement[]
+  payments       Payment[]
+  accountHolders User[]     @relation("AccountToUser")
+}
