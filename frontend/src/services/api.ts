@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import { LoginResponseDto } from '@/models/LoginResponseDto'
 import { MovementDto } from '@/models/MovementDto'
 import { PaymentDto } from '@/models/PaymentDto'
+import type { RegisterRequestDto } from '@/models/RegisterRequestDto'
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -29,12 +30,9 @@ http.interceptors.request.use(
   }
 )
 
-export async function register(loginRequest: LoginRequestDto) {
+export async function register(loginRequest: RegisterRequestDto) {
   try {
-    const response = await http.post('/auth/register', loginRequest)
-    const responseData = new LoginResponseDto(response.data)
-    const { setToken } = useAuthStore()
-    setToken(responseData.token)
+    await http.post('/register', loginRequest)
   } catch (error) {
     console.error(error)
     throw new Error('Register failed') // Throw an error on register failure
