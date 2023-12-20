@@ -1,8 +1,9 @@
 import { ProtectProps, UnprotectProps } from "../../library/src/utils/crypto";
 import {
   bytesToAesKey,
+  bytesToHmacKey,
   bytesToSigningKey,
-  bytesToVerificationKey,
+  bytesToECDSAKey,
 } from "./converter";
 import { Utils } from "./utils";
 import {
@@ -27,7 +28,7 @@ export class Commands {
   }
 
   async protect(args: string[]): Promise<void> {
-    if (args.length != 5) {
+    if (args.length != 5 && args.length != 6) {
       console.log(protectUsage);
       return;
     }
@@ -36,15 +37,24 @@ export class Commands {
     const outputPath = args[2];
     const aesKeyPath = args[3];
     const signKeyPath = args[4];
+    let signKey: any = undefined;
+    let hmacKey: any = undefined;
 
     try {
       const input = Utils.readFile(inputPath);
       const aesKey = await bytesToAesKey(Utils.readFile(aesKeyPath));
-      const signKey = await bytesToSigningKey(Utils.readFile(signKeyPath));
+
+      if (args.length == 5) {
+        signKey = await bytesToSigningKey(Utils.readFile(signKeyPath));
+      }
+      else {
+        hmacKey = await bytesToHmacKey(Utils.readFile(signKeyPath));
+      }
 
       const protectProps: ProtectProps = {
         aesKey: aesKey,
         signingKey: signKey,
+        hmacKey: hmacKey,
       };
 
       const jsonData = JSON.parse(input.toString());
@@ -63,7 +73,7 @@ export class Commands {
   }
 
   async check(args: string[]): Promise<void> {
-    if (args.length != 4) {
+    if (args.length != 4 && args.length != 5) {
       console.log(checkUsage);
       return;
     }
@@ -71,18 +81,24 @@ export class Commands {
     const inputPath = args[1];
     const aesKeyPath = args[2];
     const verifyKeyPath = args[3];
+    let verifyKey: any = undefined;
+    let hmacKey: any = undefined;
 
     try {
       const input = Utils.readFile(inputPath);
       const aesKey = await bytesToAesKey(Utils.readFile(aesKeyPath));
-      const verifyKey = await bytesToVerificationKey(
-        Utils.readFile(verifyKeyPath),
-      );
+
+      if (args.length == 4) {
+        verifyKey = await bytesToECDSAKey(Utils.readFile(verifyKeyPath));
+      }
+      else {
+        hmacKey = await bytesToHmacKey(Utils.readFile(verifyKeyPath));
+      }
 
       const unprotectedProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
-        hmacKey: undefined,
+        hmacKey: hmacKey,
         verifyingKey: verifyKey,
         nonceVerification: undefined,
       };
@@ -99,7 +115,7 @@ export class Commands {
   }
 
   async unprotect(args: string[]): Promise<void> {
-    if (args.length != 5) {
+    if (args.length != 5 && args.length != 6) {
       console.log(unprotectUsage);
       return;
     }
@@ -108,18 +124,24 @@ export class Commands {
     const outputPath = args[2];
     const aesKeyPath = args[3];
     const verifyKeyPath = args[4];
+    let verifyKey: any = undefined;
+    let hmacKey: any = undefined;
 
     try {
       const input = Utils.readFile(inputPath);
       const aesKey = await bytesToAesKey(Utils.readFile(aesKeyPath));
-      const verifyKey = await bytesToVerificationKey(
-        Utils.readFile(verifyKeyPath),
-      );
+
+      if (args.length == 5) {
+        verifyKey = await bytesToECDSAKey(Utils.readFile(verifyKeyPath));
+      }
+      else {
+        hmacKey = await bytesToHmacKey(Utils.readFile(verifyKeyPath));
+      }
 
       const unProtectProps: UnprotectProps = {
         iv: undefined,
         aesKey: aesKey,
-        hmacKey: undefined,
+        hmacKey: hmacKey,
         verifyingKey: verifyKey,
         nonceVerification: undefined,
       };

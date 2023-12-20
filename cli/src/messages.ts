@@ -1,13 +1,13 @@
 export const helpUsage = "Usage: ./blingbank help";
 
 export const protectUsage =
-  "Usage: ./blingbank protect <input-file> <output-file> <aes-key> <priv-key>";
+  "Usage: ./blingbank protect <input-file> <output-file> <aes-key> <sign-key> [--hmac]";
 
 export const checkUsage =
-  "Usage: ./blingbank check <input-file> <session-secret-key> <receiver-public-key>";
+  "Usage: ./blingbank check <input-file> <session-secret-key> <verify-key> [--hmac]";
 
 export const unprotectUsage =
-  "Usage: ./blingbank unprotect <input-file> <output-file> <session-secret-key> <receiver-public-key>";
+  "Usage: ./blingbank unprotect <input-file> <output-file> <session-secret-key> <verify-key> [--hmac]";
 
 export const unknownCommand =
   "Unknown command. Type ./blingbank help to display all available commands and their description";
