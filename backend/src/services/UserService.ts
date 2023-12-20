@@ -65,3 +65,14 @@ export const generateToken = (payload: TokenData) => {
   });
   return token;
 };
+
+export const getUsers = async () => {
+  const users = await db.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  });
+  return users;
+}

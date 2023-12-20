@@ -95,8 +95,8 @@ onMounted(() => {
 
 const sortedAccounts = computed(() => {
   return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId)
-    const idB = parseInt(b.accountId)
+    const idA = parseInt(a.id)
+    const idB = parseInt(b.id)
     return idA - idB
   })
 })
@@ -106,7 +106,7 @@ watch(
   () => selectedAccountId.value,
   (newVal) => {
     if (newVal) {
-      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+      selectedAccount.value = accounts.value.find((account) => account.id === newVal) || null
     }
   }
 )
@@ -114,7 +114,7 @@ watch(
 const selectedAccount = ref<AccountDto | null>(null)
 // get account payments
 async function fetchAccountpayments() {
-  payments.value = await getAccountPayments(selectedAccount.value?.accountId ?? '')
+  payments.value = await getAccountPayments(selectedAccount.value?.id ?? '')
 }
 
 watch(

@@ -44,10 +44,11 @@ export async function register(loginRequest: RegisterRequestDto) {
 
 export async function login(loginRequest: LoginRequestDto, sharedSecret: string) {
   try {
-    const { setToken } = useAuthStore()
+    const { setToken, setEmail } = useAuthStore()
     const { setSessionKey, setPublicKey, setPrivateKey, setSecretShared } = useKeyStore()
     setToken('')
     setSecretShared(sharedSecret)
+    setEmail(loginRequest.email)
     const response = await http.post('/login', loginRequest)
 
     const cipheredChallenge = new ChallengeDto(response.data).challenge
@@ -100,23 +101,23 @@ export async function login(loginRequest: LoginRequestDto, sharedSecret: string)
 }
 
 export async function getHolders(): Promise<HolderDto[]> {
-  const response = await http.get('/holders')
+  const response = await http.get('/users')
 
-  const holders = response.data.accountHolders
+  const holders = response.data.users
 
   return holders.map((holder: any) => new HolderDto(holder))
 }
 
-export async function getAccountsFromHolder(holderId: string): Promise<AccountDto[]> {
-  const response = await http.get(`/accounts/holder/${holderId}`)
+export async function getAccountsFromHolder(email: string): Promise<AccountDto[]> {
+  const response = await http.get(`/accounts/holder/${email}`)
 
-  const accounts = response.data.accounts
+  const accounts = response.data
 
   return accounts.map((account: any) => new AccountDto(account))
 }
 
-export async function createAccount(account: AccountDto, holderName: string): Promise<AccountDto> {
-  const response = await http.post('/accounts/create/' + holderName, account)
+export async function createAccount(account: AccountDto): Promise<AccountDto> {
+  const response = await http.post('/accounts', account)
 
   return new AccountDto(response.data)
 }
@@ -124,7 +125,7 @@ export async function createAccount(account: AccountDto, holderName: string): Pr
 export async function getAccountMovements(accountId: string) {
   const response = await http.get(`/movements/account/${accountId}`)
 
-  const movements = response.data.movements
+  const movements = response.data
 
   return movements.map((movement: any) => new MovementDto(movement))
 }

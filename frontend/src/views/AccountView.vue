@@ -1,14 +1,38 @@
 <template>
   <div class="accounts">
-    <h1>Accounts of user {{ username }}</h1>
+    <h1>Accounts of user {{ email }}</h1>
     <v-data-table :items="accounts" :headers="headers">
-      <template #item.holders="{ item }">
-        {{ item.holders.sort().join(', ') }}
+      <template v-slot:item="row">
+        <tr>
+          <td>{{ row.item.id }}</td>
+          <td>{{ row.item.name }}</td>
+          <td>{{ row.item.currency }}</td>
+          <td>
+            <v-btn class="mx-2" fab dark small color="pink" @click="onButtonClick(row.item)">
+              <v-icon dark>mdi-heart</v-icon>
+            </v-btn>
+          </td>
+        </tr>
       </template>
     </v-data-table>
 
     <div class="create-account-container">
       <router-link to="/create-account" class="create-account-button">Create Account</router-link>
+    </div>
+
+    <!-- Display movements of selected account -->
+    <div v-if="selectedAccount" class="account-details">
+      <h2>Movements of Account {{ selectedAccount.name }}</h2>
+      <v-data-table :headers="headers" :items="movements">
+        <template v-slot:item="{ item }">
+          <tr>
+            <td>{{ item.movementId }}</td>
+            <td>{{ item.movementDate }}</td>
+            <td>{{ item.movementDescription }}</td>
+            <td>{{ item.movementValue }}</td>
+          </tr>
+        </template>
+      </v-data-table>
     </div>
 
     <LogoutButton />
@@ -24,19 +48,17 @@ import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import { getAccountMovements } from '@/services/api'
+import type { MovementDto } from '@/models/MovementDto'
 
 const accounts = ref<AccountDto[]>([])
+const movements = ref<MovementDto[]>([])
 
 const headers = [
-  { title: 'Account Number', key: 'accountId', sortable: true },
+  { title: 'Account Number', key: 'id', sortable: true },
   {
-    title: 'Holders',
-    key: 'holders',
-    sortable: false
-  },
-  {
-    title: 'Balance',
-    key: 'balance',
+    title: 'Name',
+    key: 'name',
     sortable: true
   },
   {
@@ -45,21 +67,26 @@ const headers = [
     sortable: true
   },
   {
-    title: '# of Movements',
-    key: 'numberOfMovements',
-    sortable: true
+    title: 'Actions',
+    key: 'actions'
   }
 ]
 
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
+const selectedAccount = ref<AccountDto | null>(null)
 
 async function fetchAccountsFromHolder() {
-  const response = await getAccountsFromHolder(username.value)
+  const response = await getAccountsFromHolder(email.value)
   accounts.value = response.map((item) => ({
     ...item,
-    holders: item.holders.sort() // Sort holders alphabetically
+    name: item.name // Sort holders alphabetically
   }))
+}
+
+async function onButtonClick(account: AccountDto) {
+  movements.value = await getAccountMovements(account.id || '')
+  selectedAccount.value = account
 }
 
 fetchAccountsFromHolder()

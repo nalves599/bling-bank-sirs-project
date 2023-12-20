@@ -79,3 +79,31 @@ export const getAccountById = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Could not get account" });
   }
 };
+
+export const getAccountsByHolder = async (req: Request, res: Response) => {
+  const { email } = req.params;
+
+  try {
+    const accounts = await AccountService.getAccountsByHolder(email);
+
+    console.log(accounts);
+
+    res.json(accounts);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Could not get accounts" });
+  }
+}
+
+export const getAccountMovements = async (req: Request, res: Response) => {
+  const { accountId } = req.params;
+
+  try {
+    const movements = await AccountService.getAccountMovements(accountId);
+
+    res.json(movements);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Could not get movements" });
+  }
+};

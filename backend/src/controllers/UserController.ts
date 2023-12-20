@@ -157,3 +157,14 @@ export const getMe = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Could not get user" });
   }
 };
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await UserService.getUsers();
+
+    res.json({ users });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Could not get uses" });
+  }
+}

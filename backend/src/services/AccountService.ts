@@ -77,3 +77,29 @@ export const uprotectAccount = async (accountId: string, userKey: string) => {
 
   const accountKey = KeyUtil.combineShamirSecrets([serverKey, userKey]);
 };
+
+export const getAccountsByHolder = async (email: string) => {
+
+  const accounts = await db.account.findMany({
+    where: {
+      accountHolders: {
+        some: {
+          email: email,
+        },
+      },
+    },
+  });
+
+  return accounts;
+}
+
+
+export const getAccountMovements = async (accountId: string) => {
+  const movements = await db.movement.findMany({
+    where: {
+      accountId: accountId,
+    },
+  });
+
+  return movements;
+};

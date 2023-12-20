@@ -22,18 +22,17 @@
       <option value="" disabled>Select an account</option>
       <option
         v-for="account in sortedAccounts"
-        :key="account.accountId"
-        :value="account.accountId"
+        :key="account.name"
+        :value="account.name"
         style="background-color: #f8f8f8"
       >
-        {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-        {{ account.holders.sort().join(', ') }}
+        {{ account.name }}
       </option>
     </select>
 
     <!-- Display movements of selected account -->
     <div v-if="selectedAccount" class="account-details">
-      <h2>Movements of Account {{ selectedAccount.accountId }}</h2>
+      <h2>Movements of Account {{ selectedAccount.name }}</h2>
       <v-data-table :headers="headers" :items="movements">
         <template v-slot:item="{ item }">
           <tr>
@@ -65,10 +64,10 @@ const accounts = ref<AccountDto[]>([])
 const movements = ref<MovementDto[]>([])
 const selectedAccountId = ref<string | null>(null)
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(username.value)
+  accounts.value = await getAccountsFromHolder(email.value)
 }
 
 onMounted(() => {
@@ -77,8 +76,8 @@ onMounted(() => {
 
 const sortedAccounts = computed(() => {
   return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId)
-    const idB = parseInt(b.accountId)
+    const idA = parseInt(a.name)
+    const idB = parseInt(b.name)
     return idA - idB
   })
 })
@@ -88,7 +87,7 @@ watch(
   () => selectedAccountId.value,
   (newVal) => {
     if (newVal) {
-      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+      selectedAccount.value = accounts.value.find((account) => account.id === newVal) || null
     }
   }
 )
@@ -96,7 +95,7 @@ watch(
 const selectedAccount = ref<AccountDto | null>(null)
 // get account movements
 async function fetchAccountMovements() {
-  movements.value = await getAccountMovements(selectedAccount.value?.accountId)
+  movements.value = await getAccountMovements(selectedAccount.value?.id || '')
 }
 
 watch(

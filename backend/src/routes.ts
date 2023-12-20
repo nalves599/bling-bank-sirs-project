@@ -18,11 +18,15 @@ routes.use(authenticatedRoutes);
 // Authenticated routes
 authenticatedRoutes.get("/me", jwtAuth, UserController.getMe);
 authenticatedRoutes.post("/me/keys", jwtAuth, KeyController.addKey);
+authenticatedRoutes.get("/users", UserController.getUsers);
 
 // Account routes
 authenticatedRoutes.post("/accounts", AccountController.createAccount);
 authenticatedRoutes.get("/accounts/:id", AccountController.getAccountById);
+authenticatedRoutes.get("/accounts/holder/:holderId", AccountController.getAccountsByHolder);
 
+// Movement routes
+authenticatedRoutes.get("/movements/account/:accountId", AccountController.getAccountMovements);
 // Keys
 
 export default routes;

@@ -69,8 +69,8 @@ const fetchAccountsFromHolder = async () => {
 
 const sortedAccounts = computed(() => {
   return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId)
-    const idB = parseInt(b.accountId)
+    const idA = parseInt(a.id)
+    const idB = parseInt(b.id)
     return idA - idB
   })
 })
@@ -81,7 +81,7 @@ watch(
   () => selectedAccountId.value,
   (newVal) => {
     if (newVal !== null) {
-      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+      selectedAccount.value = accounts.value.find((account) => account.id === newVal) || null
     }
   }
 )
