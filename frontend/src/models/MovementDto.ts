@@ -7,10 +7,10 @@ export class MovementDto {
 
   constructor(jsonObj?: MovementDto) {
     if (jsonObj) {
-      this.movementId = jsonObj.movementId
-      this.movementDate = jsonObj.movementDate
-      this.movementValue = jsonObj.movementValue
-      this.movementDescription = jsonObj.movementDescription
+      this.movementId = jsonObj.id
+      this.movementDate = jsonObj.date
+      this.movementValue = jsonObj.value
+      this.movementDescription = jsonObj.description
     }
   }
 }

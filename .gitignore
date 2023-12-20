@@ -90,3 +90,5 @@ build/
 /files
 # frontend env files
 frontend/.env
+# backend application properties files
+backend/src/main/resources/application.properties

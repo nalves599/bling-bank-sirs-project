@@ -1,11 +1,9 @@
 <template>
   <v-app class="main-page">
     <div class="main-page">
-      <h1>BlingBank</h1>
-      <h2>The safest bank on the planet</h2>
+      <h1>Successfully registered!</h1>
       <div>
-        <router-link to="/register" class="login-button">Register</router-link>
-        <router-link to="/login" class="login-button login-button-margin">Login</router-link>
+        <router-link to="/login" class="login-button">Login</router-link>
       </div>
     </div>
   </v-app>
@@ -25,13 +23,8 @@
 }
 
 h1 {
-  font-size: 148px;
+  font-size: 55px;
   margin-bottom: 20px;
-}
-
-h2 {
-  font-size: 48px;
-  margin-bottom: 40px;
 }
 
 .login-button {
@@ -41,14 +34,10 @@ h2 {
   text-decoration: none;
   font-size: 20px;
   border-radius: 5px;
-  margin-right: 30px; /* Margin between buttons */
+  margin-top: 20px; /* Adjusted to match the margin of h1 */
 }
 
 .login-button:hover {
   background-color: #45a049;
-}
-
-.login-button-margin {
-  margin-right: 10px; /* Adjust the margin as needed */
 }
 </style>

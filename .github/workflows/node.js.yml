@@ -14,15 +14,18 @@ jobs:
       - name: Use Node.js 20.x
         uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
+          node-version: '20.10.0'
       - name: Library
         run: |
           cd library
+          npm cache clean --force
           npm ci
           npm run test
           npm run build
+          npm pack
       - name: cli
         run: |
           cd cli
-          npm ci
+          npm cache clean --force
+          npm install --force
           npm run build
