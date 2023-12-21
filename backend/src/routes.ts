@@ -32,7 +32,8 @@ authenticatedRoutes.get("/movements/account/:accountId", AccountController.getAc
 
 // Payments routes
 authenticatedRoutes.get("/payments/:accountId", AccountController.getAccountPayments);
-authenticatedRoutes.post("/accounts/:id/payments", jwtAuth, AccountController.submitPayment);
+authenticatedRoutes.post("/accounts/:id/payments", jwtAuth, AccountController.submitPayment)
+authenticatedRoutes.get("/payments/:id", AccountController.getPaymentById);
 
 // Account routes
 authenticatedRoutes.post("/payments/:id/sign", jwtAuth, PaymentController.signPayment);

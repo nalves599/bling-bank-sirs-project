@@ -170,6 +170,19 @@ export const getAccountPayments = async (req: Request, res: Response) => {
   }
 };
 
+export const getPaymentById = async (req: Request, res: Response) => {
+  const { paymentId } = req.params;
+
+  try {
+    const payment = await AccountService.getPaymentById(paymentId);
+
+    res.json(payment);
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Could not get payment" });
+  }
+}
+
 export const submitPayment = async (req: Request, res: Response) => {
   const accountId = req.params.id;
   const sessionId = req.authData?.sessionId!;

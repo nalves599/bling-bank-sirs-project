@@ -108,3 +108,13 @@ export const getAccountPayments = async (accountId: string) => {
 
   return payments;
 };
+
+export const getPaymentById = async (paymentId: string) => {
+  const payment = await db.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+  });
+
+  return payment;
+}
