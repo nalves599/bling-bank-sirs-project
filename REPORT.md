@@ -3,16 +3,16 @@
 ## 1. Introduction
 
 BlingBank provides an online banking platform, accessible via a web application.
-The main functionalities are: account management, expense monitoring, and payments. The account management allows an efficient oversight of account balance. Expense monitoring shows the movements corresponding to expenses, in categories. Finally, payments allow a simple way to make bill payments.
+The main functionalities are account management, expense monitoring, and payments. Account management allows an efficient oversight of account balance. Expense monitoring shows the movements corresponding to expenses, in categories. Finally, payments allow a simple way to make bill payments.
 
 ### 1.1. Secure Documents
-Our secure documents must ensure authenticity and confidentiality of the account data. Therefore, these properties are achieved by a custom library which will be explained in more detail in the following sections.
+Our secure documents must ensure the authenticity and confidentiality of the account data. Therefore, these properties are achieved by a custom library which will be explained in more detail in the following sections.
 
 ### 1.2. Infrastructure
-BlingBank's infrastructure is composed of four servers: a gateway, a web server, a backend server and a database server.
+BlingBank's infrastructure is composed of three servers: a gateway, a web server, and a database server.
 
 ### 1.3. Security Challenge
-The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed.
+The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with multiple owners require authorization and non-repudiation from all owners before the payment order is executed.
 
 ### 1.4 Project Structure
 Our BlingBank project has the following structure that will be explained in more detail in the following sections.
@@ -25,12 +25,12 @@ Our BlingBank project has the following structure that will be explained in more
 
 #### 2.1.1. Design
 
-BlingBank's cryptographic custom library needs to protect, check, and unprotect documents. The protection of a document is done in such way that it ensures confidentiality, integrity and authenticity. In order to achieve this the following structure was created.
+BlingBank's cryptographic custom library needs to protect, check, and unprotect documents. The protection of a document is done in such a way that it ensures confidentiality, integrity, and authenticity. To achieve this the following structure was created.
 
 ##### Confidentiality
 
-It was used AES (Advanced Encryption Standard) with a 256-bit key in CBC (Cipher Block Chaining) mode.
-In order to use CBC mode, an IV (Initialization Vector) is needed.
+It used AES (Advanced Encryption Standard) with a 256-bit key in CBC (Cipher Block Chaining) mode.
+In order to use CBC mode, an IV (Initialization Vector) is needed. That IV is generated randomly every time something new is encrypted.
 AES-256 is considered to be secure by the NIST (National Institute of Standards and Technology), therefore it was chosen.
 CBC mode is more secure than ECB (Electronic Code Book) mode, due to the fact that if there are two blocks with the same content, they will not be encrypted to the same value.
 
@@ -53,31 +53,31 @@ With the HMAC, the document can be verified by the receiver, ensuring authentici
 
 ###### Non-Repudiation
 
-By using a DS, the document can be signed with a private key and then verified with the corresponding public key.
-This way, the document can be verified by anyone that has public key, ensuring non-repudiation.
+By using a DS and a nonce, the document can be signed with a private key and then verified with the corresponding public key.
+This way, the document can be verified by anyone who has the public key, ensuring non-repudiation.
 
 ###### Replay Attacks
 
 By itself, the Library does not protect against replay attacks.
 This is done by design. The Library is meant to be stateless, so it does not keep track of the documents that were already processed.
 It is up to the user of the Library to keep track of the documents that were already processed.
-This issue was discussed with the professor and it was agreed that this was not a issue as long as the verification is done by the third party using the library.
+This issue was discussed with the professor and it was agreed that this was not an issue as long as the verification is done by the third party using the library.
 It was discussed that the CLI tool does not need to protect against replay attacks.
 In the case of the backend, this implementation is done by the backend itself.
 
 ###### Freshness
 
-The Library also has the ability to check the freshness of the document.
+The Library also can check the freshness of the document.
 While protecting, it can generate a nonce based on the current time or accept a custom nonce.
 While unprotecting/checking, a custom nonce verification function can be used.
 Allowing for modularity and flexibility.
-It was also discussed with the professor if the CLI should verify the freshness of the document. It was not required, but in the backend it was implemented.
+It was also discussed with the professor if the CLI should verify the freshness of the document. It was not required, but in the backend, it was implemented.
 
 ##### Document Structure
 
 With all the properties mentioned above, we can now define how the library will protect the documents.
 
-Starting by the "outside" layer, we can get two parts: the IV and the protected data.
+Starting with the "outside" layer, we can get two parts: the IV and the protected data.
 
 Since the IV is not sensitive data, it can be sent in plain text and it can be easily extracted from the protected data, since it has always the same length (16 bytes).
 
@@ -95,7 +95,7 @@ The HMAC or DS is calculated over the content and the nonce.
 
 ![Protected Document Structure](img/report/protected.jpg)
 
-Note: The protected data is encoded to base64 in order to be sent as a string,
+Note: The protected data is encoded to base64/hex in order to be sent as a string,
 since JSON does not support raw bytes.
 
 <details>
@@ -183,7 +183,7 @@ Tests were also implemented, using jest, in order to ensure that the library was
 This was a very important step, since it allowed us to find bugs and fix them.
 
 We followed a very modular approach, in order to make the library as flexible as possible.
-The multiple functions allow the user that uses it to choose for example, if either a HMAC or a DS is used, use a custom nonce or choose the nonce verifcation function.
+The multiple functions allow the user that uses it to choose for example, if either a HMAC or a DS is used, use a custom nonce or choose the nonce verification function.
 This was done without compromising the security of the library.
 
 In the case of the protect/unprotect functions, the library does not care about the content that is being protected: the library receives bytes and returns bytes.
@@ -214,33 +214,30 @@ The infrastructure is composed of three servers: a gateway, a web/backend server
 
 There are 3 networks: the gateway network, the public network (DMZ) and the private network.
 
-The gateway has the ip address of 10.69.0.0/24
+The gateway has an external IP address `10.69.0.2/24`
 
 The gateway network works also as a NAT (Network Address Translation) and a firewall.
 
-The firewall is configured to only allow the public network to send tcp requests to the private network through port 3306
+The firewall is configured to only allow the webserver in the DMZ network to send TCP requests to the DB in the private network through port 5432.
 
-`iptables -A FORWARD -p tcp -i eth2 -s 10.69.2.2 -d 10.69.1.2 --dport 3306 -j ACCEPT`
+```
+iptables -A FORWARD -p tcp -i eth2 -s 10.69.2.2 -d 10.69.1.2 --dport 5432 -j ACCEPT
 
-All other traffic to the private network is dropped.
+# Drop all traffic to the private network not established
+iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -d 10.69.1.0/24 -j DROP
+```
 
-`iptables -A FORWARD -m conntrack --ctstate UNTRACKED -d 10.69.1.0/24 -j DROP`
-
-The public network has the ip address of 10.69.2.0/24
-
-In the public newtork web/backend server.
-
-The private network has the ip address of 10.69.1.0/24
-
-In the private network resides the database server.
+The web server has the IP address `10.69.2.2/24` in the DMZ network.
+The database server has the IP address `10.69.1.2/24` in the private network.
 
 ![Infrastructure](img/report/infrastructure.jpg)
 
 ##### Technologies Used
 
-As said previously, the library, the CLI, the backend and the frontend were all developed in Typescript.
+As said previously, the library, the CLI, the backend, and the frontend were all developed in Typescript.
 This was done in order to have a single language for the whole project, allowing us to easily share code between the different parts of the project.
-At the first weeks of the project, the development was being made in Java, which was easier to implement the cryptographic library. The problem with Java was that it was not possible to use the library in the frontend. It seemed odd for a bank website to not be able to show the accounts information at the browser. A possible approach was downloading the protected file and use another tool to unprotect it. This seemed like a bad approach, since it would be a bad user experience. By having Typescript, all the project spoke the same language, allowing for the user to see in a secure way the information about his accounts.
+At the first weeks of the project, the development was made in Java, which was easier to implement the cryptographic library. The problem with Java was that it was not possible to use the library in the frontend. It seemed odd for a bank website to not be able to show the accounts information at the browser. A possible approach was downloading the protected file and use another tool to unprotect it. This seemed like a bad approach, since it would be a bad user experience. By having Typescript, all the project spoke the same language, allowing for the user to see in a secure way the information about his accounts.
 
 The database was implemented using PostgreSQL, which is a relational database. It was chosen due to the fact that it is a very popular database and it is very easy to use.
 
@@ -250,8 +247,8 @@ In order to provide security in the application, multiple solutions were impleme
 
 ##### Master Key
 
-The backend server has a Master Key which is stored in a file, and it is loaded as an environment variable, when the server starts.
-This Master Key is used to store sensitive keys in the database. Some exemples of these keys will be explained in the following sections.
+The backend server has a master key that only it knows, which it is loaded as an environment variable, when the server starts.
+This master key is used to store sensitive keys in the database. Some examples of these keys will be explained in the following sections.
 
 ##### Registration
 
@@ -318,7 +315,7 @@ This obviously is not a good solution, but allows us to easily create accounts.
 
 We used the Shamir Secret Sharing algorithm, since it allows us to have more security. 
 It allows for the information of accounts to not be compromised if the server is compromised.
-The algorithm generates M keys, and by giving a threshold of N keys, it is possible to recover the secret, where N <= M.
+The algorithm generates N keys, and by giving a threshold of K keys, it is possible to recover the secret, where K <= N.
 By setting the threshold to 2, it is necessary to have at least 2 keys to access the account data.
 So, by itself, the server cannot access the account information, since it only has one key, it always needs to have at least one user to access the account information.
 
