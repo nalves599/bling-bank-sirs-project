@@ -173,3 +173,16 @@ export async function getPaymentById(id: string) {
 
   return new PaymentDto(response.data)
 }
+
+export async function signPayment(paymentId: number, paymentHash: string) {
+
+  const paymentBuffer = lib.hexToBuffer(paymentHash)
+
+  const signature = await lib.signMessage(paymentBuffer ,useKeyStore().privateKey)
+
+  const payload = { "signature": signature }
+
+  const response = await http.post(`/payments/${paymentId}/sign`, payload)
+
+  return new PaymentDto(response.data)
+}

@@ -54,7 +54,7 @@ export default {
     return {
       signedHash: '',
       showErrorMessage: false,
-      paymentDetails: new PaymentDto(), // Initialize with an instance of PaymentDto
+      paymentDetails: new PaymentDto() // Initialize with an instance of PaymentDto
     }
   },
   async mounted() {
@@ -69,7 +69,6 @@ export default {
 
         // Make the API request to get payment details by id
         this.paymentDetails = await getPaymentById(id.toString())
-
       } catch (error) {
         console.error('Error fetching payment details:', error)
       }
@@ -96,12 +95,10 @@ export default {
       // Add logic to generate a unique payment hash
       // You can replace this with your actual hash generation logic
       return 'GeneratedHash123'
-    },
-  },
+    }
+  }
 }
 </script>
-
-
 
 <style scoped>
 .payment-details-container {
