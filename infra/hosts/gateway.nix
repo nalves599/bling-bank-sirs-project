@@ -37,10 +37,11 @@
 
   networking.firewall = {
     extraCommands = ''
-      iptables -A FORWARD -p tcp -i eth2 -s 10.69.2.2 -d 10.69.1.2 --dport 3306 -j ACCEPT
+      iptables -A FORWARD -p tcp -i eth2 -s 10.69.2.2 -d 10.69.1.2 --dport 5432 -j ACCEPT
 
       # Drop all traffic to the private network
-      iptables -A FORWARD -m conntrack --ctstate UNTRACKED -d 10.69.1.0/24 -j DROP
+      iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+      iptables -A FORWARD -d 10.69.1.0/24 -j DROP
     '';
   };
 

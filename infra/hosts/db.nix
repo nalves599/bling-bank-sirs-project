@@ -27,22 +27,18 @@
     ];
   };
 
-  networking.firewall.allowedTCPPorts = [3306];
+  networking.firewall.allowedTCPPorts = [5432];
 
-  services.mysql = {
+  services.postgresql = {
     enable = true;
-    package = pkgs.mariadb;
     initialScript = builtins.toFile "init.sql" ''
       CREATE DATABASE blingbank;
       GRANT ALL PRIVILEGES ON blingbank.* TO 'blingbank'@'dnt-sirs.com' IDENTIFIED BY 'Sup3rS3cr3tP4ssw0rd';
     '';
     settings = {
-      # TODO: Fix SSL
-      # mariadb = {
-      #   "ssl_ca" = toString(../certs/CA.pem);
-      #   "ssl_cert" = toString(../certs/db.crt);
-      #   "ssl_key" = toString(../certs/db.key);
-      # };
+      ssl_cert_file = toString(../certs/db.crt);
+      ssl_ca_file = toString(../certs/ca.crt);
+      ssl_key_file = toString(../certs/db.key);
     };
   };
 }

@@ -28,11 +28,24 @@
     ];
   };
 
-  services.nginx.virtualHosts."dnt-sirs.com" = {
-    serverAliases = ["www.dnt-sirs.com" "api.dnt-sirs.com"];
+  services.nginx.virtualHosts."api.dnt-sirs.com" = {
     forceSSL = true;
     sslCertificateKey = ../certs/web.key;
     sslCertificate = ../certs/web.crt;
     sslTrustedCertificate = ../certs/CA.pem;
+    locations."/" = {
+      proxyPass = "http://localhost:8080";
+    };
+  };
+
+  services.nginx.virtualHosts."dnt-sirs.com" = {
+    serverAliases = ["www.dnt-sirs.com"];
+    forceSSL = true;
+    sslCertificateKey = ../certs/web.key;
+    sslCertificate = ../certs/web.crt;
+    sslTrustedCertificate = ../certs/CA.pem;
+    locations."/" = {
+      proxyPass = "http://localhost:8085";
+    };
   };
 }
