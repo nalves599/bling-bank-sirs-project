@@ -27,5 +27,7 @@ jobs:
         run: |
           cd cli
           npm cache clean --force
+          npm unistall blingbank-lib
           npm install --force
+          npm i ../library/blingbank-lib-1.0.0.tgz
           npm run build
