@@ -167,3 +167,9 @@ export async function approvePayment(paymentId: number) {
 
   return new PaymentDto(response.data)
 }
+
+export async function getPaymentById(id: string) {
+  const response = await http.get(`/payments/${id}`)
+
+  return new PaymentDto(response.data)
+}

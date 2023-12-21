@@ -31,37 +31,49 @@
 
     <div class="info-container">
       <p>
-        Info: To sign a payment you must copy its hash, sign it with your private key, and then
+        Info: To sign a payment, you must copy its hash, sign it with your private key, and then
         paste the signed hash.
       </p>
     </div>
 
     <div class="button-container">
-      <button @click="signPayment">Sign Payment</button>
+      <button :disabled="signedHash === ''" @click="signPayment">Sign Payment</button>
       <button @click="goBack" class="back-button">Go Back</button>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { ref, onMounted } from 'vue'
+import { getPaymentById } from '@/services/api'
+import { PaymentDto } from '@/models/PaymentDto'
+import router from '@/router'
+
 export default {
   data() {
     return {
-      paymentDetails: {
-        id: 1,
-        account: 'Account#4',
-        description: 'Netflix',
-        value: 16,
-        currency: 'USD',
-        requiredApprovals: 2,
-        givenApprovals: 1,
-        status: 'Pending'
-      },
       signedHash: '',
-      showErrorMessage: false
+      showErrorMessage: false,
+      paymentDetails: new PaymentDto(), // Initialize with an instance of PaymentDto
     }
   },
+  async mounted() {
+    // Fetch payment details when the component is mounted
+    await this.fetchPaymentById()
+  },
   methods: {
+    async fetchPaymentById() {
+      try {
+        // Extract the id from the URL
+        const id = router.currentRoute.value.params.id
+
+        // Make the API request to get payment details by id
+        this.paymentDetails = await getPaymentById(id.toString())
+
+      } catch (error) {
+        console.error('Error fetching payment details:', error)
+      }
+    },
     signPayment() {
       if (this.signedHash === '') {
         // Display an error message if the signed hash is empty
@@ -74,7 +86,7 @@ export default {
       // Add logic to handle signing payment
       console.log('Payment signed!')
       // You may want to update the status here after signing the payment
-      this.paymentDetails.status = 'Signed' // Adjust this line based on your logic
+      this.paymentDetails.approved = true // Adjust this line based on your logic
     },
     goBack() {
       // Navigate back to the previous page
@@ -84,10 +96,12 @@ export default {
       // Add logic to generate a unique payment hash
       // You can replace this with your actual hash generation logic
       return 'GeneratedHash123'
-    }
-  }
+    },
+  },
 }
 </script>
+
+
 
 <style scoped>
 .payment-details-container {
