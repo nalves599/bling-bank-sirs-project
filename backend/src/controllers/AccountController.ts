@@ -57,10 +57,12 @@ export const createAccount = async (req: Request, res: Response) => {
 export const unlockAccount = async (req: Request, res: Response) => {
   const accountId = req.params.id;
   const { secret } = req.body;
-
+  
   try {
-    const serverSecret = await SecurityService.getShamirSecret(accountId);
+    const serverSecret : any = await SecurityService.getShamirSecret(accountId);
+  
     const key = await KeyUtil.combineShamirSecrets([serverSecret, secret]);
+
     SecurityService.saveAccountKey(accountId, key);
 
     console.log("Account unlocked", accountId, key);

@@ -77,7 +77,7 @@ const { email } = storeToRefs(authStore)
 const selectedAccount = ref<AccountDto | null>(null)
 
 async function fetchAccountsFromHolder() {
-  const response = await getAccountsFromHolder(email.value)
+  const response = await getAccountsFromHolder()
   accounts.value = response.map((item) => ({
     ...item,
     name: item.name // Sort holders alphabetically

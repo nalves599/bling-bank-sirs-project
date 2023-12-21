@@ -51,6 +51,7 @@ export const getSharedSecret = async (userId: string) => {
     throw new Error("Shared secret not found");
   }
 
+
   const encryptedSharedSecret = crypto.hexToBuffer(entry.value);
   const { payload: sharedSecret } = await crypto.unprotect(
     encryptedSharedSecret,
@@ -67,11 +68,13 @@ export const createSessionKey = async () => {
   const sessionKey = await crypto.generateKey();
 
   sessionKeys.set(sessionId, sessionKey);
+  console.debug("Session key created:", sessionId);
 
   return { sessionId, sessionKey };
 };
 
 export const getSessionKey = (sessionId: string) => {
+  console.debug("Session key requested:", sessionId);
   if (sessionKeys.has(sessionId)) {
     return sessionKeys.get(sessionId);
   }

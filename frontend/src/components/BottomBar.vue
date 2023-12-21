@@ -4,6 +4,8 @@
     <span class="separator"></span>
     <router-link :to="'/accounts/' + user.name">Accounts</router-link>
     <span class="separator"></span>
+    <router-link :to="'/movements/' + user.name">Movements</router-link>
+    <span class="separator"></span>
     <router-link :to="'/payments/' + user.name">Payments</router-link>
   </div>
 </template>

@@ -108,12 +108,21 @@ export async function getHolders(): Promise<HolderDto[]> {
   return holders.map((holder: any) => new HolderDto(holder))
 }
 
-export async function getAccountsFromHolder(email: string): Promise<AccountDto[]> {
-  const response = await http.get(`/accounts/holder/${email}`)
+export async function getAccountsFromHolder(): Promise<AccountDto[]> {
+  const response = await http.get(`/me`)
 
-  const accounts = response.data
+  const { token } = useAuthStore()
+  console.log(token)
+
+  const accounts = response.data.accounts
 
   return accounts.map((account: any) => new AccountDto(account))
+}
+
+export async function unlockAccount(accountId: string, shamirSecret: string) {
+  const request = { secret: shamirSecret }
+
+  await http.post(`/accounts/${accountId}/unlock`, request)
 }
 
 export async function createAccount(account: AccountDto): Promise<AccountDto> {
@@ -123,7 +132,9 @@ export async function createAccount(account: AccountDto): Promise<AccountDto> {
 }
 
 export async function getAccountMovements(accountId: string) {
-  const response = await http.get(`/movements/account/${accountId}`)
+  const response = await http.get(`/accounts/${accountId}`)
+
+  console.log(response.data)
 
   const movements = response.data
 

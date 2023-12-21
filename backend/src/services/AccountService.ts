@@ -48,11 +48,13 @@ export const getAccountById = async (accountId: string, accountKey: ArrayBuffer)
 
   if (!encryptedAccount) { return null; }
 
+  const balance = encryptedAccount.balance;
+  const decryptedBalance = await crypto.paramUnprotect(balance, accountKey);
+  const intBalance = crypto.fromBytesInt32( new Uint8Array(decryptedBalance).buffer );
+
   const account = {
     ...encryptedAccount,
-    balance: crypto.fromBytesInt32(
-      await crypto.paramUnprotect(encryptedAccount.balance, accountKey),
-    ),
+    balance: intBalance,
   };
 
   return account;
