@@ -1,4 +1,4 @@
-import { ProtectProps, UnprotectProps } from "blingbank-lib/dist/utils/crypto";
+import { ProtectProps, UnprotectProps } from "blingbank-lib/dist/crypto";
 import {
   bytesToAesKey,
   bytesToSigningKey,
