@@ -41,24 +41,31 @@
       <div v-if="selectedAccount" class="account-details">
         <h2>Payments of Account {{ selectedAccount.name }}</h2>
         <v-data-table :headers="headers" :items="payments">
-          <template v-slot:item="{ item }">
-            <tr>
-              <td>{{ item.id }}</td>
-              <td>{{ item.date }}</td>
-              <td>{{ item.description }}</td>
-              <td>{{ item.amount }}</td>
-              <td>{{ item.currencyType }}</td>
-              <td>{{ item.approvedApprovals }}</td>
-              <td>{{ item.requiredApprovals }}</td>
-              <td>{{ item.approved }}</td>
-              <td>
-                <button v-if="!item.approved" @click="acceptPayment(Number(item.id))">
-                  Accept Payment
+        <template v-slot:item="{ item }">
+          <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ item.amount }}</td>
+            <td>{{ item.currencyType }}</td>
+            <td>{{ item.approvedApprovals }}</td>
+            <td>{{ item.requiredApprovals }}</td>
+            <td>{{ item.approved }}</td>
+            <td>
+              <template v-if="!item.approved">
+                <button
+                  :class="{'green-button': !item.approved, 'red-button': item.approved}"
+                  @click="signPayment(Number(item.id))"
+                >
+                  Sign Payment
                 </button>
-                <span v-else>Accepted</span>
-              </td>
-            </tr>
-          </template>
+              </template>
+              <template v-else>
+                <span>Signed</span>
+              </template>
+            </td>
+          </tr>
+        </template>
         </v-data-table>
       </div>
     </div>
@@ -72,11 +79,12 @@
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
-import { getAccountsFromHolder, getAccountPayments, approvePayment } from '@/services/api'
+import { getAccountsFromHolder, getAccountPayments } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import type { PaymentDto } from '@/models/PaymentDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import router from '@/router'
 
 const accounts = ref<AccountDto[]>([])
 const payments = ref<PaymentDto[]>([])
@@ -128,10 +136,8 @@ const headers = [
   { title: 'Approved', key: 'approved', sortable: true }
 ]
 
-const acceptPayment = async (paymentId: number) => {
-  approvePayment(paymentId)
-  // reload table
-  fetchAccountpayments()
+const signPayment = async (paymentId: number) => {
+  router.push(`/sign-payment/${paymentId}`)
 }
 </script>
 
@@ -171,5 +177,15 @@ const acceptPayment = async (paymentId: number) => {
 
 .payment-table-container {
   margin-top: 20px;
+}
+
+.green-button {
+  background-color: green;
+  color: white;
+}
+
+.red-button {
+  background-color: red;
+  color: white;
 }
 </style>
