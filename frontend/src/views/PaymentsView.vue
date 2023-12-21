@@ -78,7 +78,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { getAccountsFromHolder, getAccountPayments } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import type { PaymentDto } from '@/models/PaymentDto'

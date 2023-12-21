@@ -24,6 +24,10 @@
         </select>
       </div>
       <div class="form-group">
+        <label for="shamir">shamir key:</label>
+        <input type="text" v-model="shamir" id="shamir" required />
+      </div>
+      <div class="form-group">
         <button type="submit">Create Payment</button>
       </div>
     </form>
@@ -42,6 +46,7 @@ import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
 import { PaymentDto } from '@/models/PaymentDto'
 import router from '@/router'
+import { unlockAccount } from '@/services/api'
 
 const destination = ref('')
 const amount = ref(0)
@@ -52,11 +57,12 @@ const selectedAccountId = ref<number | null>(null)
 const authStore = useAuthStore()
 const { email } = storeToRefs(authStore)
 const selectedAccount = ref<AccountDto | null>(null)
+const shamir = ref('')
 
 const accounts = ref<AccountDto[]>([])
 
 async function fetchAccountsFromHolder() {
-  const response = await getAccountsFromHolder(email.value)
+  const response = await getAccountsFromHolder()
   accounts.value = response.map((item) => ({
     ...item,
     name: item.name // Sort holders alphabetically
@@ -70,12 +76,16 @@ const formatDate = () => {
 
 const paymentCreate = () => {
   const paymentDto: PaymentDto = {
-    amount: amount.value,
-    date: new Date(date.value),
+    value: amount.value.toString(),
+    totp: new Date(date.value).toString(),
     description: description.value,
     accountId: selectedAccountId.value || 0
   }
-  createPayment(paymentDto)
+  const accountId = selectedAccountId.value?.toString() || ''
+
+  unlockAccount(accountId, shamir.value)
+
+  createPayment(paymentDto, accountId)
   router.push(`/payments/${email.value}`)
 }
 

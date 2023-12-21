@@ -183,7 +183,7 @@ export const submitPayment = async (req: Request, res: Response) => {
     }
     const decrypted = {
       description: await SecurityService.decryptWithSessionKey(description, sessionId),
-      value: crypto.fromBytesInt32(await crypto.paramUnprotect(value, sessionKey)),
+      value: parseInt( await SecurityService.decryptWithSessionKey(value, sessionId)),
       totp: await SecurityService.decryptWithSessionKey(totp, sessionId),
     };
 

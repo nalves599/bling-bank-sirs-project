@@ -144,8 +144,20 @@ export async function getAccountPayments(accountId: string) {
   return payments.map((payment: any) => new PaymentDto(payment))
 }
 
-export async function createPayment(payment: PaymentDto) {
-  const response = await http.post('/payments/create', payment)
+export async function createPayment(payment: PaymentDto, id: string) {
+  const protectedTotp = await lib.paramProtect(payment.totp, useKeyStore().sessionKey)
+  if (typeof protectedTotp === 'string') payment.totp = protectedTotp
+  else payment.totp = lib.decoder.decode(protectedTotp)
+
+  const protectedValue = await lib.paramProtect(payment.value, useKeyStore().sessionKey)
+  if (typeof protectedValue === 'string') payment.value = protectedValue
+  else payment.value = lib.decoder.decode(protectedValue)
+
+  const protectedDescription = await lib.paramProtect(payment.description, useKeyStore().sessionKey)
+  if (typeof protectedDescription === 'string') payment.description = protectedDescription
+  else payment.description = lib.decoder.decode(protectedDescription)
+
+  const response = await http.post(`/accounts/${id}/payments`, payment)
 
   return new PaymentDto(response.data)
 }
