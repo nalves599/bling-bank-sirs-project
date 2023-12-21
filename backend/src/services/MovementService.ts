@@ -1,5 +1,7 @@
 import db from '../database';
 
+import { crypto } from 'blingbank-lib';
+
 export type CreateMovement = {
   date: string;
   value: string;
@@ -20,3 +22,22 @@ export const createMovement = async (accountId: string, movement: CreateMovement
 
   return createdMovement;
 };
+
+export const getMovementsByAccountId = async (accountId: string, key: ArrayBuffer) => {
+  const movements = await db.movement.findMany({
+    where: {
+      accountId: accountId,
+    },
+  });
+
+  const decryptedMovements = await Promise.all(movements.map(async (movement) => {
+    return {
+      date: await crypto.paramUnprotect(movement.date, key),
+      value: crypto.fromBytesInt32(await crypto.paramUnprotect(movement.value, key)),
+      description: crypto.decoder.decode(await crypto.paramUnprotect(movement.description, key)),
+      paymentID: movement.paymentId,
+    };
+  }));
+
+  return decryptedMovements;
+}

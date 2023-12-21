@@ -14,6 +14,7 @@ const sharedSecrets = new Map<string, ArrayBuffer>(); // <userId, sharedSecret>
 const sessionKeys = new Map<string, ArrayBuffer>(); // <sessionId, sessionKey>
 const shamirSecrets = new Map<string, string>(); // <accountId, base64(shamirSecret)>
 const lastNonces = new Map<string, ArrayBuffer>(); // <sessionId, lastNonce>
+const accountSecrets = new Map<string, ArrayBuffer>(); // <accountId, accountSecret>
 
 export const saveSharedSecret = async (
   userId: string,
@@ -122,6 +123,17 @@ export const getShamirSecret = async (accountId: string) => {
 
   return crypto.decoder.decode(shamirSecret);
 };
+
+export const saveAccountKey = (
+  accountId: string,
+  accountSecret: ArrayBuffer,
+) => {
+  accountSecrets.set(accountId, accountSecret);
+}
+
+export const getAccountKey = (accountId: string) => {
+  return accountSecrets.get(accountId);
+}
 
 export const decryptWithSessionKey = async (
   encrypted: string,

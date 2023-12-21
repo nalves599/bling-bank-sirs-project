@@ -23,6 +23,7 @@ authenticatedRoutes.get("/users", UserController.getUsers);
 // Account routes
 authenticatedRoutes.post("/accounts", AccountController.createAccount);
 authenticatedRoutes.get("/accounts/:id", AccountController.getAccountById);
+authenticatedRoutes.post("/accounts/:id/unlock", jwtAuth, AccountController.unlockAccount);
 authenticatedRoutes.get("/accounts/holder/:holderId", AccountController.getAccountsByHolder);
 
 // Movement routes
@@ -30,8 +31,10 @@ authenticatedRoutes.get("/movements/account/:accountId", AccountController.getAc
 
 // Payments routes
 authenticatedRoutes.get("/payments/:accountId", AccountController.getAccountPayments);
-authenticatedRoutes.post("/payments/create", AccountController.createPayment);
+authenticatedRoutes.post("/accounts/:id/payments", jwtAuth, AccountController.submitPayment);
 
 // Keys
+
+// Account routes
 
 export default routes;

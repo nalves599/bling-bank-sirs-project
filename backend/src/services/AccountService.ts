@@ -36,7 +36,7 @@ export const createAccount = async (
   return createdAccount;
 };
 
-export const getAccount = async (accountId: string, key?: ArrayBuffer) => {
+export const getAccountById = async (accountId: string, accountKey: ArrayBuffer) => {
   const encryptedAccount = await db.account.findUnique({
     where: {
       id: accountId,
@@ -46,14 +46,7 @@ export const getAccount = async (accountId: string, key?: ArrayBuffer) => {
     },
   });
 
-  if (!encryptedAccount) {
-    return null;
-  }
-
-  const accountKey = key || accountSecrets.get(accountId);
-  if (!accountKey) {
-    throw new Error("Account secret not found");
-  }
+  if (!encryptedAccount) { return null; }
 
   const account = {
     ...encryptedAccount,

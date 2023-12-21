@@ -10,7 +10,7 @@ export const addKey = async (
   const hash = crypto.bufferToHex(await crypto.sha256(key));
   const content = String(await crypto.paramProtect(signKey, key));
 
-  console.debug("addKey", { hash, content });
+  console.log("Add key", hash, content);
 
   return db.signKey.create({
     data: {
