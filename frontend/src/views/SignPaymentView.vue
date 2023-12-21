@@ -19,7 +19,7 @@
   </div>
 
   <div class="button-container">
-    <button :disabled="signedHash === ''" @click="signPayment">Sign Payment</button>
+    <button @click="signPayment">Sign Payment</button>
     <button @click="goBack" class="back-button">Go Back</button>
   </div>
 </template>
@@ -29,6 +29,7 @@ import { ref, onMounted } from 'vue'
 import { getPaymentById } from '@/services/api'
 import { PaymentDto } from '@/models/PaymentDto'
 import router from '@/router'
+import { signPayment } from '@/services/api'
 
 export default {
   data() {
@@ -56,28 +57,15 @@ export default {
         console.error('Error fetching payment details:', error)
       }
     },
-    signPayment() {
-      if (this.signedHash === '') {
-        // Display an error message if the signed hash is empty
-        this.showErrorMessage = true
-        return
-      }
-      // Reset the error message when signing is successful
-      this.showErrorMessage = false
+    async signPayment() {
+      const paymentId = this.$route.params.id
 
-      // Add logic to handle signing payment
-      console.log('Payment signed!')
-      // You may want to update the status here after signing the payment
-      this.paymentDetails.approved = true // Adjust this line based on your logic
+      await signPayment(paymentId.toString(), this.paymentDetails.hash || '')
+      this.$router.go(-1)
     },
     goBack() {
       // Navigate back to the previous page
       this.$router.go(-1)
-    },
-    generatePaymentHash() {
-      // Add logic to generate a unique payment hash
-      // You can replace this with your actual hash generation logic
-      return 'GeneratedHash123'
     }
   }
 }

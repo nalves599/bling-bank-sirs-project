@@ -11,6 +11,7 @@ import type { RegisterRequestDto } from '@/models/RegisterRequestDto'
 import { ChallengeResolvedDto } from '@/models/ChallengeResolvedDto'
 import { crypto as lib } from 'blingbank-lib'
 import { ChallengeDto } from '@/models/ChallengeDto'
+import { bufferToHex, hexToBuffer } from 'blingbank-lib/dist/crypto'
 
 const http = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -174,12 +175,12 @@ export async function getPaymentById(id: string) {
   return new PaymentDto(response.data)
 }
 
-export async function signPayment(paymentId: number, paymentHash: string) {
+export async function signPayment(paymentId: string, paymentHash: string) {
   const paymentBuffer = lib.hexToBuffer(paymentHash)
 
   const signature = await lib.signMessage(paymentBuffer, useKeyStore().privateKey)
 
-  const payload = { signature: signature }
+  const payload = { signature: bufferToHex(signature) }
 
   const response = await http.post(`/payments/${paymentId}/sign`, payload)
 
