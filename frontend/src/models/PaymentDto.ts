@@ -1,24 +1,26 @@
 export class PaymentDto {
-  id!: string
+  id?: string
 
-  date!: Date
-  amount!: number
+  totp!: string
+  value!: string
   description!: string
-  currencyType!: string
+  currencyType?: string
   accountId!: number
+  hash?: string
 
-  requiredApprovals!: number
-  approvedApprovals!: number
+  requiredApprovals?: number
+  approvedApprovals?: number
 
-  approved!: boolean
+  approved?: boolean
 
   constructor(jsonObj?: PaymentDto) {
     if (jsonObj) {
       this.id = jsonObj.id
-      this.date = jsonObj.date
-      this.amount = jsonObj.amount
+      this.totp = jsonObj.totp
+      this.value = jsonObj.value
       this.description = jsonObj.description
       this.currencyType = jsonObj.currencyType
+      this.hash = jsonObj.hash
       this.requiredApprovals = jsonObj.requiredApprovals
       this.approvedApprovals = jsonObj.approvedApprovals
       this.approved = jsonObj.approved

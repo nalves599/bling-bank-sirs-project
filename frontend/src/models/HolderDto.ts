@@ -1,11 +1,13 @@
 export class HolderDto {
-  accountHolderId!: string
-  holderName!: string
+  id!: string
+  name!: string
+  email!: string
 
   constructor(jsonObj?: HolderDto) {
     if (jsonObj) {
-      this.accountHolderId = jsonObj.accountHolderId
-      this.holderName = jsonObj.holderName
+      this.id = jsonObj.id
+      this.name = jsonObj.name
+      this.email = jsonObj.email
     }
   }
 }

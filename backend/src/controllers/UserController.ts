@@ -116,7 +116,7 @@ export const generateToken = async (req: Request, res: Response) => {
     }
 
     const initialNonce = crypto.decoder.decode(await crypto.generateNonce());
-    const { sessionId } = await SecurityService.createSessionKey();
+    const { sessionId, sessionKey } = await SecurityService.createSessionKey();
 
     console.debug("Initial nonce:", initialNonce);
     console.debug("Session ID:", sessionId);
@@ -128,7 +128,9 @@ export const generateToken = async (req: Request, res: Response) => {
     });
     challenges.delete(user.id);
 
-    res.json({ token });
+    const encryptedSessionKey = String(await crypto.paramProtect(sessionKey, sharedSecret));
+
+    res.json({ token, encryptedSessionKey });
   } catch (error) {
     console.error(error);
     res.status(400).json({ message: "Could not get token" });
@@ -155,3 +157,14 @@ export const getMe = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Could not get user" });
   }
 };
+
+export const getUsers = async (req: Request, res: Response) => {
+  try {
+    const users = await UserService.getUsers();
+
+    res.json({ users });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ message: "Could not get uses" });
+  }
+}

@@ -4,7 +4,7 @@ import {
   protect,
   unprotect,
   check,
-} from "blingbank-lib/dist/utils/crypto";
+} from "blingbank-lib/dist/crypto";
 
 import { TextEncoder } from "util";
 

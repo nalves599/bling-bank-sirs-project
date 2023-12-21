@@ -22,28 +22,39 @@
       <option value="" disabled>Select an account</option>
       <option
         v-for="account in sortedAccounts"
-        :key="account.accountId"
-        :value="account.accountId"
+        :key="account.id"
+        :value="account.id"
         style="background-color: #f8f8f8"
       >
-        {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-        {{ account.holders.sort().join(', ') }}
+        {{ account.name }}
       </option>
     </select>
 
     <!-- Display movements of selected account -->
     <div v-if="selectedAccount" class="account-details">
-      <h2>Movements of Account {{ selectedAccount.accountId }}</h2>
-      <v-data-table :headers="headers" :items="movements">
-        <template v-slot:item="{ item }">
-          <tr>
-            <td>{{ item.movementId }}</td>
-            <td>{{ item.movementDate }}</td>
-            <td>{{ item.movementDescription }}</td>
-            <td>{{ item.movementValue }}</td>
-          </tr>
-        </template>
-      </v-data-table>
+      <div v-if="movements.length != 0">
+        <h2>Movements of Account {{ selectedAccount.name }}</h2>
+        <v-data-table :headers="headers" :items="movements">
+          <template v-slot:item="{ item }">
+            <tr>
+              <td>{{ item.movementId }}</td>
+              <td>{{ item.movementDate }}</td>
+              <td>{{ item.movementDescription }}</td>
+              <td>{{ item.movementValue }}</td>
+            </tr>
+          </template>
+        </v-data-table>
+      </div>
+      <div v-if="movements.length === 0">
+        <form @submit.prevent="fetchAccountMovements">
+          <div class="form-group">
+            <label for="shamir">Shamir Secret:</label>
+            <input v-model="shamir" id="shamir" type="text" required />
+          </div>
+
+          <button type="submit">Unlock</button>
+        </form>
+      </div>
     </div>
 
     <BottomBar />
@@ -52,23 +63,21 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '@/stores/auth'
-import { storeToRefs } from 'pinia'
 import { ref, onMounted, computed, watch } from 'vue'
 import { getAccountsFromHolder, getAccountMovements } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import type { MovementDto } from '@/models/MovementDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import { unlockAccount } from '@/services/api'
 
 const accounts = ref<AccountDto[]>([])
 const movements = ref<MovementDto[]>([])
 const selectedAccountId = ref<string | null>(null)
-const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const shamir = ref('')
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(username.value)
+  accounts.value = await getAccountsFromHolder()
 }
 
 onMounted(() => {
@@ -77,8 +86,8 @@ onMounted(() => {
 
 const sortedAccounts = computed(() => {
   return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId)
-    const idB = parseInt(b.accountId)
+    const idA = parseInt(a.name)
+    const idB = parseInt(b.name)
     return idA - idB
   })
 })
@@ -88,7 +97,7 @@ watch(
   () => selectedAccountId.value,
   (newVal) => {
     if (newVal) {
-      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+      selectedAccount.value = accounts.value.find((account) => account.id === newVal) || null
     }
   }
 )
@@ -96,17 +105,9 @@ watch(
 const selectedAccount = ref<AccountDto | null>(null)
 // get account movements
 async function fetchAccountMovements() {
-  movements.value = await getAccountMovements(selectedAccount.value?.accountId)
+  await unlockAccount(selectedAccount.value?.id || '', shamir.value)
+  movements.value = await getAccountMovements(selectedAccount.value?.id || '')
 }
-
-watch(
-  () => selectedAccount.value,
-  () => {
-    if (selectedAccount.value) {
-      fetchAccountMovements()
-    }
-  }
-)
 
 const headers = [
   { title: 'Movement ID', key: 'movementId', sortable: true },
@@ -129,5 +130,60 @@ const headers = [
   .account-details {
     text-align: center;
   }
+}
+</style>
+
+<style scoped>
+.create-account {
+  font-size: 20px;
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+  color: #fff; /* Light text color */
+}
+
+h2 {
+  color: #fff; /* Light text color */
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #ccc; /* Light text color */
+}
+
+input,
+textarea,
+select,
+VueMultiselect {
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #555; /* Darker border color */
+  border-radius: 4px;
+  background-color: #444; /* Darker background color */
+  color: #fff; /* Light text color */
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 </style>

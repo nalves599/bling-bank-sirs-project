@@ -36,7 +36,7 @@ export const createAccount = async (
   return createdAccount;
 };
 
-export const getAccount = async (accountId: string, key?: ArrayBuffer) => {
+export const getAccountById = async (accountId: string, accountKey: ArrayBuffer) => {
   const encryptedAccount = await db.account.findUnique({
     where: {
       id: accountId,
@@ -46,20 +46,15 @@ export const getAccount = async (accountId: string, key?: ArrayBuffer) => {
     },
   });
 
-  if (!encryptedAccount) {
-    return null;
-  }
+  if (!encryptedAccount) { return null; }
 
-  const accountKey = key || accountSecrets.get(accountId);
-  if (!accountKey) {
-    throw new Error("Account secret not found");
-  }
+  const balance = encryptedAccount.balance;
+  const decryptedBalance = await crypto.paramUnprotect(balance, accountKey);
+  const intBalance = crypto.fromBytesInt32( new Uint8Array(decryptedBalance).buffer );
 
   const account = {
     ...encryptedAccount,
-    balance: crypto.fromBytesInt32(
-      await crypto.paramUnprotect(encryptedAccount.balance, accountKey),
-    ),
+    balance: intBalance,
   };
 
   return account;
@@ -77,3 +72,49 @@ export const uprotectAccount = async (accountId: string, userKey: string) => {
 
   const accountKey = KeyUtil.combineShamirSecrets([serverKey, userKey]);
 };
+
+export const getAccountsByHolder = async (email: string) => {
+
+  const accounts = await db.account.findMany({
+    where: {
+      accountHolders: {
+        some: {
+          email: email,
+        },
+      },
+    },
+  });
+
+  return accounts;
+}
+
+
+export const getAccountMovements = async (accountId: string) => {
+  const movements = await db.movement.findMany({
+    where: {
+      accountId: accountId,
+    },
+  });
+
+  return movements;
+};
+
+export const getAccountPayments = async (accountId: string) => {
+  const payments = await db.payment.findMany({
+    where: {
+      accountId: accountId,
+    },
+  });
+
+  return payments;
+};
+
+export const getPaymentById = async (paymentId: string) => {
+  const payment = await db.payment.findUnique({
+    where: {
+      id: paymentId,
+    },
+  });
+
+  return payment;
+}

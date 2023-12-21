@@ -7,6 +7,7 @@
       <v-card-text>
         <v-form v-model="form" @submit.prevent="onSubmit">
           <v-text-field v-model="holderName" label="Holder Name" required></v-text-field>
+          <v-text-field v-model="holderEmail" label="Holder Email" required></v-text-field>
           <v-text-field
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
@@ -29,10 +30,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { register } from '@/services/api'
-import { LoginRequestDto } from '@/models/LoginRequestDto'
+import { RegisterRequestDto } from '@/models/RegisterRequestDto'
 import router from '@/router'
 
 const holderName = ref('')
+const holderEmail = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const form = ref(null)
@@ -48,12 +50,13 @@ function setError(message: string) {
 
 async function onSubmit() {
   try {
-    const loginRequestDto: LoginRequestDto = {
-      holderName: holderName.value,
-      password: password.value
-    }
+    const registerRequestDto = new RegisterRequestDto(
+      holderName.value,
+      holderEmail.value,
+      password.value
+    )
 
-    await register(loginRequestDto)
+    await register(registerRequestDto)
 
     router.push('/register-success')
   } catch (error) {

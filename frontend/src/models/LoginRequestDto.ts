@@ -1,9 +1,9 @@
 export class LoginRequestDto {
-  holderName: string
+  email: string
   password: string
 
-  constructor(holderName: string, password: string) {
-    this.holderName = holderName
+  constructor(holderEmail: string, password: string) {
+    this.email = holderEmail
     this.password = password
   }
 }

@@ -21,26 +21,25 @@
     >
       <option value="" disabled>Select an account</option>
       <option
-        v-for="account in sortedAccounts"
-        :key="account.accountId"
-        :value="account.accountId"
+        v-for="account in accounts"
+        :key="account.id"
+        :value="account.id"
         style="background-color: #f8f8f8"
       >
-        {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-        {{ account.holders.sort().join(', ') }}
+        {{ account.id }} - {{ account.currency }}
       </option>
     </select>
 
     <!-- Display payments of selected account -->
     <div class="create-payment-container">
-      <router-link :to="'/create-payment/' + username" class="create-payment-button"
+      <router-link :to="'/create-payment/' + email" class="create-payment-button"
         >Create Payment</router-link
       >
     </div>
 
     <div class="payment-table-container">
       <div v-if="selectedAccount" class="account-details">
-        <h2>Payments of Account {{ selectedAccount.accountId }}</h2>
+        <h2>Payments of Account {{ selectedAccount.name }}</h2>
         <v-data-table :headers="headers" :items="payments">
           <template v-slot:item="{ item }">
             <tr>
@@ -48,16 +47,18 @@
               <td>{{ item.date }}</td>
               <td>{{ item.description }}</td>
               <td>{{ item.amount }}</td>
+              <td>
+                <v-btn class="mx-2" fab dark small color="pink" @click="signPayment(item.id)">
+                  <v-icon dark>mdi-heart</v-icon>
+                </v-btn>
+                <template>
+                  <button @click="signPayment(item.id)">Sign Payment</button>
+                </template>
+              </td>
               <td>{{ item.currencyType }}</td>
               <td>{{ item.approvedApprovals }}</td>
               <td>{{ item.requiredApprovals }}</td>
               <td>{{ item.approved }}</td>
-              <td>
-                <button v-if="!item.approved" @click="acceptPayment(Number(item.id))">
-                  Accept Payment
-                </button>
-                <span v-else>Accepted</span>
-              </td>
             </tr>
           </template>
         </v-data-table>
@@ -72,33 +73,26 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, computed, watch } from 'vue'
-import { getAccountsFromHolder, getAccountPayments, approvePayment } from '@/services/api'
+import { ref, onMounted, watch } from 'vue'
+import { getAccountsFromHolder, getAccountPayments } from '@/services/api'
 import type { AccountDto } from '@/models/AccountDto'
 import type { PaymentDto } from '@/models/PaymentDto'
 import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
+import router from '@/router'
 
 const accounts = ref<AccountDto[]>([])
 const payments = ref<PaymentDto[]>([])
 const selectedAccountId = ref<string | null>(null)
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(username.value)
+  accounts.value = await getAccountsFromHolder()
 }
 
 onMounted(() => {
   fetchAccountsFromHolder()
-})
-
-const sortedAccounts = computed(() => {
-  return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId)
-    const idB = parseInt(b.accountId)
-    return idA - idB
-  })
 })
 
 // Watcher to ensure selected option stays in the dropdown
@@ -106,7 +100,7 @@ watch(
   () => selectedAccountId.value,
   (newVal) => {
     if (newVal) {
-      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
+      selectedAccount.value = accounts.value.find((account) => account.id === newVal) || null
     }
   }
 )
@@ -114,7 +108,7 @@ watch(
 const selectedAccount = ref<AccountDto | null>(null)
 // get account payments
 async function fetchAccountpayments() {
-  payments.value = await getAccountPayments(selectedAccount.value?.accountId ?? '')
+  payments.value = await getAccountPayments(selectedAccount.value?.id ?? '')
 }
 
 watch(
@@ -137,10 +131,8 @@ const headers = [
   { title: 'Approved', key: 'approved', sortable: true }
 ]
 
-const acceptPayment = async (paymentId: number) => {
-  approvePayment(paymentId)
-  // reload table
-  fetchAccountpayments()
+const signPayment = async (paymentId: string) => {
+  router.push(`/sign-payment/${paymentId}`)
 }
 </script>
 
@@ -180,5 +172,15 @@ const acceptPayment = async (paymentId: number) => {
 
 .payment-table-container {
   margin-top: 20px;
+}
+
+.green-button {
+  background-color: green;
+  color: white;
+}
+
+.red-button {
+  background-color: red;
+  color: white;
 }
 </style>

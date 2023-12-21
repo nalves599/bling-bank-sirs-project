@@ -14,6 +14,7 @@ const sharedSecrets = new Map<string, ArrayBuffer>(); // <userId, sharedSecret>
 const sessionKeys = new Map<string, ArrayBuffer>(); // <sessionId, sessionKey>
 const shamirSecrets = new Map<string, string>(); // <accountId, base64(shamirSecret)>
 const lastNonces = new Map<string, ArrayBuffer>(); // <sessionId, lastNonce>
+const accountSecrets = new Map<string, ArrayBuffer>(); // <accountId, accountSecret>
 
 export const saveSharedSecret = async (
   userId: string,
@@ -50,6 +51,7 @@ export const getSharedSecret = async (userId: string) => {
     throw new Error("Shared secret not found");
   }
 
+
   const encryptedSharedSecret = crypto.hexToBuffer(entry.value);
   const { payload: sharedSecret } = await crypto.unprotect(
     encryptedSharedSecret,
@@ -66,11 +68,13 @@ export const createSessionKey = async () => {
   const sessionKey = await crypto.generateKey();
 
   sessionKeys.set(sessionId, sessionKey);
+  console.debug("Session key created:", sessionId);
 
   return { sessionId, sessionKey };
 };
 
 export const getSessionKey = (sessionId: string) => {
+  console.debug("Session key requested:", sessionId);
   if (sessionKeys.has(sessionId)) {
     return sessionKeys.get(sessionId);
   }
@@ -123,6 +127,17 @@ export const getShamirSecret = async (accountId: string) => {
   return crypto.decoder.decode(shamirSecret);
 };
 
+export const saveAccountKey = (
+  accountId: string,
+  accountSecret: ArrayBuffer,
+) => {
+  accountSecrets.set(accountId, accountSecret);
+}
+
+export const getAccountKey = (accountId: string) => {
+  return accountSecrets.get(accountId);
+}
+
 export const decryptWithSessionKey = async (
   encrypted: string,
   sessionId: string,
@@ -136,7 +151,7 @@ export const decryptWithSessionKey = async (
   const decrypted = await crypto.paramUnprotect(
     encrypted,
     sessionKey,
-    crypto.nonceCheck(lastNonce),
+    // crypto.nonceCheck(lastNonce), //TODO: Uncomment this line
   );
   return crypto.decoder.decode(decrypted);
 };

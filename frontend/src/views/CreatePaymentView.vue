@@ -18,15 +18,14 @@
         <label for="accountDropdown">Source Account:</label>
         <select v-model="selectedAccountId" id="accountDropdown" @change="fetchAccountsFromHolder">
           <option value="" disabled>Select an account</option>
-          <option
-            v-for="account in sortedAccounts"
-            :key="account.accountId"
-            :value="parseInt(account.accountId)"
-          >
-            {{ account.accountId }} - Balance: {{ account.balance }} - Holders:
-            {{ account.holders.sort().join(', ') }}
+          <option v-for="account in accounts" :key="account.id" :value="account.id">
+            {{ account.id }} - {{ account.name }}
           </option>
         </select>
+      </div>
+      <div class="form-group">
+        <label for="shamir">shamir key:</label>
+        <input type="text" v-model="shamir" id="shamir" required />
       </div>
       <div class="form-group">
         <button type="submit">Create Payment</button>
@@ -47,6 +46,7 @@ import BottomBar from '@/components/BottomBar.vue'
 import LogoutButton from '@/components/LogoutButton.vue'
 import { PaymentDto } from '@/models/PaymentDto'
 import router from '@/router'
+import { unlockAccount } from '@/services/api'
 
 const destination = ref('')
 const amount = ref(0)
@@ -55,36 +55,19 @@ const description = ref('')
 const selectedAccountId = ref<number | null>(null)
 
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
+const selectedAccount = ref<AccountDto | null>(null)
+const shamir = ref('')
 
 const accounts = ref<AccountDto[]>([])
 
-onMounted(() => {
-  fetchAccountsFromHolder()
-})
-
-const fetchAccountsFromHolder = async () => {
-  accounts.value = await getAccountsFromHolder(username.value)
+async function fetchAccountsFromHolder() {
+  const response = await getAccountsFromHolder()
+  accounts.value = response.map((item) => ({
+    ...item,
+    name: item.name // Sort holders alphabetically
+  }))
 }
-
-const sortedAccounts = computed(() => {
-  return [...accounts.value].sort((a, b) => {
-    const idA = parseInt(a.accountId)
-    const idB = parseInt(b.accountId)
-    return idA - idB
-  })
-})
-
-const selectedAccount = ref<AccountDto | null>(null)
-
-watch(
-  () => selectedAccountId.value,
-  (newVal) => {
-    if (newVal !== null) {
-      selectedAccount.value = accounts.value.find((account) => account.accountId === newVal) || null
-    }
-  }
-)
 
 const formatDate = () => {
   const formattedDate = new Date(date.value).toISOString().split('T')[0]
@@ -93,14 +76,20 @@ const formatDate = () => {
 
 const paymentCreate = () => {
   const paymentDto: PaymentDto = {
-    amount: amount.value,
-    date: new Date(date.value),
+    value: amount.value.toString(),
+    totp: new Date(date.value).toString(),
     description: description.value,
     accountId: selectedAccountId.value || 0
   }
-  createPayment(paymentDto)
-  router.push(`/payments/${username.value}`)
+  const accountId = selectedAccountId.value?.toString() || ''
+
+  unlockAccount(accountId, shamir.value)
+
+  createPayment(paymentDto, accountId)
+  router.push(`/payments/${email.value}`)
 }
+
+fetchAccountsFromHolder()
 </script>
 
 <style scoped>

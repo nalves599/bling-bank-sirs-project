@@ -6,8 +6,8 @@
         <VueMultiselect v-model="selected" :options="options" :multiple="true"></VueMultiselect>
       </div>
       <div class="form-group">
-        <label for="balance">Initial Balance:</label>
-        <input type="number" v-model="balance" id="balance" required />
+        <label for="accountname">Name:</label>
+        <input v-model="accountname" id="accountname" type="text" required />
       </div>
       <div class="form-group">
         <label for="currency">Currency:</label>
@@ -37,32 +37,32 @@ import { createAccount } from '@/services/api'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 
-const selected = ref(null)
+const selected = ref([])
 const options = ref([])
-const balance = ref(null)
+const accountname = ref('')
 const currency = ref('')
 const error = ref('')
 
 onMounted(async () => {
   options.value = await getHolders().then((response) => {
-    return response.map((item) => item.holderName)
+    return response.map((item) => item.email)
   })
 })
 
 const authStore = useAuthStore()
-const { username } = storeToRefs(authStore)
+const { email } = storeToRefs(authStore)
 
 async function createAcc() {
   try {
     const accountDto: AccountDto = {
-      holders: selected.value.map((item) => item),
-      balance: balance.value,
+      accountHolders: selected.value.map((item: string) => item),
+      name: accountname.value,
       currency: currency.value
     }
 
-    await createAccount(accountDto, username.value)
+    await createAccount(accountDto)
 
-    router.push(`/accounts/${username.value}`)
+    router.push(`/accounts/${email.value}`)
   } catch (e) {
     // Set the error message if there's an issue
     error.value = 'Failed to create the account. You must include your user as one of the holders.'

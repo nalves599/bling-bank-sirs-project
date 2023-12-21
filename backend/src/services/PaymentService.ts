@@ -1,21 +1,31 @@
 import db from '../database';
 
+import * as SecurityService from './SecurityService';
+
+import { crypto } from 'blingbank-lib';
+
 export type CreatePayment = {
-  value: string;
-  accountId: string;
+  value: number;
   description: string;
   totp: string;
-  hash: string;
 }
 
-export const createPayment = async (payment: CreatePayment) => {
+export const createPayment = async (accountId: string, payment: CreatePayment, key: ArrayBuffer) => {
+  const hash = await crypto.sha256(payment.toString());
+  const encryptedPayment = {
+    value: String(await crypto.paramProtect(crypto.toBytesInt32(payment.value), key)),
+    description: String(await crypto.paramProtect(payment.description, key)),
+    totp: String(await crypto.paramProtect(crypto.encoder.encode(payment.totp), key)),
+    hash: String(await crypto.paramProtect(hash, key)),
+  };
+
   const createdPayment = await db.payment.create({
     data: {
-      value: payment.value,
-      description: payment.description,
-      accountId: payment.accountId,
-      totp: payment.totp,
-      hash: payment.hash,
+      value: encryptedPayment.value,
+      description: encryptedPayment.description,
+      accountId,
+      totp: encryptedPayment.totp,
+      hash: encryptedPayment.hash,
     },
   });
 
@@ -32,12 +42,68 @@ export const getPayment = async (paymentId: string) => {
   return payment;
 }
 
-export const getPaymentsByAccount = async (accountId: string) => {
+export const getPaymentsByAccountId = async (accountId: string, key: ArrayBuffer) => {
   const payments = await db.payment.findMany({
     where: {
       accountId: accountId,
     },
+    include: {
+      signatures: true,
+    },
   });
 
-  return payments;
+  const decryptedPayments = await Promise.all(payments.map(async (payment) => {
+    return {
+      value: crypto.fromBytesInt32(await crypto.paramUnprotect(payment.value, key)),
+      description: crypto.decoder.decode(await crypto.paramUnprotect(payment.description, key)),
+      totp: crypto.decoder.decode(await crypto.paramUnprotect(payment.totp, key)),
+      hash: payment.hash,
+      signatures: await Promise.all(payment.signatures.map(async (signature) => ({
+        date: await crypto.paramUnprotect(signature.date, key),
+        content: crypto.decoder.decode(await crypto.paramUnprotect(signature.content, key)),
+        signKeyId: signature.signKeyId,
+      }))),
+    };
+  }));
+
+  return decryptedPayments;
+}
+
+export const signPayment = async (paymentId: string, userId: string, signature: string) => {
+
+  const userSignKeys = await db.signKey.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  const paymentSignatures = await db.signature.findMany({
+    where: {
+      paymentId,
+    },
+    include: {
+      signKey: true,
+    },
+  });
+
+  paymentSignatures.forEach((paymentSignature) => {
+    if (paymentSignature.signKey.userId === userId) {
+      throw new Error('User already signed this payment');
+    }
+  });
+
+  const sharedSecret = await SecurityService.getSharedSecret(userId);
+  if (!sharedSecret) {
+    throw new Error('User does not have a shared secret');
+  }
+
+  await db.signature.create({
+    data: {
+      date: new Date().toISOString(),
+      content: signature,
+      paymentId,
+      signKeyId: userSignKeys[0].id,
+    },
+  });
+
 }
