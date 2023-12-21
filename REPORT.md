@@ -13,21 +13,6 @@ BlingBank's infrastructure is composed of four servers: a gateway, a web server,
 
 ### 1.3. Security Challenge
 The security challenge consists of a new requirement: a new document format specifically for payment orders which must guarantee confidentiality, authenticity, and non-repudiation of each transaction. Additionally, accounts with mulitple owners require authorization and non-repudiation from all owners before the payment order is executed.
-With all these requirements, the new document format for payment orders has the following structure:
-
-TODO: Is this the document?
-```json
-{
-    "account": "account-id",
-    "amount": "amount",
-    "currency": "currency",
-    "date": "date",
-    "description": "description",
-    "requiredApprovals": "required-approvals",
-    "givenApprovals": "given-approvals",
-    "accepted": "accepted"
-}
-```
 
 ### 1.4 Project Structure
 Our BlingBank project has the following structure that will be explained in more detail in the following sections.
@@ -439,8 +424,8 @@ Overall the project was a great learning experience and we are very happy with t
 
 ## 4. Bibliography
 
-[NIST Official Website](https://www.nist.gov/)
-[Shamir Secret Sharing](https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing)
+[NIST Official Website](https://www.nist.gov/)\
+[Shamir Secret Sharing](https://en.wikipedia.org/wiki/Shamir%27s_secret_sharing)\
 [Diffie-Hellman Key Exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
 
 ----
