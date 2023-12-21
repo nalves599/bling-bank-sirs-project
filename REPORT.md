@@ -233,6 +233,9 @@ The database server has the IP address `10.69.1.2/24` in the private network.
 
 ![Infrastructure](img/report/infrastructure.jpg)
 
+To deploy the applications is needed to follow the [README.md](./infra/README.md) and then copy the directories `backend`, `frontend`, and `library` to the inside of the webserver virtual machine.
+After copying the files we need to run `npm install && npm run build; npx prisma db push; npm run start` on the backend and frontend directory.
+
 ##### Technologies Used
 
 As said previously, the library, the CLI, the backend, and the frontend were all developed in Typescript.
@@ -408,14 +411,14 @@ We also learned that we can't take security for granted and how difficult it is 
 Not only due to the sheer amount of ways used to attack a system, but also due to the fact that it is very easy to make a mistake and compromise the whole system.
 Setting up the infrastructure was also a great learning experience, since it allowed us to learn how to configure a network and how to setup a firewall.
 
-We were very sastified in being able to implement in our project the shamir secret sharing algorithm, which was not taught in class, but we were able to learn it by ourselves and how it allowed us to have a more robust system.
+We were very satisfied in being able to implement in our project the shamir secret sharing algorithm, which was not taught in class, but we were able to learn it by ourselves and how it allowed us to have a more robust system.
 Implementing the session keys and the JWT tokens was also a great learning experience, since it allowed us to learn how to implement a secure login system.
 
 We were also very happy with the fact that we were able to implement the library in a way that it can be used in the frontend and in the backend, allowing us to have a single language for the whole project. One of the main reasons to do this was to allow the user to see his information in a browser without even noticing that his data was being transformed in the background.
 
 We wish we had a little more time to refine the project, but we are very happy with the result.
 
-For the future, the system would benefit from some kind of sotisficated signature scheme, using a yubikey or a smartcard, in order to have a more secure way to sign the payment orders. It would be also nice to implement the Diffie-Hellman (DH) key exchange protocol, in order to have a more secure way to exchange the shared-secret.
+For the future, the system would benefit from some kind of sophisticated signature scheme, using a yubikey or a smartcard, in order to have a more secure way to sign the payment orders. It would be also nice to implement the Diffie-Hellman (DH) key exchange protocol, in order to have a more secure way to exchange the shared-secret.
 
 Overall the project was a great learning experience and we are very happy with the result.
 
