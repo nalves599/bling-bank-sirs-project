@@ -47,23 +47,25 @@
               <td>{{ item.date }}</td>
               <td>{{ item.description }}</td>
               <td>{{ item.amount }}</td>
+              <td>
+                <v-btn
+                  class="mx-2"
+                  fab
+                  dark
+                  small
+                  color="pink"
+                  @click="signPayment(Number(item.id))"
+                >
+                  <v-icon dark>mdi-heart</v-icon>
+                </v-btn>
+                <template>
+                  <button @click="signPayment(item.id)">Sign Payment</button>
+                </template>
+              </td>
               <td>{{ item.currencyType }}</td>
               <td>{{ item.approvedApprovals }}</td>
               <td>{{ item.requiredApprovals }}</td>
               <td>{{ item.approved }}</td>
-              <td>
-                <template v-if="!item.approved">
-                  <button
-                    :class="{ 'green-button': !item.approved, 'red-button': item.approved }"
-                    @click="signPayment(Number(item.id))"
-                  >
-                    Sign Payment
-                  </button>
-                </template>
-                <template v-else>
-                  <span>Signed</span>
-                </template>
-              </td>
             </tr>
           </template>
         </v-data-table>
@@ -136,7 +138,7 @@ const headers = [
   { title: 'Approved', key: 'approved', sortable: true }
 ]
 
-const signPayment = async (paymentId: number) => {
+const signPayment = async (paymentId: string) => {
   router.push(`/sign-payment/${paymentId}`)
 }
 </script>
