@@ -58,7 +58,7 @@ const router = createRouter({
       component: () => import('../views/CreateAccountView.vue')
     },
     {
-      path: '/sign-payment/:name',
+      path: '/sign-payment/:id',
       name: 'sign-payment',
       component: () => import('../views/SignPaymentView.vue')
     }

@@ -5,41 +5,22 @@
     <div class="table-container">
       <div class="left-column">
         <div v-for="(value, title) in paymentDetails" :key="title" class="table-row">
-          <div class="table-cell component-title">{{ title }}</div>
-        </div>
-        <div class="table-row">
-          <div class="table-cell component-title">Payment Hash</div>
-        </div>
-      </div>
-      <div class="right-column">
-        <div v-for="(value, title) in paymentDetails" :key="title" class="table-row">
-          <div class="table-cell component-value">{{ value }}</div>
-        </div>
-        <div class="table-row">
-          <div class="table-cell component-value">{{ generatePaymentHash() }}</div>
-        </div>
-        <div class="table-row">
-          <div class="table-cell">
-            <textarea v-model="signedHash" placeholder="Paste Signed Hash"></textarea>
-            <div v-if="showErrorMessage" class="error-message">
-              Error: Please enter the signed hash.
-            </div>
-          </div>
+          <div class="table-cell component-title">{{ title }} -{{ value }}</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="info-container">
-      <p>
-        Info: To sign a payment, you must copy its hash, sign it with your private key, and then
-        paste the signed hash.
-      </p>
-    </div>
+  <div class="info-container">
+    <p>
+      Info: To sign a payment, you must copy its hash, sign it with your private key, and then paste
+      the signed hash.
+    </p>
+  </div>
 
-    <div class="button-container">
-      <button :disabled="signedHash === ''" @click="signPayment">Sign Payment</button>
-      <button @click="goBack" class="back-button">Go Back</button>
-    </div>
+  <div class="button-container">
+    <button :disabled="signedHash === ''" @click="signPayment">Sign Payment</button>
+    <button @click="goBack" class="back-button">Go Back</button>
   </div>
 </template>
 
@@ -65,10 +46,12 @@ export default {
     async fetchPaymentById() {
       try {
         // Extract the id from the URL
-        const id = router.currentRoute.value.params.id
+        const id = this.$route.params.id
 
         // Make the API request to get payment details by id
         this.paymentDetails = await getPaymentById(id.toString())
+
+        console.log('Payment details:', this.paymentDetails)
       } catch (error) {
         console.error('Error fetching payment details:', error)
       }
@@ -102,7 +85,7 @@ export default {
 
 <style scoped>
 .payment-details-container {
-  max-width: 600px;
+  max-width: auto;
   margin: auto;
 }
 

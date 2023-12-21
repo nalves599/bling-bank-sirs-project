@@ -6,6 +6,7 @@ export class PaymentDto {
   description!: string
   currencyType?: string
   accountId!: number
+  hash?: string
 
   requiredApprovals?: number
   approvedApprovals?: number
@@ -19,6 +20,7 @@ export class PaymentDto {
       this.value = jsonObj.value
       this.description = jsonObj.description
       this.currencyType = jsonObj.currencyType
+      this.hash = jsonObj.hash
       this.requiredApprovals = jsonObj.requiredApprovals
       this.approvedApprovals = jsonObj.approvedApprovals
       this.approved = jsonObj.approved

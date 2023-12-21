@@ -48,14 +48,7 @@
               <td>{{ item.description }}</td>
               <td>{{ item.amount }}</td>
               <td>
-                <v-btn
-                  class="mx-2"
-                  fab
-                  dark
-                  small
-                  color="pink"
-                  @click="signPayment(Number(item.id))"
-                >
+                <v-btn class="mx-2" fab dark small color="pink" @click="signPayment(item.id)">
                   <v-icon dark>mdi-heart</v-icon>
                 </v-btn>
                 <template>

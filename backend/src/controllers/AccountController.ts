@@ -171,10 +171,10 @@ export const getAccountPayments = async (req: Request, res: Response) => {
 };
 
 export const getPaymentById = async (req: Request, res: Response) => {
-  const { paymentId } = req.params;
+  const { id } = req.params;
 
   try {
-    const payment = await AccountService.getPaymentById(paymentId);
+    const payment = await AccountService.getPaymentById(id);
 
     res.json(payment);
   } catch (error) {
