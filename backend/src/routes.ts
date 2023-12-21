@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as UserController from "./controllers/UserController";
 import * as AccountController from "./controllers/AccountController";
 import * as KeyController from "./controllers/KeyController";
+import * as PaymentController from "./controllers/PaymentController";
 import { jwtAuth } from "./middlewares/authentication";
 
 const routes = Router();
@@ -33,8 +34,7 @@ authenticatedRoutes.get("/movements/account/:accountId", AccountController.getAc
 authenticatedRoutes.get("/payments/:accountId", AccountController.getAccountPayments);
 authenticatedRoutes.post("/accounts/:id/payments", jwtAuth, AccountController.submitPayment);
 
-// Keys
-
 // Account routes
+authenticatedRoutes.post("/payments/:id/sign", jwtAuth, PaymentController.signPayment);
 
 export default routes;

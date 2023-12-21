@@ -21,7 +21,9 @@
         <div class="table-row">
           <div class="table-cell">
             <textarea v-model="signedHash" placeholder="Paste Signed Hash"></textarea>
-            <div v-if="showErrorMessage" class="error-message">Error: Please enter the signed hash.</div>
+            <div v-if="showErrorMessage" class="error-message">
+              Error: Please enter the signed hash.
+            </div>
           </div>
         </div>
       </div>
@@ -29,7 +31,8 @@
 
     <div class="info-container">
       <p>
-        Info: To sign a payment you must copy its hash, sign it with your private key, and then paste the signed hash.
+        Info: To sign a payment you must copy its hash, sign it with your private key, and then
+        paste the signed hash.
       </p>
     </div>
 
@@ -62,12 +65,12 @@ export default {
     signPayment() {
       if (this.signedHash === '') {
         // Display an error message if the signed hash is empty
-        this.showErrorMessage = true;
-        return;
+        this.showErrorMessage = true
+        return
       }
       // Reset the error message when signing is successful
-      this.showErrorMessage = false;
-      
+      this.showErrorMessage = false
+
       // Add logic to handle signing payment
       console.log('Payment signed!')
       // You may want to update the status here after signing the payment
@@ -80,7 +83,7 @@ export default {
     generatePaymentHash() {
       // Add logic to generate a unique payment hash
       // You can replace this with your actual hash generation logic
-      return 'GeneratedHash123';
+      return 'GeneratedHash123'
     }
   }
 }

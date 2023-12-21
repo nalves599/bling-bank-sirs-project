@@ -68,3 +68,42 @@ export const getPaymentsByAccountId = async (accountId: string, key: ArrayBuffer
 
   return decryptedPayments;
 }
+
+export const signPayment = async (paymentId: string, userId: string, signature: string) => {
+
+  const userSignKeys = await db.signKey.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  const paymentSignatures = await db.signature.findMany({
+    where: {
+      paymentId,
+    },
+    include: {
+      signKey: true,
+    },
+  });
+
+  paymentSignatures.forEach((paymentSignature) => {
+    if (paymentSignature.signKey.userId === userId) {
+      throw new Error('User already signed this payment');
+    }
+  });
+
+  const sharedSecret = await SecurityService.getSharedSecret(userId);
+  if (!sharedSecret) {
+    throw new Error('User does not have a shared secret');
+  }
+
+  await db.signature.create({
+    data: {
+      date: new Date().toISOString(),
+      content: signature,
+      paymentId,
+      signKeyId: userSignKeys[0].id,
+    },
+  });
+
+}
