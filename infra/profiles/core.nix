@@ -39,7 +39,6 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBN1G9PeJIPuyl4amUH7NovvQRBBKvKAO6ldjr6a0a0K" # Nuno
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID+cijTKbz7SP3ZZsc1MdagXpolzJyq3I6VFBKvDyea7" # Tomas
-      # TODO: Add missing keys
     ];
   };
 

@@ -288,7 +288,7 @@ The server will then store the public key in the database, encrypted with the Sh
 This distribution of keys tries to follow what was taught in class about the Perfect Forward Secrecy (PFS).
 If a session key is compromised, the attacker can only access the information of that session.
 Here we assume that the Key Encrypting Key (KEK) is the shared-secret (created in the registration phase).
-Authenticity can be achieved by the user verifying the freshness (through the nonce/challenge) and the integrity (through the HMAC) of the message. TODO:
+Authenticity can be achieved by the user verifying the freshness (through the nonce/challenge) and the integrity (through the HMAC) of the message.
 
 The challenge is used to ensure that the user is who he says he is. The challenge itself is based on the shared-secret, since it is assumed that the user has access to it.
 It would also be possible for the user to challenge the server but this was not implemented due to time constraints.
@@ -307,7 +307,7 @@ When a user creates an account, a POST request is sent with the account holders,
 
 Upon receiving this request, the server will generate an account key that will be used to encrypt the account movements and the account balance.
 Then it will generate N + 1 Keys based on the account key, where N is the number of account holders, using the Shamir Secret Sharing algorithm.
-The extra key is the server's key which will be stored in the database, encrypted with the Master Key. (TODO)
+The extra key is the server's key which will be stored in the database, encrypted with the Master Key.
 
 The other N keys will be sent by email to the respective users, encrypted with the shared-secret of each user and deleted from the backend's memory.
 

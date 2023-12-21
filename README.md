@@ -27,7 +27,7 @@ In order to install the multiple machines, a guide was provided [here](https://g
 
 The following diagram shows the networks and machines:
 
-*(include a text-based or an image-based diagram)*
+![infra](img/report/infrastructure.jpg)
 
 ### Prerequisites
 
@@ -248,6 +248,8 @@ Upon creating an account, the user will receive an email with the account's secr
 
 He can also see the movements of each account.
 
+[![shamir-mov](img/report/shamir-mov.png)](img/report/shamir-mov.png)
+
 [![Movements](img/report/movements.png)](img/report/movements.png)
 
 Going to the payments tab, the user can see the payments that he has made.
@@ -258,9 +260,13 @@ He can also create new payments.
 
 [![Create Payment](img/report/create-payment.png)](img/report/create-payment.png)
 
-//TODO
+He can also sign the payment.
 
-*(IMPORTANT: show evidence of the security mechanisms in action; show message payloads, print relevant messages, perform simulated attacks to show the defenses in action, etc.)*
+[![Sign Payment](img/report/sign-payment.png)](img/report/sign-payment.png)
+
+Login phase.
+
+[![session](img/report/session.png)](img/report/session.png)
 
 This concludes the demonstration.
 

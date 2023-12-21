@@ -14,8 +14,6 @@ export const createAccount = async (req: Request, res: Response) => {
   const { name, currency, accountHolders } = req.body;
 
   try {
-    // TODO: Check if user is authorized to create account
-    // TODO: Check if account holders are valid users
     const users = await Promise.all(
       accountHolders.map((email: string) => UserService.getUserByEmail(email)),
     );

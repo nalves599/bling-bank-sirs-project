@@ -407,12 +407,12 @@ export function toBytesInt64(num: bigint) {
 }
 
 export const generatePOWChallenge = () => {
-  const challenge = (Math.random() * 1000 + 100).toFixed(0); // TODO: Improve challenge
+  const challenge = (Math.random() * 1000 + 100).toFixed(0);
   return String(challenge);
 };
 
 export const solvePOWChallenge = (challenge: string) => {
-  const solution = parseInt(challenge) * 39; // TODO: Improve challenge
+  const solution = parseInt(challenge) * 39;
   return String(solution);
 };
 
