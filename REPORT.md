@@ -242,7 +242,7 @@ As said previously, the library, the CLI, the backend and the frontend were all 
 This was done in order to have a single language for the whole project, allowing us to easily share code between the different parts of the project.
 At the first weeks of the project, the development was being made in Java, which was easier to implement the cryptographic library. The problem with Java was that it was not possible to use the library in the frontend. It seemed odd for a bank website to not be able to show the accounts information at the browser. A possible approach was downloading the protected file and use another tool to unprotect it. This seemed like a bad approach, since it would be a bad user experience. By having Typescript, all the project spoke the same language, allowing for the user to see in a secure way the information about his accounts.
 
-The database was implemented using MongoDB, which is a NoSQL database. This was done in order to have a more flexible database, allowing us to easily change the structure of the database without having to change the code.
+The database was implemented using PostgreSQL, which is a relational database. It was chosen due to the fact that it is a very popular database and it is very easy to use.
 
 #### 2.2.2. Server Communication Security
 
