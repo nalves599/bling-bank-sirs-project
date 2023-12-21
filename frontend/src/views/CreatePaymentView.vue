@@ -56,7 +56,6 @@ const selectedAccount = ref<AccountDto | null>(null)
 const accounts = ref<AccountDto[]>([])
 
 async function fetchAccountsFromHolder() {
-  console.log(email.value)
   const response = await getAccountsFromHolder(email.value)
   accounts.value = response.map((item) => ({
     ...item,

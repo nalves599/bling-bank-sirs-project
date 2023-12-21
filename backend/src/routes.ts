@@ -12,7 +12,7 @@ routes.post("/login", UserController.login);
 routes.post("/login/token", UserController.generateToken);
 
 const authenticatedRoutes = Router();
-//authenticatedRoutes.use(jwtAuth); // TODO: Add authentication middleware
+authenticatedRoutes.use(jwtAuth);
 routes.use(authenticatedRoutes);
 
 // Authenticated routes

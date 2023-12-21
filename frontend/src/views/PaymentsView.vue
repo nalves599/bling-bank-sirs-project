@@ -85,7 +85,7 @@ const authStore = useAuthStore()
 const { email } = storeToRefs(authStore)
 
 async function fetchAccountsFromHolder() {
-  accounts.value = await getAccountsFromHolder(email.value)
+  accounts.value = await getAccountsFromHolder()
 }
 
 onMounted(() => {
