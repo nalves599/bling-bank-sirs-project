@@ -214,16 +214,51 @@ These interaction can be seen in the `authenticity_attack.sh` script.
 $ ./authenticity_attack.sh
 ```
 
-### Web Application - TODO
+### Web Application
 
 Assuming that the machines are properly configured after following the installation instructions, we can now demonstrate the web application.
 
+In order to use the web application, the user must first register an account.
 
-*(give a tour of the best features of the application; add screenshots when relevant)*
+[![Register](img/report/register.png)](img/report/register.png)
 
-```sh
-$ demo command
-```
+After registering, the user will receive an email with the shared secret that will be used to authenticate the user.
+
+[![Email](img/report/shared-secret.png)](img/report/shared-secret.png)
+
+With the shared secret, the user can now login to the web application.
+
+[![Login](img/report/login.png)](img/report/login.png)
+
+The user will be welcomed to the web application.
+
+[![Welcome](img/report/welcome.png)](img/report/welcome.png)
+
+Here he can see his accounts.
+
+[![Accounts](img/report/accounts.png)](img/report/accounts.png)
+
+He can create new accounts.
+
+[![Create Account](img/report/create-account.png)](img/report/create-account.png)
+
+Upon creating an account, the user will receive an email with the account's secret.
+
+[![Account Secret](img/report/shamir-secret.png)](img/report/shamir-secret.png)
+
+He can also see the movements of each account.
+
+[![Movements](img/report/movements.png)](img/report/movements.png)
+
+Going to the payments tab, the user can see the payments that he has made.
+
+[![Payments](img/report/payments.png)](img/report/payments.png)
+
+He can also create new payments.
+
+[![Create Payment](img/report/create-payment.png)](img/report/create-payment.png)
+
+//TODO
 
 *(IMPORTANT: show evidence of the security mechanisms in action; show message payloads, print relevant messages, perform simulated attacks to show the defenses in action, etc.)*
 
