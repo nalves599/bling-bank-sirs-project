@@ -32,7 +32,7 @@ export const saveSharedSecret = async (
     },
   });
 
-  sharedSecrets.set(userId, messageEncrypted as ArrayBuffer);
+  sharedSecrets.set(userId, sharedSecret as ArrayBuffer);
 };
 
 export const getSharedSecret = async (userId: string) => {
@@ -51,7 +51,6 @@ export const getSharedSecret = async (userId: string) => {
     throw new Error("Shared secret not found");
   }
 
-
   const encryptedSharedSecret = crypto.hexToBuffer(entry.value);
   const { payload: sharedSecret } = await crypto.unprotect(
     encryptedSharedSecret,
@@ -60,6 +59,7 @@ export const getSharedSecret = async (userId: string) => {
     },
   );
 
+  sharedSecrets.set(userId, sharedSecret as ArrayBuffer);
   return sharedSecret;
 };
 
@@ -132,11 +132,11 @@ export const saveAccountKey = (
   accountSecret: ArrayBuffer,
 ) => {
   accountSecrets.set(accountId, accountSecret);
-}
+};
 
 export const getAccountKey = (accountId: string) => {
   return accountSecrets.get(accountId);
-}
+};
 
 export const decryptWithSessionKey = async (
   encrypted: string,

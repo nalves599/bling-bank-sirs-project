@@ -31,9 +31,14 @@
 
   services.postgresql = {
     enable = true;
+    enableTCPIP = true;
     initialScript = builtins.toFile "init.sql" ''
       CREATE DATABASE blingbank;
-      GRANT ALL PRIVILEGES ON blingbank.* TO 'blingbank'@'dnt-sirs.com' IDENTIFIED BY 'Sup3rS3cr3tP4ssw0rd';
+      CREATE USER blingbank WITH PASSWORD 'blingbank';
+      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO blingbank;
+    '';
+    authentication = ''
+      host  all  all 10.69.2.2/32 password
     '';
     settings = {
       ssl_cert_file = toString(../certs/db.crt);
